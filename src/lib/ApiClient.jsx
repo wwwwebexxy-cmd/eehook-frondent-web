@@ -69,6 +69,14 @@ async function refreshAccessToken() {
 
 const client = axios.create({ baseURL: `${API_URL}/`, withCredentials: true });
 
+// The deployed storefront and dashboard use HttpOnly auth cookies through
+// the same-origin `/backend` proxy. Do not attach a stale token retained in
+// session storage to those requests: Axios would prefer that bearer token
+// over the current cookie session and can incorrectly downgrade an admin
+// request to a previous user's permissions. Absolute API origins still use
+// the token fallback for local/legacy configurations.
+const usesSameOriginCookieAuth = API_URL.startsWith("/");
+
 client.interceptors.request.use(async (config) => {
     const method = String(config.method || "get").toUpperCase();
     if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
@@ -80,7 +88,9 @@ client.interceptors.request.use(async (config) => {
     const existingAuthorization = typeof config.headers?.get === "function"
         ? config.headers.get("Authorization")
         : config.headers?.Authorization;
-    if (accessToken && !existingAuthorization) config.headers.Authorization = `Bearer ${accessToken}`;
+    if (accessToken && !existingAuthorization && !usesSameOriginCookieAuth) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+    }
     return config;
 });
 
