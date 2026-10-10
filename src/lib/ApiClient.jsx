@@ -2,6 +2,7 @@ import axios from "axios";
 import { clearAuthSession } from "../features/auth/authUtils";
 import showToast from "../utils/toast";
 import { API_URL } from "./apiUrl";
+import { assertJsonApiResponse } from "./apiResponse";
 
 let refreshPromise = null;
 let csrfPromise = null;
@@ -37,6 +38,7 @@ export async function ensureCsrf() {
     if (current) return current;
     if (!csrfPromise) {
         csrfPromise = axios.get(`${API_URL}/auth/csrf/`, { withCredentials: true })
+            .then(assertJsonApiResponse)
             .then((response) => {
                 csrfToken = response.data?.csrfToken || readCookie("csrftoken");
                 return csrfToken;
@@ -53,7 +55,8 @@ async function refreshAccessToken() {
                 `${API_URL}/token/refresh/`,
                 {},
                 { withCredentials: true, headers: csrfToken ? { "X-CSRFToken": csrfToken } : {} },
-            ))
+            )
+                .then(assertJsonApiResponse))
             .finally(() => { refreshPromise = null; });
     }
 
@@ -74,7 +77,7 @@ client.interceptors.request.use(async (config) => {
 });
 
 client.interceptors.response.use(
-    (response) => response,
+    assertJsonApiResponse,
     async (error) => {
         const originalRequest = error.config || {};
         const status = error.response?.status;
