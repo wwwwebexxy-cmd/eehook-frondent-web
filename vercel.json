@@ -24,6 +24,10 @@
     "destination": "https://16.16.204.58/health/"
     },
     {
+      "source": "/backend/:path*/",
+      "destination": "https://16.16.204.58/:path*/"
+    },
+    {
       "source": "/backend/:path*",
       "destination": "https://16.16.204.58/:path*"
     },
