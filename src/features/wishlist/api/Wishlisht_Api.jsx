@@ -39,7 +39,8 @@ export const Wishlist_get = async () => {
             "wishlist/"
         );
 
-        return response.data;
+        const payload = response.data;
+        return Array.isArray(payload) ? payload : payload?.results || [];
 
     }
 

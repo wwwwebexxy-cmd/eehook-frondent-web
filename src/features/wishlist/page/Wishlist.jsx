@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "../styles/Wishlist.css";
 import { FiX } from "react-icons/fi";
 import WishlistQuery from "../queries/WishlistQuery";
@@ -17,6 +16,7 @@ export default function Wishlist() {
 
 
     const { data = [], isLoading, error, refetch } = WishlistQuery()
+    const wishlistItems = Array.isArray(data) ? data : [];
 
     const removeWishlist = async (id) => {
 
@@ -52,9 +52,21 @@ export default function Wishlist() {
             </div>
 
 
-            <div className={`wishlist-grid ${data.length <= 3 ? "few-products" : "many-products"}`}>
+            <div className={`wishlist-grid ${wishlistItems.length <= 3 ? "few-products" : "many-products"}`}>
 
-                {data?.map((item) => (
+                {isLoading ? (
+                    <div className="wishlist-state" aria-live="polite">Loading your wishlist...</div>
+                ) : error ? (
+                    <div className="wishlist-state" role="alert">
+                        <p>We couldn&apos;t load your wishlist.</p>
+                        <button type="button" onClick={() => refetch()}>Try again</button>
+                    </div>
+                ) : wishlistItems.length === 0 ? (
+                    <div className="wishlist-state">
+                        <p>Your wishlist is empty.</p>
+                        <Link to="/shop">Explore products</Link>
+                    </div>
+                ) : wishlistItems.map((item) => (
                     <div className="wishlist-card" key={item.id} >
 
                         <button
@@ -122,7 +134,7 @@ export default function Wishlist() {
 
                             </div>
 
-                            <button onClick={(e) => navigate(
+                            <button onClick={() => navigate(
                                 `/single/${item.product}?variant=${item.variant}&size=${item.variant_size}`
                             )}>View More</button>
 

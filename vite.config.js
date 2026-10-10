@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const devApiTarget = env.VITE_DEV_API_PROXY_TARGET || 'http://127.0.0.1:8000'
+  const devApiTarget = env.VITE_DEV_API_PROXY_TARGET || 'https://16.16.204.58'
 
   return {
     plugins: [react()],
@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
         '/backend': {
           target: devApiTarget,
           changeOrigin: true,
+          secure: true,
           rewrite: (path) => path.replace(/^\/backend/, ''),
         },
       },
