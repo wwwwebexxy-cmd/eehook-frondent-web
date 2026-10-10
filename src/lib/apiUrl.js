@@ -1,14 +1,11 @@
 // VITE_API_BASE_URL is the supported configuration. Keep VITE_API_URL as a
-// migration fallback so an existing local checkout does not fail abruptly.
+// migration fallback, and default to the same-origin proxy used by Vercel and
+// local Vite development when a deployment environment variable is omitted.
 const configuredApiUrl = String(
     import.meta.env.VITE_API_BASE_URL
         || import.meta.env.VITE_API_URL
-        || (import.meta.env.MODE === "test" ? "/backend" : ""),
+        || "/backend",
 ).trim().replace(/\/+$/, "");
-
-if (!configuredApiUrl) {
-    throw new Error("VITE_API_BASE_URL must be configured.");
-}
 
 const isRelativeApiUrl = configuredApiUrl.startsWith("/");
 const isVercelProxyApiUrl = configuredApiUrl === "/backend";
