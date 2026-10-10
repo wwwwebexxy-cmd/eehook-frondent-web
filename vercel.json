@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
       "source": "/backend/:path*",
@@ -23,7 +24,7 @@
       "destination": "https://16.16.204.58/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/:path((?!backend(?:/|$)).*)",
       "destination": "/index.html"
     }
   ]

@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { clearAuthSession, isPrivilegedUser, saveAuthSession } from "../authUtils";
+import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./Login.css";
 
 function Login() {
@@ -66,7 +67,7 @@ function Login() {
                 clearAuthSession();
                 setErrorMessage(error.response?.data?.detail || "Admin accounts must use the Super Admin login page.");
             } else {
-                setErrorMessage("Invalid email or password.");
+                setErrorMessage(getApiErrorMessage(error, "Invalid email or password."));
             }
 
         } finally {

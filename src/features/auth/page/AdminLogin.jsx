@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { isSuperAdminUser, saveAuthSession, clearAuthSession } from "../authUtils";
+import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./Login.css";
 
 export default function AdminLogin() {
@@ -41,7 +42,7 @@ export default function AdminLogin() {
             } else if (requestError.response?.status === 403) {
                 setError(requestError.response?.data?.detail || "Only Super Admin accounts can access this login.");
             } else {
-                setError("Invalid email or password.");
+                setError(getApiErrorMessage(requestError, "Invalid email or password."));
             }
         } finally { setLoading(false); }
     };

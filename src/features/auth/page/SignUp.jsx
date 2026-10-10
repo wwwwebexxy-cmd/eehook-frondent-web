@@ -6,6 +6,7 @@ import client from "../../../lib/ApiClient";
 import { clearAuthSession, isSuperAdminUser, saveAuthSession } from "../authUtils";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import showToast from "../../../utils/toast";
+import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./SignUp.css";
 
 function Signup() {
@@ -71,8 +72,7 @@ function Signup() {
             const backendPasswordError = data.password;
             setPasswordError(Array.isArray(backendPasswordError) ? backendPasswordError.join(" ") : backendPasswordError || "");
             
-            const errorMsg = data.detail || (data.non_field_errors && data.non_field_errors[0]) || (data.email && data.email[0]) || (data.first_name && data.first_name[0]) || "Registration failed.";
-            setFormError(errorMsg);
+            setFormError(getApiErrorMessage(error, "Registration failed.", { exclude: ["password"] }));
 
         } finally {
 

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCopy, FiCreditCard, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiPower, FiRefreshCw, FiSettings, FiShield, FiShoppingBag, FiTag, FiToggleLeft, FiToggleRight, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
-import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
+import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, ErrorState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
 import useFormErrors from "../hooks/useFormErrors";
@@ -295,16 +295,19 @@ export default function OrderDashboard() {
         return () => window.removeEventListener("api:forbidden", onForbidden);
     }, []);
 
-    useEffect(() => {
-        let active = true;
-        Promise.allSettled([listResource("schema"), listResource("overview")]).then(([schemaResult, overviewResult]) => {
-            if (!active) return;
-            if (schemaResult.status === "fulfilled") setSchema(schemaResult.value.data);
-            if (overviewResult.status === "fulfilled") setOverview(overviewResult.value.data || {});
-            setOverviewLoading(false);
-        });
-        return () => { active = false; };
+    const loadDashboard = useCallback(async () => {
+        setOverviewLoading(true);
+        const [schemaResult, overviewResult] = await Promise.allSettled([listResource("schema"), listResource("overview")]);
+        if (schemaResult.status === "fulfilled") setSchema(schemaResult.value.data);
+        if (overviewResult.status === "fulfilled") setOverview(overviewResult.value.data || {});
+        else setOverview({ __error: getErrorMessage(overviewResult.reason, "Could not load dashboard overview.") });
+        setOverviewLoading(false);
     }, []);
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => { void loadDashboard(); }, 0);
+        return () => window.clearTimeout(timer);
+    }, [loadDashboard]);
 
     const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/eehook-dashboard" : `/eehook-dashboard/${key}`); };
     const logout = async () => { await logoutSession(); navigate("/login", { replace: true }); };
@@ -323,6 +326,10 @@ export default function OrderDashboard() {
 }
 
 function Overview({ data, loading }) {
+    const error = data?.__error;
+    if (error && !loading) {
+        return <div className="admin-page"><PageHeader eyebrow="OVERVIEW" title="Store overview" description="Your store at a glance â€” products, customers, and order progress." /><ErrorState message={error} onRetry={() => window.location.reload()} /></div>;
+    }
     const count = (...candidates) => {
         for (const candidate of candidates) {
             if (candidate === null || candidate === undefined || candidate === "") continue;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { clearAuthSession } from "../features/auth/authUtils";
+import { clearAuthSession, getAuthValue, saveAuthTokens } from "../features/auth/authUtils";
 import showToast from "../utils/toast";
 import { API_URL } from "./apiUrl";
 import { assertJsonApiResponse } from "./apiResponse";
@@ -56,7 +56,11 @@ async function refreshAccessToken() {
                 {},
                 { withCredentials: true, headers: csrfToken ? { "X-CSRFToken": csrfToken } : {} },
             )
-                .then(assertJsonApiResponse))
+                .then(assertJsonApiResponse)
+                .then((response) => {
+                    saveAuthTokens(response.data);
+                    return response;
+                }))
             .finally(() => { refreshPromise = null; });
     }
 
@@ -72,7 +76,11 @@ client.interceptors.request.use(async (config) => {
         config.headers = config.headers || {};
         if (csrfToken) config.headers["X-CSRFToken"] = csrfToken;
     }
-    if (config.headers?.Authorization) delete config.headers.Authorization;
+    const accessToken = getAuthValue("access") || getAuthValue("access_token");
+    const existingAuthorization = typeof config.headers?.get === "function"
+        ? config.headers.get("Authorization")
+        : config.headers?.Authorization;
+    if (accessToken && !existingAuthorization) config.headers.Authorization = `Bearer ${accessToken}`;
     return config;
 });
 

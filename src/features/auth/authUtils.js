@@ -52,12 +52,28 @@ export function saveAuthUser(user = {}) {
     setSessionValue("permissions", JSON.stringify(user.permissions || {}));
 }
 
+export function saveAuthTokens(data = {}) {
+    const tokenData = data?.tokens || data;
+    const access = tokenData?.access ?? tokenData?.access_token;
+    const refresh = tokenData?.refresh ?? tokenData?.refresh_token;
+    if (access !== undefined) setSessionValue("access", access);
+    if (refresh !== undefined) setSessionValue("refresh", refresh);
+}
+
 export function saveAuthSession(data = {}) {
     const user = data.user || data;
+    const previousAccess = getAuthValue("access") || getAuthValue("access_token");
+    const previousRefresh = getAuthValue("refresh") || getAuthValue("refresh_token");
+    const tokenData = data?.tokens || data;
+    const hasAccess = tokenData?.access !== undefined || tokenData?.access_token !== undefined;
+    const hasRefresh = tokenData?.refresh !== undefined || tokenData?.refresh_token !== undefined;
     clearAuthSession();
     setSessionValue("authenticated", "true");
     setSessionValue("admin_user", JSON.stringify(user));
     saveAuthUser(user);
+    saveAuthTokens(data);
+    if (!hasAccess && previousAccess) setSessionValue("access", previousAccess);
+    if (!hasRefresh && previousRefresh) setSessionValue("refresh", previousRefresh);
     return user;
 }
 

@@ -7,6 +7,25 @@ afterEach(() => {
 });
 
 describe("auth session storage", () => {
+    it("stores access and refresh tokens returned by the login API in session storage", () => {
+        saveAuthSession({
+            access: "access-token",
+            refresh: "refresh-token",
+            user: { id: 12, email: "customer@example.com", role: "Customer" },
+        });
+
+        expect(getAuthValue("access")).toBe("access-token");
+        expect(getAuthValue("refresh")).toBe("refresh-token");
+    });
+
+    it("keeps tokens when session restoration returns only the current user", () => {
+        saveAuthSession({ access: "access-token", refresh: "refresh-token", user: { id: 12, role: "Customer" } });
+        saveAuthSession({ id: 12, email: "customer@example.com", role: "Customer" });
+
+        expect(getAuthValue("access")).toBe("access-token");
+        expect(getAuthValue("refresh")).toBe("refresh-token");
+    });
+
     it("keeps credentials in per-tab session storage and removes legacy local storage credentials", () => {
         localStorage.setItem("access", "legacy-token");
 
