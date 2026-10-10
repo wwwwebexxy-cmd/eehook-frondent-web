@@ -13,6 +13,10 @@
   ],
   "rewrites": [
     {
+      "source": "/backend/health/",
+      "destination": "https://16.16.204.58/health/"
+    },
+    {
       "source": "/backend/login/",
       "destination": "https://16.16.204.58/login/"
     },
