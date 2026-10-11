@@ -6,12 +6,40 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import Hero_Query from "../queries/Hero_Query";
 import PromoBanners_Query from "../queries/PromoBanners_Query";
 import HeroSideBanner_Query from "../queries/HeroSideBanner_Query";
+import defaultHeroImage from "../../../assets/eehook_hero_tech.png";
+import defaultHeroSideImage from "../../../assets/eehook_lifestyle_vibe.png";
+
+const DEFAULT_HERO_SLIDES = [
+  {
+    id: "default-tech-hero",
+    subtitle: "Technology, thoughtfully curated",
+    title: "Elevate your everyday",
+    description: "Discover premium electronics and modern lifestyle essentials selected for the way you live.",
+    button_text: "Shop now",
+    image: defaultHeroImage,
+  },
+];
+
+const DEFAULT_SIDE_BANNER = {
+  image: defaultHeroSideImage,
+  link: "/shop",
+};
+
+const getHeroImageUrl = (image) => image === defaultHeroImage || image === defaultHeroSideImage
+  ? image
+  : getImageUrl(image);
 
 const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBanner: providedSideBanner }) => {
 
-  const hasHeroBanners = Array.isArray(heroBanners);
+  // An empty homepage response is not an intentional override. Keep the
+  // dedicated hero endpoint available, then fall back to the bundled hero
+  // image when the API has no active banners configured.
+  const hasHeroBanners = Array.isArray(heroBanners) && heroBanners.length > 0;
   const { data: rawHeroSlides } = Hero_Query({ enabled: !hasHeroBanners });
-  const heroSlides = hasHeroBanners ? heroBanners : (Array.isArray(rawHeroSlides) ? rawHeroSlides : []);
+  const queriedHeroSlides = Array.isArray(rawHeroSlides) ? rawHeroSlides : [];
+  const heroSlides = (hasHeroBanners ? heroBanners : queriedHeroSlides).length > 0
+    ? (hasHeroBanners ? heroBanners : queriedHeroSlides)
+    : DEFAULT_HERO_SLIDES;
 
   const hasPromoBanners = Array.isArray(providedPromoBanners);
   const { data: rawPromoBanners } = PromoBanners_Query({ enabled: !hasPromoBanners });
@@ -19,7 +47,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
 
   const hasSideBanner = providedSideBanner !== undefined;
   const { data: queriedSideBanner } = HeroSideBanner_Query({ enabled: !hasSideBanner });
-  const heroSideBanner = hasSideBanner ? providedSideBanner : queriedSideBanner;
+  const heroSideBanner = hasSideBanner
+    ? providedSideBanner
+    : (queriedSideBanner?.image ? queriedSideBanner : DEFAULT_SIDE_BANNER);
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -62,10 +92,6 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
   };
-
-  if (heroSlides.length === 0) {
-    return null;
-  }
 
   return (
     <div className="hero-page-wrapper">
@@ -115,7 +141,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
             >
 
               <img
-                src={getImageUrl(slide.image || slide.banner_image || slide.image_url)}
+                src={getHeroImageUrl(slide.image || slide.banner_image || slide.image_url)}
                 alt={slide.title || slide.heading || "Featured collection"}
                 className="hero-image"
               />
@@ -178,10 +204,10 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           <div className="fixed-banner-content">
              {heroSideBanner?.link ? (
                <a href={heroSideBanner.link} target="_blank" rel="noopener noreferrer">
-                 <img src={getImageUrl(heroSideBanner.image)} alt="Promotional Banner" className="fixed-banner-image" />
+                 <img src={getHeroImageUrl(heroSideBanner.image)} alt="Promotional Banner" className="fixed-banner-image" />
                </a>
              ) : (
-               <img src={getImageUrl(heroSideBanner?.image)} alt="Promotional Banner" className="fixed-banner-image" />
+                 <img src={getHeroImageUrl(heroSideBanner?.image)} alt="Promotional Banner" className="fixed-banner-image" />
              )}
           </div>
         </div>}

@@ -3,10 +3,11 @@
     max-width: 100%;
     min-width: 0;
     /* padding:45px 20px; */
-    background: #F8F9F3;
+    background: #fbfbf6;
     text-align: center;
     overflow: hidden;
-    max-width: 1200px;
+    max-width: 1600px;
+    padding: 6px 0 12px;
     margin: auto;
 }
 
@@ -86,26 +87,31 @@
     max-width: 100%;
     min-width: 0;
     display: flex;
-    gap: 35px;
+    gap: clamp(18px, 1.8vw, 36px);
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    justify-content: flex-start;
+    justify-content: space-evenly;
     scrollbar-width: none;
-    padding: 10px 5px;
+    padding: 8px 58px 12px;
+}
+
+.category-container.is-scrollable,
+.subcategory-container.is-scrollable {
+    justify-content: flex-start;
 }
 .subcategory-container{
      width: 100%;
     max-width: 100%;
     min-width: 0;
     display: flex;
-    gap: 35px;
+    gap: clamp(18px, 1.8vw, 36px);
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    justify-content: flex-start;
+    justify-content: space-evenly;
     scrollbar-width: none;
-    padding: 10px 5px;
+    padding: 8px 58px 12px;
 }
 
 
@@ -120,7 +126,7 @@
 .category-card,
 .subcategory-card {
     flex: 0 0 auto;
-    width: 100px;
+    width: clamp(92px, 7vw, 118px);
     cursor: pointer;
     text-align: center;
     transition: .35s ease;
@@ -132,17 +138,19 @@
 }
 
 .image-circle {
-    width: 90px;
-    height: 110px; /* Proportional to 90px width */
+    width: 100px;
+    height: 124px;
     margin: auto;
-    border-radius: 45px 45px 12px 12px; /* Adjusted arched background */
+    border-radius: 32px 32px 8px 8px;
     overflow: hidden;
-    background: #FFFFFF; /* Match the common website clean card color */
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: .3s ease;
-    padding: 8px; /* scaled down space around image */
+    padding: 14px 12px 12px;
+    border: 1px solid #f0f0e8;
+    box-shadow: 0 8px 22px rgba(44, 58, 66, .07);
 }
 
 .image-circle img {
@@ -153,13 +161,13 @@
 
 .category-card p,
 .subcategory-card p {
-    margin: 10px 0 0;
+    margin: 11px 0 0;
     color: #222;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', 'Outfit', sans-serif;
     text-transform: capitalize;
-    line-height: 1.2;
+    line-height: 1.25;
 }
 
 .active-category .image-circle {
@@ -180,19 +188,19 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1px solid #e8bcbc;
-    background: #F8F9F3;
-    color: #FF9000;
+    border: 1px solid #eadbb9;
+    background: #FFFFFF;
+    color: #b78c32;
     font-size: 28px;
     display: flex;
     justify-content: center;
-    /* align-items:center; */
+    align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
 }
 
 .slider-arrow:hover {
-    background: #F8F9F3;
+    background: #fff3ef;
 }
 
 .slider-arrow.left {
@@ -307,17 +315,17 @@
 
     .category-container,
     .subcategory-container {
-        gap: 25px;
+        gap: 20px;
     }
 
     .category-card,
     .subcategory-card {
-        width: 105px;
+        width: 102px;
     }
 
     .image-circle {
-        width: 100px;
-        height: 100px;
+        width: 96px;
+        height: 116px;
     }
 
     .category-card p,
@@ -345,6 +353,8 @@
     .subcategory-container {
       
         justify-content: flex-start;
+        padding-left: 42px;
+        padding-right: 42px;
      
     }
 }
@@ -361,17 +371,20 @@
 
     .category-container,
     .subcategory-container {
-        gap: 18px;
+        gap: 14px;
+        padding-left: 42px;
+        padding-right: 42px;
     }
 
     .category-card,
     .subcategory-card {
-        width: 85px;
+        width: 88px;
     }
 
     .image-circle {
         width: 80px;
-        height: 80px;
+        height: 98px;
+        padding: 11px 9px 9px;
     }
 
     .category-card p,
@@ -405,6 +418,8 @@
     .category-container,
     .subcategory-container {
         gap: 15px;
+        padding-left: 34px;
+        padding-right: 34px;
     }
 
     .category-card,
@@ -413,8 +428,9 @@
     }
 
     .image-circle {
-        width: 70px;
-        height: 70px;
+        width: 68px;
+        height: 84px;
+        padding: 9px 7px 7px;
     }
 
     .category-card p,

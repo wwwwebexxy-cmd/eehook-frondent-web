@@ -255,7 +255,7 @@ function Shop_by_category({ categories: providedCategories }) {
 
 
                 <div
-                    className="category-container"
+                    className={`category-container ${categoryArrow.left || categoryArrow.right ? "is-scrollable" : ""}`}
                     ref={categorySliderRef}
                 >
 
@@ -321,7 +321,10 @@ function Shop_by_category({ categories: providedCategories }) {
                         }
 
 
-                        <div className="subcategory-container" ref={subCategorySliderRef}>
+                        <div
+                            className={`subcategory-container ${subCategoryArrow.left || subCategoryArrow.right ? "is-scrollable" : ""}`}
+                            ref={subCategorySliderRef}
+                        >
 
                             {selectedCategory.subcategories?.map(
                                 (item) => (

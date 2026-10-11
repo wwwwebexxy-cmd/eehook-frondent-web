@@ -119,7 +119,7 @@ function Home() {
             <Heropage heroBanners={heroBanners} />
 
             {categories.length > 0 && (
-                <div className="category-section-wrapper" style={{ background: "#F8F9F3", padding: "15px 15px 45px" }}>
+                <div className="category-section-wrapper" style={{ background: "#fbfbf6", padding: "14px 15px 28px" }}>
                     <Shop_by_category categories={categories} />
                 </div>
             )}
