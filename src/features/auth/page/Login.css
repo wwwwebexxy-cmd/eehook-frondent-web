@@ -192,6 +192,14 @@ body{
   border-radius:10px!important;
 }
 
+.google-unavailable {
+  margin: 0;
+  color: #7b5a37;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .signup-link{
   margin-top:25px;
   text-align:center;

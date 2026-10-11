@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
 import { clearAuthSession, isSuperAdminUser, saveAuthSession } from "../authUtils";
+import { isGoogleAuthConfigured } from "../googleConfig";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import showToast from "../../../utils/toast";
 import { getApiErrorMessage } from "../../../lib/apiResponse";
@@ -84,6 +85,11 @@ function Signup() {
 
     const handleGoogleSuccess = async (credentialResponse) => {
 
+        if (!credentialResponse?.credential) {
+            setFormError("Google sign-in did not return a credential. Please try again.");
+            return;
+        }
+
         try {
 
             const response = await client.post("google-login/", {
@@ -108,10 +114,12 @@ function Signup() {
 
             const status = error.response?.status;
             if (status === 400) {
-                setFormError("Use a Google account with a verified email.");
+                setFormError(error.response?.data?.error || "Use a Google account with a verified email.");
             } else if (status === 403) {
                 clearAuthSession();
                 setFormError("This account is disabled or is not allowed for this login area.");
+            } else if (status === 503) {
+                setFormError("Google sign-in is not configured. Please use email and password.");
             } else {
                 setFormError(error.response?.data?.detail || error.response?.data?.error || "Google Signup Failed");
             }
@@ -122,7 +130,7 @@ function Signup() {
 
     const handleGoogleError = () => {
 
-        alert("Google Signup Failed");
+        setFormError("Google sign-in was cancelled or could not be completed. Please try again.");
 
     };
     return (
@@ -252,17 +260,21 @@ function Signup() {
                         <div className="google-section">
 
                             <div className="google-btn">
-
-                                <GoogleLogin
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={handleGoogleError}
-                                    theme="outline"
-                                    text="continue_with"
-                                    shape="pill"
-                                    size="large"
-                                    width="280"
-                                />
-
+                                {isGoogleAuthConfigured ? (
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleSuccess}
+                                        onError={handleGoogleError}
+                                        theme="outline"
+                                        text="continue_with"
+                                        shape="pill"
+                                        size="large"
+                                        width="280"
+                                    />
+                                ) : (
+                                    <p className="google-unavailable" role="status">
+                                        Google sign-in is temporarily unavailable. Please use email and password.
+                                    </p>
+                                )}
                             </div>
 
                         </div>

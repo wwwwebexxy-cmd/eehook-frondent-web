@@ -193,6 +193,14 @@ display:flex;
 justify-content:center;
 }
 
+.google-unavailable {
+margin: 0;
+color: #7b5a37;
+font-size: 0.82rem;
+line-height: 1.45;
+text-align: center;
+}
+
 .google-btn > div{
 width:100% !important;
 display:flex;

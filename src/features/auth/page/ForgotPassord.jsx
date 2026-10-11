@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import client from "../../../lib/ApiClient";
+import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./Forgotpassword.css";
 
 function ForgotPassword() {
@@ -8,6 +9,7 @@ function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const neutralMessage = "If the account exists, a reset email will be sent.";
 
     const handleSubmit = async (e) => {
@@ -16,11 +18,12 @@ function ForgotPassword() {
 
         setLoading(true);
         setMessage("");
+        setErrorMessage("");
 
         try {
 
             const response = await client.post("forgot-password/", {
-                email,
+                email: email.trim(),
             });
 
             setMessage(response.data?.message || neutralMessage);
@@ -28,9 +31,11 @@ function ForgotPassword() {
 
         } catch (error) {
 
-            // The backend intentionally returns the same acknowledgement for
-            // registered and unregistered addresses. Keep that behaviour in UI.
-            setMessage(error.response?.data?.message || neutralMessage);
+            if (error.response?.status === 400) {
+                setErrorMessage(getApiErrorMessage(error, "Enter a valid email address."));
+            } else {
+                setErrorMessage("We could not process that request right now. Please try again.");
+            }
 
         } finally {
 
@@ -74,6 +79,7 @@ function ForgotPassword() {
                     </button>
 
                     {message && <p className="password-reset-success" role="status">{message}</p>}
+                    {errorMessage && <p className="password-reset-error" role="alert">{errorMessage}</p>}
 
                 </form>
 
