@@ -351,14 +351,6 @@
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
-@media (hover: none), (pointer: coarse) {
-    .carousel-nav-btn {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(-50%) scale(1);
-    }
-}
-
 /* ---------------- Tablet ---------------- */
 
 @media(max-width:768px){
