@@ -90,6 +90,9 @@ function Signup() {
             return;
         }
 
+        setLoading(true);
+        setFormError("");
+
         try {
 
             const response = await client.post("google-login/", {
@@ -124,12 +127,15 @@ function Signup() {
                 setFormError(error.response?.data?.detail || error.response?.data?.error || "Google Signup Failed");
             }
 
+        } finally {
+            setLoading(false);
         }
 
     };
 
     const handleGoogleError = () => {
 
+        setLoading(false);
         setFormError("Google sign-in was cancelled or could not be completed. Please try again.");
 
     };

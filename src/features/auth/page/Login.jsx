@@ -86,6 +86,9 @@ function Login() {
             return;
         }
 
+        setLoading(true);
+        setErrorMessage("");
+
         try {
 
             const response = await client.post("google-login/", {
@@ -117,12 +120,15 @@ function Login() {
                 setErrorMessage("Google login failed.");
             }
 
+        } finally {
+            setLoading(false);
         }
 
     };
 
     const handleGoogleError = () => {
 
+        setLoading(false);
         setErrorMessage("Google sign-in was cancelled or could not be completed. Please try again.");
 
     };
