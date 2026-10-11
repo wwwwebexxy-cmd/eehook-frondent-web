@@ -126,13 +126,9 @@ function Shop_by_category({ categories: providedCategories }) {
     };
 
 
-    const filteredCategories = categories.filter(
-        (category) => category.subcategories?.length > 0
-    );
-
     const categoryItems = activeOffer
-        ? [{ id: `offer-${activeOffer.id}`, name: "OFFERS", image: specialOffer, type: "offer" }, ...filteredCategories]
-        : filteredCategories;
+        ? [{ id: `offer-${activeOffer.id}`, name: "OFFERS", image: specialOffer, type: "offer" }, ...categories]
+        : categories;
 
 
 
@@ -209,6 +205,13 @@ function Shop_by_category({ categories: providedCategories }) {
             return;
         }
 
+        // Categories do not need subcategories to be useful. Open their
+        // category listing directly instead of rendering an empty panel.
+        if (!category.subcategories?.length) {
+            navigate(`/shop?category=${category.id}`);
+            return;
+        }
+
         setSelectedCategory(category);
 
         setTimeout(() => {
@@ -239,7 +242,6 @@ function Shop_by_category({ categories: providedCategories }) {
 
     return (
         <section className="shop-category">
-
             {/* CATEGORY SLIDER */}
 
             <div className="slider-wrapper">

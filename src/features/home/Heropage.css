@@ -80,7 +80,7 @@
 /* ---------------- Split Layout ---------------- */
 .hero-split-layout {
     width: 100%;
-    height: clamp(220px, 14.5vw, 300px);
+    height: clamp(190px, 12vw, 260px);
     display: flex;
     gap: 0; /* no gap */
     padding: 0; /* padding moved to wrapper */
@@ -363,9 +363,7 @@
 
 @media(max-width:768px){
 .hero-split-layout {
-    /* Keep the heading, supporting copy, and CTA inside the hero instead of
-       allowing the fixed navbar to cover the top of the content. */
-    height: clamp(200px, 36vw, 275px);
+    height: clamp(180px, 31vw, 240px);
 }
 
 .hero-carousel-section {
@@ -419,7 +417,7 @@
 }
 
 .hero-split-layout {
-    height: clamp(180px, 58vw, 250px);
+    height: clamp(160px, 48vw, 220px);
 }
 
 .hero-carousel-section {
@@ -476,7 +474,7 @@
 }
 
 .hero-split-layout {
-    height: 180px;
+    height: 160px;
 }
 
 .hero-carousel-section {
