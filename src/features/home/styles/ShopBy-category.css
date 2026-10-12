@@ -316,6 +316,7 @@
     .category-container,
     .subcategory-container {
         gap: 20px;
+        padding-left: 40px;
     }
 
     .category-card,
@@ -353,7 +354,7 @@
     .subcategory-container {
       
         justify-content: flex-start;
-        padding-left: 42px;
+        padding-left: 30px;
         padding-right: 42px;
      
     }
@@ -372,7 +373,7 @@
     .category-container,
     .subcategory-container {
         gap: 14px;
-        padding-left: 42px;
+        padding-left: 9px;
         padding-right: 42px;
     }
 
@@ -418,7 +419,7 @@
     .category-container,
     .subcategory-container {
         gap: 15px;
-        padding-left: 34px;
+        padding-left: 4px;
         padding-right: 34px;
     }
 
