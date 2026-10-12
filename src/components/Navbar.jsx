@@ -16,8 +16,23 @@ import Offer_Query from "../hooks/offers/queries/Offer_Query.jsx";
 import Cart_query from "../features/cart/queries/Cart_query.jsx";
 import ShopBy_categoryQuery from "../features/shop_by_category/queries/ShopBy_categoryQuery.jsx";
 import Homepage_Query from "../features/home/queries/Homepage_Query.jsx";
+import Product_Query from "../features/sale/queries/Product_Query.jsx";
 import { getImageUrl } from "../utils/imageUrl.js";
 import WelcomeBonusNotifications from "../features/welcomeBonus/components/WelcomeBonusNotifications.jsx";
+
+function SearchSuggestions({ products, loading, onSelect }) {
+    if (loading) {
+        return <div className="search-suggestions" role="status" aria-label="Searching products"><span className="search-suggestion-skeleton skeleton" /><span className="search-suggestion-skeleton skeleton" /><span className="search-suggestion-skeleton skeleton" /></div>;
+    }
+    if (!products.length) return <div className="search-suggestions search-suggestions-empty">No matching products</div>;
+    return <div className="search-suggestions" role="listbox" aria-label="Product suggestions">
+        {products.map((product) => <button type="button" role="option" className="search-suggestion" key={product.id || product.pk} onClick={() => onSelect(product)}>
+            <span>{product.name}</span>
+            {product.brand?.name && <small>{product.brand.name}</small>}
+        </button>)}
+    </div>;
+}
+
 function Navbar() {
 
     const location = useLocation();
@@ -101,6 +116,13 @@ const cartLength = cart.total_items ?? 0;
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchText, setSearchText] = useState("");
 
+    const searchQuery = searchText.trim();
+    const { data: suggestionData, isFetching: suggestionsLoading } = Product_Query(
+        { search: searchQuery, page_size: 6 },
+        { enabled: searchOpen && searchQuery.length >= 2 }
+    );
+    const searchSuggestions = suggestionData?.results || [];
+
     const navigate = useNavigate();
 
     const goToSearch = () => {
@@ -109,6 +131,14 @@ const cartLength = cart.total_items ?? 0;
             setSearchOpen(false);
             setSearchText("");
         }
+    };
+
+    const selectSuggestion = (product) => {
+        const productId = product?.id ?? product?.pk;
+        if (productId) navigate(`/single/${productId}`);
+        else goToSearch();
+        setSearchOpen(false);
+        setSearchText("");
     };
 
     const handleSearch = (e) => {
@@ -232,6 +262,7 @@ const cartLength = cart.total_items ?? 0;
                                     />
 
                                     {searchOpen && <button type="button" className="input-search-button input_search_icon" onClick={goToSearch} aria-label="Search products"><LuSearch size={20} /></button>}
+                                     {searchOpen && searchQuery.length >= 2 && <SearchSuggestions products={searchSuggestions} loading={suggestionsLoading} onSelect={selectSuggestion} />}
                                 </div>
 
 
@@ -275,15 +306,18 @@ const cartLength = cart.total_items ?? 0;
 
                 {searchOpen && (
                     <div className="search_dropdown">
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            onKeyDown={handleSearch}
-                            autoFocus
-                        />
-                        {searchOpen && <button type="button" className="input-search-button input_search_icon" onClick={goToSearch} aria-label="Search products"><LuSearch size={20} /></button>}
+                        <div className="mobile-search-input-wrap">
+                            <input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                onKeyDown={handleSearch}
+                                autoFocus
+                            />
+                            <button type="button" className="input-search-button input_search_icon" onClick={goToSearch} aria-label="Search products"><LuSearch size={20} /></button>
+                        </div>
+                         {searchQuery.length >= 2 && <SearchSuggestions products={searchSuggestions} loading={suggestionsLoading} onSelect={selectSuggestion} />}
                     </div>
                 )}
 

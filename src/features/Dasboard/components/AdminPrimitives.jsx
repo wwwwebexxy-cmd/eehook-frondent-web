@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiLoader, FiSearch, FiX } from "react-icons/fi";
+import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiSearch, FiX } from "react-icons/fi";
 import { getImageUrl } from "../../../utils/imageUrl";
 
 export function Skeleton({ className = "" }) {
@@ -15,7 +15,14 @@ export function TableSkeleton({ columns = 5, rows = 6 }) {
 }
 
 export function LoadingState({ label = "Loading..." }) {
-    return <div className="admin-state admin-loading" role="status"><FiLoader className="spin" aria-hidden="true" /><span>{label}</span></div>;
+    return <div className="admin-state admin-loading admin-loading-surface" role="status" aria-label={label}>
+        <div className="admin-loading-card" aria-hidden="true">
+            <Skeleton className="admin-loading-heading" />
+            <Skeleton className="admin-loading-line wide" />
+            <Skeleton className="admin-loading-line" />
+            <Skeleton className="admin-loading-line short" />
+        </div>
+    </div>;
 }
 
 export function EmptyState({ title = "No records found", description = "Try changing your search or create a new record." }) {

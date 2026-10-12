@@ -1125,7 +1125,7 @@
 .section-heritage{
     width:100%;
     max-width:1400px;
-    margin:100px auto;
+    margin:100px auto 0;
     padding:60px 5%;
     
     background-color: transparent;
@@ -1213,7 +1213,7 @@
     .section-heritage{
 
         padding:40px 20px;
-        margin:70px auto;
+        margin:70px auto 0;
 
     }
 
@@ -1242,4 +1242,16 @@
         font-size:.95rem;
     }
 
+}
+
+/* Keep the contact form visually connected to the promise section on the
+   homepage while preserving the larger spacing on the standalone contact page. */
+.homepage-discovery > .contact-page {
+    padding-top: 42px;
+}
+
+@media(max-width:768px){
+    .homepage-discovery > .contact-page {
+        padding-top: 30px;
+    }
 }

@@ -36,7 +36,7 @@ function App() {
         return () => { active = false; };
     }, []);
 
-    if (!authReady) return <div aria-live="polite" className="app-loading">Loading...</div>;
+    if (!authReady) return <div aria-live="polite" aria-label="Loading application" className="app-loading"><div className="app-loading-card" aria-hidden="true"><span className="skeleton app-loading-logo" /><span className="skeleton app-loading-line wide" /><span className="skeleton app-loading-line" /></div></div>;
 
     const normalizedPath = location.pathname.toLowerCase();
     const isAdminPage = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");

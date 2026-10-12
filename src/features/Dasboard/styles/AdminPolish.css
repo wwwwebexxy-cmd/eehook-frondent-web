@@ -489,6 +489,43 @@
     animation: admin-skeleton-shimmer 1.25s ease-in-out infinite;
 }
 
+.admin-loading-surface {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 24px;
+    text-align: left;
+}
+
+.admin-loading-card {
+    width: 100%;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 22px;
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.admin-loading-heading {
+    width: 34%;
+    height: 22px;
+    margin-bottom: 8px;
+}
+
+.admin-loading-line {
+    width: 68%;
+}
+
+.admin-loading-line.wide {
+    width: 90%;
+}
+
+.admin-loading-line.short {
+    width: 46%;
+}
+
 .overview-skeleton-value {
     width: 56px;
     height: 25px;
