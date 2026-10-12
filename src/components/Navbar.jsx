@@ -129,13 +129,20 @@ const cartLength = cart.total_items ?? 0;
             {/* Top Navigation Wrapper    ${isHomePage && !scrolled ? "transparent" : "scrolled"}*/}
             <div className={`navbar ${showNavbar ? "show" : "hide"}`}>
                 <div className="nav_main">
-                    <button type="button" className="nav_toggle" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu">
+                    <button
+                        type="button"
+                        className={`nav_toggle ${menuOpen ? "is-open" : ""}`}
+                        onClick={() => setMenuOpen(true)}
+                        aria-label="Open navigation menu"
+                        aria-expanded={menuOpen}
+                        aria-controls="mobile-navigation"
+                    >
                         <AiOutlineDoubleRight size={30} />
                     </button>
 
                     <div className="nav_main2">
-                        <NavLink to='/' className="logo-link">
-                            <img src={navbarlogo} alt="Logo" className="navbar-logo" />
+                        <NavLink to='/' className="logo-link topbar-logo-link">
+                            <img src={navbarlogo} alt="Logo" className="navbar-logo topbar-logo" />
                         </NavLink>
 
                         <div className="link_flex">
@@ -284,7 +291,7 @@ const cartLength = cart.total_items ?? 0;
 
 
             {/* Mobile Drawer Side Menu Overlay */}
-            <div className={`mobile_menu ${menuOpen ? "show" : ""}`}>
+            <div id="mobile-navigation" className={`mobile_menu ${menuOpen ? "show" : ""}`}>
                 <div className="mobile_header">
                     <NavLink to='/' className="logo-link" style={{ marginTop: '5px' }}>
                         <img src={eehook} alt="Logo" className="navbar-logo" />
