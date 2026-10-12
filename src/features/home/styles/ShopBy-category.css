@@ -155,7 +155,7 @@
     align-items: center;
     justify-content: center;
     transition: .3s ease;
-    padding: 14px 12px 12px;
+    /* padding: 14px 12px 12px; */
     border: 1px solid #f0f0e8;
     box-shadow: 0 8px 22px rgba(44, 58, 66, .07);
 }
@@ -163,7 +163,7 @@
 .image-circle img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Contain so the whole product is visible within the arch */
+    object-fit:cover; /* Contain so the whole product is visible within the arch */
 }
 
 .category-card p,
