@@ -392,7 +392,7 @@
     .image-circle {
         width: 80px;
         height: 98px;
-        padding: 11px 9px 9px;
+        /* padding: 11px 9px 9px; */
     }
 
     .category-card p,
@@ -439,7 +439,7 @@
     .image-circle {
         width: 68px;
         height: 84px;
-        padding: 9px 7px 7px;
+        /* padding: 9px 7px 7px; */
     }
 
     .category-card p,
