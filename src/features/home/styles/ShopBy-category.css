@@ -114,6 +114,13 @@
     padding: 8px 58px 12px;
 }
 
+/* Keep the 1440px laptop row from leaving excess space after the last card. */
+@media (min-width: 1200px) and (max-width: 1600px) {
+    .category-container {
+        padding-right: 24px;
+    }
+}
+
 
 
 .category-container::-webkit-scrollbar,
