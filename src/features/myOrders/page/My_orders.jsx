@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import client from "../../../lib/ApiClient";
 import "../styles/Myorders.css";
 import { getImageUrl } from "../../../utils/imageUrl";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const MyOrders = () => {
 
@@ -377,9 +378,7 @@ const MyOrders = () => {
                                     </span>
 
                                     <strong>
-                                        AED {Number(
-                                            order.total_amount || 0
-                                        ).toFixed(2)}
+                                        <DirhamAmount value={order.total_amount || 0} />
                                     </strong>
 
                                 </div>

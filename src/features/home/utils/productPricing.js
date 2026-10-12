@@ -70,5 +70,5 @@ export function getHomepageProductPricing(product = {}, variant = null, now = ne
 
 export function formatHomepagePrice(value) {
     const price = toPrice(value);
-    return price === null ? "Price unavailable" : `AED ${price.toFixed(2)}`;
+    return price === null ? "Price unavailable" : price.toFixed(2);
 }

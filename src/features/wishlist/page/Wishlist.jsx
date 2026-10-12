@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineDoubleRight } from "react-icons/ai";
 import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 
 
@@ -110,13 +111,11 @@ export default function Wishlist() {
                                         <div className="wishlist-price-box">
 
                                             <span className="wishlist-old-price">
-                                                AED
-                                                {Number(item.original_price).toFixed(2)}
+                                                <DirhamAmount value={item.original_price} />
                                             </span>
 
                                             <span className="wishlist-new-price">
-                                                AED
-                                                {Number(item.discounted_price).toFixed(2)}
+                                                <DirhamAmount value={item.discounted_price} />
                                             </span>
 
                                         </div>
@@ -124,8 +123,7 @@ export default function Wishlist() {
                                     ) : (
 
                                         <span className="wishlist-new-price">
-                                            AED
-                                            {Number(item.original_price).toFixed(2)}
+                                            <DirhamAmount value={item.original_price} />
                                         </span>
 
                                     )

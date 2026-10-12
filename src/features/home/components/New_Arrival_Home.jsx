@@ -9,7 +9,8 @@ import { Wishlist_delete, Wishlist_post } from "../../wishlist/api/Wishlisht_Api
 import showToast from "../../../utils/toast";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { hasAuthSession } from "../../auth/authUtils";
-import { formatHomepagePrice, getHomepageProductPricing } from "../utils/productPricing";
+import DirhamAmount from "../../../components/DirhamAmount";
+import { getHomepageProductPricing } from "../utils/productPricing";
 
 const MAX_PRODUCTS_PER_SECTION = 16;
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
@@ -150,8 +151,8 @@ function New_Arrival_Home({
                                         <h3 className="newHome-product-title">{item.description || item.name}</h3>
                                         <div className="product-meta">
                                             <div className="price-area">
-                                                {originalPrice !== null && <span className="old-price">{formatHomepagePrice(originalPrice)}</span>}
-                                                <span className="product-price">{formatHomepagePrice(currentPrice)}</span>
+                                                {originalPrice !== null && <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>}
+                                                <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>
                                         </div>
                                     </div>

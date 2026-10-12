@@ -22,6 +22,7 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import { logoutSession } from "../../../lib/ApiClient";
 import { getPasswordPolicyError } from "../../auth/passwordPolicy";
 import { getAuthValue } from "../../auth/authUtils";
+import DirhamAmount from "../../../components/DirhamAmount";
 import "../styles/AdminDashboard.css";
 import "../styles/LogoutTheme.css";
 import "../styles/AdminPolish.css";
@@ -73,7 +74,7 @@ const TRUST_BENEFIT_ICON_OPTIONS = [
     ["easy-returns", "Easy returns"],
 ];
 
-const money = (value) => `AED ${Number(value || 0).toLocaleString("en-AE", { minimumFractionDigits: 2 })}`;
+const money = (value) => <DirhamAmount value={Number(value || 0)} useGrouping />;
 const date = (value) => value ? new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 const titleize = (value = "") => value.replaceAll("_", " ").replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const columnLabel = (resource, key) => ({
@@ -110,7 +111,7 @@ const couponDiscount = (row) => {
     const type = String(row?.discount_type || "").toUpperCase();
     if (type === "FIXED" || (row?.fixed_amount !== null && row?.fixed_amount !== undefined && row?.fixed_amount !== "")) {
         const amount = row?.fixed_amount ?? row?.discount_value;
-        return amount === null || amount === undefined || amount === "" ? "—" : `\u20b9${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return amount === null || amount === undefined || amount === "" ? "—" : <DirhamAmount value={amount} useGrouping />;
     }
     const percentage = row?.discount_percentage ?? row?.discount_value;
     return percentage === null || percentage === undefined || percentage === "" ? "—" : `${percentage}%`;
@@ -155,7 +156,7 @@ function displayValue(row, key, references = []) {
         return reference ? recordLabel(reference) : recordLabel(value);
     }
     if (key.includes("image")) return typeof value === "string" ? <img className="table-image-thumb" src={getImageUrl(value)} alt="" /> : recordLabel(value);
-    if (key === "discount_value") return String(row?.discount_type || "").toUpperCase() === "FIXED" ? `\u20b9${Number(value).toFixed(2)}` : `${value}%`;
+    if (key === "discount_value") return String(row?.discount_type || "").toUpperCase() === "FIXED" ? <DirhamAmount value={value} /> : `${value}%`;
     if (key.includes("percentage")) return `${value}%`;
     if (key.includes("amount") || key.includes("price") || key.includes("discount_value") || key.includes("shipping_fee") || key.includes("shipping_charge")) return money(value);
     if (key.includes("date") || key.endsWith("_at") || key === "valid_until" || key === "valid_from") return date(value);
@@ -842,10 +843,10 @@ function OrderDetailContent({ order, id, navigate }) {
             <div className="admin-panel-heading"><div><h3>Order items</h3><p>Product, quantity, pricing, and stock unit details</p></div><FiBox /></div>
             {items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}>
                 <div className="order-item-image">{item.product_image || item.image ? <img src={getImageUrl(item.product_image || item.image)} alt={item.product_name || "Product"} /> : <FiBox />}</div>
-                <div><strong>{item.product_name || item.name || recordLabel(item.product) || "Product"}</strong><span>Qty {item.quantity ?? 0}{item.color ? ` · ${item.color}` : ""}{item.size ? ` · ${item.size}` : ""}{item.unit_type ? ` · ${item.unit_type}` : ""}</span><small>Unit price {money(item.price)}{item.original_price !== undefined ? ` · Original ${money(item.original_price)}` : ""}{item.discount_amount !== undefined ? ` · Discount ${money(item.discount_amount)}` : ""}</small></div>
+                <div><strong>{item.product_name || item.name || recordLabel(item.product) || "Product"}</strong><span>Qty {item.quantity ?? 0}{item.color ? ` · ${item.color}` : ""}{item.size ? ` · ${item.size}` : ""}{item.unit_type ? ` · ${item.unit_type}` : ""}</span><small>Unit price {money(item.price)}{item.original_price !== undefined && <> · Original {money(item.original_price)}</>}{item.discount_amount !== undefined && <> · Discount {money(item.discount_amount)}</>}</small></div>
                 <strong>{money(lineTotal(item))}</strong>
             </div>)}</div> : <EmptyState title="No order items" />}
-            <div className="order-total"><span>Subtotal <strong>{money(order.subtotal)}</strong></span><span>Discount <strong>- {money(order.discount_amount)}</strong></span><span>Shipping <strong>{Number(order.shipping_charge || 0) === 0 ? "Free" : money(order.shipping_charge)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div>
+            <div className="order-total"><span>Subtotal <strong>{money(order.subtotal)}</strong></span><span>Discount <strong><DirhamAmount value={-Number(order.discount_amount || 0)} useGrouping /></strong></span><span>Shipping <strong>{Number(order.shipping_charge || 0) === 0 ? "Free" : money(order.shipping_charge)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div>
         </div>
     </div>;
 }

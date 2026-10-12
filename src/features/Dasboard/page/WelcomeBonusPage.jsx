@@ -5,6 +5,7 @@ import { FiEdit3, FiEye, FiPlus, FiPower, FiTrash2 } from "react-icons/fi";
 import { ConfirmDialog, DataTable, DebouncedSearch, Modal, PageHeader, Pagination, StatusPill } from "../components/AdminPrimitives";
 import { deleteResource, getErrorMessage, listResource, toggleWelcomeBonusActive, unwrapList } from "../services/adminApi";
 import "../styles/WelcomeBonus.css";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const idOf = (value) => value?.id ?? value?.pk ?? value?.uuid ?? value;
 const labelOf = (value, fallback = "—") => typeof value === "object" ? value?.name || value?.title || value?.label || fallback : value || fallback;
@@ -37,7 +38,7 @@ function targetName(row, products, categories) {
 function WelcomeBonusView({ row, onClose }) {
     const details = [
         ["Name", row.name], ["Apply To", applyTo(row)], ["Target", row.target_name || labelOf(row.product || row.category)],
-        ["Discount Type", discountType(row)], ["Discount", discountType(row) === "Fixed Amount" ? `AED ${Number(row.fixed_amount ?? row.discount_value ?? 0).toFixed(2)}` : `${row.discount_percentage ?? row.discount_value ?? 0}%`],
+        ["Discount Type", discountType(row)], ["Discount", discountType(row) === "Fixed Amount" ? <DirhamAmount value={row.fixed_amount ?? row.discount_value ?? 0} /> : `${row.discount_percentage ?? row.discount_value ?? 0}%`],
         ["Start Date", date(row.start_date || row.valid_from)], ["End Date", date(row.end_date || row.valid_until)], ["Status", row.is_active ? "Active" : "Inactive"],
         ["Assigned Users", count(row.assigned_users, row.assigned_users_count, row.assignment_count, row.assignments)], ["Claimed Users", count(row.claimed_users, row.claimed_users_count, row.claim_count, row.claims)], ["Redeemed Users", count(row.redeemed_users, row.redeemed_users_count, row.redemption_count, row.redemptions)],
     ];
@@ -107,7 +108,7 @@ export default function WelcomeBonusPage() {
         { key: "apply_to", label: "Apply To", render: applyTo },
         { key: "target", label: "Target", render: (row) => targetName(row, products, categories) },
         { key: "discount_type", label: "Discount Type", render: discountType },
-        { key: "discount", label: "Discount", render: (row) => discountType(row) === "Fixed Amount" ? `AED ${Number(row.fixed_amount ?? row.discount_value ?? 0).toFixed(2)}` : `${row.discount_percentage ?? row.discount_value ?? 0}%` },
+        { key: "discount", label: "Discount", render: (row) => discountType(row) === "Fixed Amount" ? <DirhamAmount value={row.fixed_amount ?? row.discount_value ?? 0} /> : `${row.discount_percentage ?? row.discount_value ?? 0}%` },
         { key: "start_date", label: "Start Date", render: (row) => date(row.start_date || row.valid_from) },
         { key: "end_date", label: "End Date", render: (row) => date(row.end_date || row.valid_until) },
         { key: "status", label: "Status", render: (row) => <StatusPill value={row.is_active ? "Active" : "Inactive"} /> },

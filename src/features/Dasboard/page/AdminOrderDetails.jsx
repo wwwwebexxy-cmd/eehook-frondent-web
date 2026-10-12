@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../styles/OrderDetails.css";
 import { getImageUrl } from "../../../utils/imageUrl";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const OrderDetails = () => {
 
@@ -283,7 +284,7 @@ const OrderDetails = () => {
 
                         <strong>
 
-                            NZ$ {order.total_amount}
+                            <DirhamAmount value={order.total_amount} />
 
                         </strong>
 
@@ -370,7 +371,7 @@ const OrderDetails = () => {
 
                                             <td>
 
-                                                NZ$ {item.price}
+                                                <DirhamAmount value={item.price} />
 
                                             </td>
 
@@ -407,7 +408,7 @@ const OrderDetails = () => {
                         </span>
 
                         <strong>
-                            NZ$ {Number(order.subtotal || 0).toFixed(2)}
+                            <DirhamAmount value={order.subtotal || 0} />
                         </strong>
 
                     </div>
@@ -424,7 +425,7 @@ const OrderDetails = () => {
                             {
                                 Number(order.shipping_charge || 0) === 0
                                     ? "Free"
-                                    : `NZ$ ${Number(order.shipping_charge).toFixed(2)}`
+                                    : <DirhamAmount value={order.shipping_charge} />
                             }
                         </strong>
 
@@ -438,7 +439,7 @@ const OrderDetails = () => {
                         </span>
 
                         <strong>
-                            NZ$ {Number(order.total_amount || 0).toFixed(2)}
+                            <DirhamAmount value={order.total_amount || 0} />
                         </strong>
 
                     </div>

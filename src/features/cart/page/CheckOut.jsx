@@ -6,6 +6,7 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 import { getSafeCheckoutUrl } from "../../../lib/checkoutUrl";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const Checkout = () => {
 
@@ -411,7 +412,7 @@ const Checkout = () => {
 
                                         <div className="eehook-summary-price">
 
-                                            AED{Number(item.total_price).toFixed(2)}
+                                            <DirhamAmount value={Number(item.total_price)} />
 
                                         </div>
 
@@ -432,7 +433,7 @@ const Checkout = () => {
 
                                 <span>
 
-                                            AED{cartSummary.subtotal.toFixed(2)}
+                                            <DirhamAmount value={cartSummary.subtotal} />
 
                                 </span>
 
@@ -453,7 +454,7 @@ const Checkout = () => {
                                     }}
                                 >
 
-                                    -₹{cartSummary.discount.toFixed(2)}
+                                    <DirhamAmount value={-cartSummary.discount} />
 
                                 </span>
 
@@ -472,7 +473,7 @@ const Checkout = () => {
                                     {
                                         cartSummary.shipping === 0
                                             ? "FREE"
-                                            : `AED${cartSummary.shipping.toFixed(2)}`
+                                            : <DirhamAmount value={cartSummary.shipping} />
                                     }
 
                                 </span>
@@ -511,7 +512,7 @@ const Checkout = () => {
 
                                 <h2>
 
-                                            AED{cartSummary.total.toFixed(2)}
+                                            <DirhamAmount value={cartSummary.total} />
 
                                 </h2>
 

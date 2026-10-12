@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../styles/Invoice.css";
 import { getImageUrl } from "../../../utils/imageUrl";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const Invoice = () => {
 
@@ -295,17 +296,12 @@ const Invoice = () => {
                                     </td>
 
                                     <td>
-                                        AED
-                                        {Number(item.price).toFixed(2)}
+                                        <DirhamAmount value={item.price} />
                                     </td>
 
                                     <td>
 
-                                        AED
-                                        {(
-                                            Number(item.price) *
-                                            item.quantity
-                                        ).toFixed(2)}
+                                        <DirhamAmount value={Number(item.price) * item.quantity} />
 
                                     </td>
 
@@ -364,9 +360,7 @@ const Invoice = () => {
                             </span>
 
                             <span>
-                                AED {Number(
-                                    order.subtotal || 0
-                                ).toFixed(2)}
+                                <DirhamAmount value={order.subtotal || 0} />
                             </span>
 
                         </div>
@@ -383,9 +377,7 @@ const Invoice = () => {
                                 {
                                     Number(order.shipping_charge || 0) === 0
                                         ? "FREE"
-                                        : `AED ${Number(
-                                            order.shipping_charge
-                                        ).toFixed(2)}`
+                                        : <DirhamAmount value={order.shipping_charge} />
                                 }
 
                             </span>
@@ -400,9 +392,7 @@ const Invoice = () => {
                             </span>
 
                             <strong>
-                                AED {Number(
-                                    order.total_amount || 0
-                                ).toFixed(2)}
+                                <DirhamAmount value={order.total_amount || 0} />
                             </strong>
 
                         </div>

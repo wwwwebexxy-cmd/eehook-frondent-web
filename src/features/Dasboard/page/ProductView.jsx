@@ -5,6 +5,7 @@ import { getErrorMessage, getResource, listResource } from "../services/adminApi
 import { EmptyState, LoadingState } from "../components/AdminPrimitives";
 import { getImageUrl } from "../../../utils/imageUrl";
 import defaultImage from "../../../assets/image_not_available.png";
+import DirhamAmount from "../../../components/DirhamAmount";
 import "../styles/ProductEditor.css";
 
 const EMPTY_VALUE = "\u2014";
@@ -39,7 +40,7 @@ function keyFeatures(value) {
         .filter(Boolean);
 }
 
-const money = (value) => value === null || value === undefined || value === "" ? EMPTY_VALUE : `AED ${Number(value).toFixed(2)}`;
+const money = (value) => value === null || value === undefined || value === "" ? EMPTY_VALUE : <DirhamAmount value={value} />;
 
 export default function ProductView() {
     const { id } = useParams();
@@ -165,7 +166,7 @@ export default function ProductView() {
                         <div className="product-view-variant-head">
                             <div>
                                 <strong>{colorLabel !== EMPTY_VALUE ? colorLabel : `Variant ${index + 1}`}</strong>
-                                <span>{variant.price_type === "multiple" ? "Multiple price" : `Single price · ${money(variant.price)} · Stock ${variant.stock ?? 0}`}</span>
+                                <span>{variant.price_type === "multiple" ? "Multiple price" : <>Single price · {money(variant.price)} · Stock {variant.stock ?? 0}</>}</span>
                                 {variant.sku && <small>SKU: {variant.sku}</small>}
                             </div>
                             {primary?.image && <img src={getImageUrl(primary.image)} alt={colorLabel} onError={(event) => { event.currentTarget.src = defaultImage; }} />}

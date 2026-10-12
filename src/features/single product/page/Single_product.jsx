@@ -35,6 +35,7 @@ import {
 } from "../../coupon/couponState";
 import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 import { hasAuthSession } from "../../auth/authUtils";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -81,7 +82,7 @@ function relatedProductImage(product) {
 function relatedProductPrice(product) {
     const value = product?.discounted_price ?? product?.current_price ?? product?.starting_price ?? product?.price;
     const price = Number(value);
-    return Number.isFinite(price) ? `AED ${price.toFixed(2)}` : "Price unavailable";
+    return <DirhamAmount value={price} fallback="Price unavailable" />;
 }
 
 function isWelcomeBonusCoupon(coupon) {
@@ -728,15 +729,15 @@ function Single_product() {
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
-                                            AED {finalPrice.toFixed(2)}
+                                            <DirhamAmount value={finalPrice} />
                                         </span>
                                         {originalPrice > finalPrice && (
                                             <>
                                                 <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
-                                                    AED {originalPrice.toFixed(2)}
+                                                    <DirhamAmount value={originalPrice} />
                                                 </span>
                                                 <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                                                    Save AED {(originalPrice - finalPrice).toFixed(2)}
+                                                    Save <DirhamAmount value={originalPrice - finalPrice} />
                                                 </span>
                                             </>
                                         )}
@@ -798,12 +799,12 @@ function Single_product() {
                 <div className="purchase-panel eehook-purchase-panel">
 
                     <div className="delivery-time-section">
-                        <div className="shipping-fee">+ AED {data.shipping_fee || "13.00"} Shipping</div>
+                        <div className="shipping-fee">+ <DirhamAmount value={data.shipping_fee || "13.00"} /> Shipping</div>
                         <div className="delivery-date">Delivery <strong>{data.estimated_delivery_time || "09 Sep - 10 Sep"}</strong></div>
                     </div>
 
                     <div className="price-right-section" style={{ marginBottom: '15px' }}>
-                        <span className="price-value">AED {Number(selectedVariant?.price_type === 'single' ? (selectedVariant?.discounted_price || selectedVariant?.price || 0) : ((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0)).toFixed(2)}</span>
+                        <span className="price-value"><DirhamAmount value={Number(selectedVariant?.price_type === 'single' ? (selectedVariant?.discounted_price || selectedVariant?.price || 0) : ((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0))} /></span>
                     </div>
 
                     <div className="stock-status">

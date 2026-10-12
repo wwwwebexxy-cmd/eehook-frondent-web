@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 function Cart_page() {
 
@@ -366,9 +367,7 @@ function Cart_page() {
                                                 cart.price && (
 
                                                     <del>
-
-                                                        AED
-                                                        {(cart.originalPrice * cart.quantity).toFixed(2)}
+                                                        <DirhamAmount value={cart.originalPrice * cart.quantity} />
 
                                                     </del>
 
@@ -376,10 +375,7 @@ function Cart_page() {
                                             }
 
                                             <h5>
-
-                                                AED
-
-                                                {cart.totalPrice.toFixed(2)}
+                                                <DirhamAmount value={cart.totalPrice} />
 
                                             </h5>
 
@@ -415,7 +411,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    AED{subtotal.toFixed(2)}
+                                    <DirhamAmount value={subtotal} />
                                 </span>
 
                             </div>
@@ -427,7 +423,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    AED{shipping.toFixed(2)}
+                                    <DirhamAmount value={shipping} />
                                 </span>
 
                             </div>
@@ -439,7 +435,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    AED{total.toFixed(2)}
+                                    <DirhamAmount value={total} />
                                 </span>
 
                             </div>

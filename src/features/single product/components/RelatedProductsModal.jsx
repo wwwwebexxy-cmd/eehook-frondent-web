@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getImageUrl } from "../../../utils/imageUrl";
 import defaultImage from "../../../assets/image_not_available.png";
+import DirhamAmount from "../../../components/DirhamAmount";
 import "../style/RelatedProductsModal.css";
 
 const idOf = (value) => value?.id ?? value?.pk ?? value?.uuid ?? value ?? null;
@@ -32,7 +33,7 @@ function originalPrice(product) {
 }
 
 function priceText(price) {
-    return Number.isFinite(price) ? `AED ${price.toFixed(2)}` : "Price available in cart";
+    return <DirhamAmount value={price} fallback="Price available in cart" />;
 }
 
 function variantsFor(product) {

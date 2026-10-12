@@ -8,14 +8,9 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import defaultImage from "../../../assets/image_not_available.png";
 import { hasAuthSession } from "../../auth/authUtils";
+import DirhamAmount from "../../../components/DirhamAmount";
 
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
-
-function formatPrice(value) {
-    if (!hasValue(value)) return "Price unavailable";
-    const numericValue = Number(value);
-    return Number.isFinite(numericValue) ? `AED ${numericValue.toFixed(2)}` : String(value);
-}
 
 function getFirstVariant(product) {
     return product?.variants?.[0] || null;
@@ -147,8 +142,12 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                     <h3 className="product-title">{product.name}</h3>
                     <div className="product-footer">
                         <div className="price-box">
-                            {showOriginalPrice && <span className="old-price">{formatPrice(originalPrice)}</span>}
-                            <span className={showOriginalPrice ? "new-price" : "price"}>{formatPrice(displayPrice)}</span>
+                            {showOriginalPrice ? (
+                                <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>
+                            ) : null}
+                            <span className={showOriginalPrice ? "new-price" : "price"}>
+                                <DirhamAmount value={displayPrice} fallback="Price unavailable" />
+                            </span>
                         </div>
                     </div>
                     <span className={`product-availability ${availability.toLowerCase().includes("out") ? "is-unavailable" : ""}`}>{availability}</span>
