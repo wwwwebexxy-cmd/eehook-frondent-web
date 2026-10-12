@@ -654,12 +654,12 @@ function OrderEditPage({ id }) {
 
 function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
     const config = resources[resource];
-    const [values, setValues] = useState(() => ({ ...(row || {}), ...initialValues }));
+    const [values, setValues] = useState(() => normalizeResourceValues({ ...(row || {}), ...initialValues }, resource));
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
     const [productMode, setProductMode] = useState(row?.product_type || (row?.has_variants ? "multiple" : "single"));
-    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "datetime-local" }; return field; }) : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "date" }; return field; }) : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
     const errors = useFormErrors(requestError);
     const readOnly = mode === "view";
     useEffect(() => {
@@ -749,9 +749,19 @@ function unwrapListForReference(payload) {
     return Array.isArray(payload?.results) ? payload.results : [];
 }
 
+function normalizeResourceValues(values, resource) {
+    if (resource !== "offers") return values;
+    return Object.fromEntries(Object.entries(values).map(([key, value]) => [
+        key,
+        ["start_date", "end_date"].includes(key) && typeof value === "string"
+            ? value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1] || value
+            : value,
+    ]));
+}
+
 function cleanPayload(values, resource) {
     const isFileField = (key) => key === "image" || key.includes("_image") || key.includes("logo");
-    const entries = Object.entries(values).filter(([key, value]) => !["id", "pk", "created_at", "updated_at"].includes(key) && value !== undefined && value !== null && value !== "" && !(isFileField(key) && !(value instanceof File)));
+    const entries = Object.entries(normalizeResourceValues(values, resource)).filter(([key, value]) => !["id", "pk", "created_at", "updated_at"].includes(key) && value !== undefined && value !== null && value !== "" && !(isFileField(key) && !(value instanceof File)));
     const hasFile = entries.some(([, value]) => value instanceof File);
     if (!hasFile) return resource === "products" ? { ...Object.fromEntries(entries), emi_available: false, emi_starting_price: null } : Object.fromEntries(entries);
     const form = new FormData(); entries.forEach(([key, value]) => { if (Array.isArray(value)) value.forEach((item) => form.append(key, item)); else form.append(key, value); });
