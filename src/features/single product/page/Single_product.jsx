@@ -7,7 +7,7 @@ import {
     useParams,
     useNavigate
 } from "react-router-dom";
-import { AiOutlineDoubleRight, AiOutlineEye, AiOutlineCheckCircle, AiOutlineLock, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { AiOutlineDoubleRight, AiOutlineEye, AiOutlineCheckCircle, AiOutlineLock, AiOutlineLeft, AiOutlineRight, AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import GetSingle_product_Query from "../queries/GetSingle_product_Query";
 import Cart_query from "../../cart/queries/Cart_query";
@@ -69,6 +69,55 @@ function getKeyFeatures(value) {
         .split(/\r?\n|[•●▪◦]/)
         .map((feature) => feature.replace(/^\s*[-*]\s*/, "").trim())
         .filter(Boolean);
+}
+
+function ExpandableProductContent({ children, className = "" }) {
+    const contentRef = useRef(null);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [hasMoreContent, setHasMoreContent] = useState(false);
+
+    useEffect(() => {
+        const content = contentRef.current;
+        if (!content || isExpanded) return undefined;
+
+        const measureContent = () => {
+            setHasMoreContent(content.scrollHeight > content.clientHeight + 1);
+        };
+
+        measureContent();
+
+        if (typeof ResizeObserver === "undefined") {
+            window.addEventListener("resize", measureContent);
+            return () => window.removeEventListener("resize", measureContent);
+        }
+
+        const resizeObserver = new ResizeObserver(measureContent);
+        resizeObserver.observe(content);
+        return () => resizeObserver.disconnect();
+    }, [children, isExpanded]);
+
+    return (
+        <>
+            <div
+                ref={contentRef}
+                className={`expandable-product-content ${className} ${isExpanded ? "is-expanded" : "is-collapsed"}`}
+            >
+                {children}
+            </div>
+
+            {hasMoreContent && (
+                <button
+                    type="button"
+                    className="product-content-toggle"
+                    onClick={() => setIsExpanded((expanded) => !expanded)}
+                    aria-expanded={isExpanded}
+                >
+                    <span>{isExpanded ? "Read less" : "Read more"}</span>
+                    {isExpanded ? <AiOutlineUp aria-hidden="true" /> : <AiOutlineDown aria-hidden="true" />}
+                </button>
+            )}
+        </>
+    );
 }
 
 function relatedProductImage(product) {
@@ -761,16 +810,20 @@ function Single_product() {
                             {descriptionText && (
                                 <section className="product-content-section" aria-labelledby="product-description-heading">
                                     <h2 id="product-description-heading">Description</h2>
-                                    <p className="description">{descriptionText}</p>
+                                    <ExpandableProductContent className="description">
+                                        {descriptionText}
+                                    </ExpandableProductContent>
                                 </section>
                             )}
 
                             {keyFeatures.length > 0 && (
                                 <section className="product-content-section key-features" aria-labelledby="product-features-heading">
                                     <h2 id="product-features-heading">Key features</h2>
-                                    <ul className="key-features-list">
-                                        {keyFeatures.map((feature, idx) => <li key={`${feature}-${idx}`}>{feature}</li>)}
-                                    </ul>
+                                    <ExpandableProductContent className="key-features-list-wrapper">
+                                        <ul className="key-features-list">
+                                            {keyFeatures.map((feature, idx) => <li key={`${feature}-${idx}`}>{feature}</li>)}
+                                        </ul>
+                                    </ExpandableProductContent>
                                 </section>
                             )}
                         </div>
