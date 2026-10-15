@@ -5,12 +5,13 @@
     white-space: nowrap;
 }
 
-.dirham-symbol {
-    width: .78em;
-    height: .68em;
+.currency-symbol {
     flex: 0 0 auto;
     color: currentColor;
-    vertical-align: -.08em;
+    font-size: .92em;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: -.04em;
 }
 
 .dirham-amount-sign {
