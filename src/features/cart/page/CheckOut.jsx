@@ -10,6 +10,7 @@ import DirhamAmount from "../../../components/DirhamAmount";
 const Checkout = () => {
 
     const navigate = useNavigate();
+    const PAYMENT_REQUEST_TIMEOUT = 35000;
 
     const [addresses, setAddresses] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -52,7 +53,7 @@ const Checkout = () => {
 
         try {
 
-            const response = await client.get("cart/");
+            const response = await client.get("cart/", { timeout: PAYMENT_REQUEST_TIMEOUT });
 
             const cartData = response.data || {};
             const inactiveItems = (Array.isArray(cartData.items) ? cartData.items : []).filter((item) => item.coupon_status === "COUPON_INACTIVE");
@@ -133,6 +134,7 @@ const Checkout = () => {
                     address: selectedAddress
                 },
                 {
+                    timeout: PAYMENT_REQUEST_TIMEOUT,
                     headers: { "Idempotency-Key": idempotencyKey }
                 }
             );
@@ -145,13 +147,41 @@ const Checkout = () => {
             const cashfree = window.Cashfree({
                 mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox",
             });
-            const checkoutResult = await cashfree.checkout({
+            // Redirect checkout navigates the current tab. Cashfree's redirect
+            // flow may keep the returned promise pending until navigation has
+            // completed, so awaiting it can leave the button stuck forever.
+            const checkoutPromise = cashfree.checkout({
                 paymentSessionId,
                 redirectTarget: "_self",
             });
 
-            if (checkoutResult?.error) {
-                throw new Error(checkoutResult.error.message || "Cashfree checkout could not be opened.");
+            // Keep handling SDK errors for browsers/in-app browsers where the
+            // redirect cannot be opened. The normal _self flow navigates away
+            // before this fallback expires.
+            const redirectTimeout = window.setTimeout(() => {
+                setCheckoutError("Cashfree checkout did not open. Please try again.");
+                setProcessing(false);
+            }, 15000);
+
+            if (checkoutPromise && typeof checkoutPromise.then === "function") {
+                checkoutPromise
+                    .then((checkoutResult) => {
+                        window.clearTimeout(redirectTimeout);
+                        if (checkoutResult?.error) {
+                            throw new Error(checkoutResult.error.message || "Cashfree checkout could not be opened.");
+                        }
+                        // A redirect result is expected to navigate away. If it
+                        // does not, release the button so the user can retry.
+                        if (checkoutResult?.redirect || checkoutResult?.paymentDetails) {
+                            setProcessing(false);
+                        }
+                    })
+                    .catch((error) => {
+                        window.clearTimeout(redirectTimeout);
+                        console.error(error);
+                        setCheckoutError("Unable to open Cashfree checkout. Please try again.");
+                        setProcessing(false);
+                    });
             }
 
         } catch (error) {
