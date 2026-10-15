@@ -170,11 +170,11 @@ const Checkout = () => {
                         if (checkoutResult?.error) {
                             throw new Error(checkoutResult.error.message || "Cashfree checkout could not be opened.");
                         }
-                        // A redirect result is expected to navigate away. If it
-                        // does not, release the button so the user can retry.
-                        if (checkoutResult?.redirect || checkoutResult?.paymentDetails) {
-                            setProcessing(false);
-                        }
+                        // A successful redirect normally navigates away. If the
+                        // SDK resolves without navigating (for example in a
+                        // browser that blocks the redirect), release the
+                        // button so the user can retry instead of staying stuck.
+                        setProcessing(false);
                     })
                     .catch((error) => {
                         window.clearTimeout(redirectTimeout);
