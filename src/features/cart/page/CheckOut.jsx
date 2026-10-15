@@ -5,7 +5,6 @@ import "../style/Checkout.css";
 import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
-import { getSafeCheckoutUrl } from "../../../lib/checkoutUrl";
 import DirhamAmount from "../../../components/DirhamAmount";
 
 const Checkout = () => {
@@ -129,7 +128,7 @@ const Checkout = () => {
             // click represents a new user-initiated checkout operation.
             const idempotencyKey = crypto.randomUUID();
             const response = await client.post(
-                "payment/create-checkout-session/",
+                "payment/create-cashfree-order/",
                 {
                     address: selectedAddress
                 },
@@ -138,7 +137,22 @@ const Checkout = () => {
                 }
             );
 
-            window.location.assign(getSafeCheckoutUrl(response.data?.checkout_url));
+            const paymentSessionId = response.data?.payment_session_id;
+            if (!paymentSessionId || typeof window.Cashfree !== "function") {
+                throw new Error("Cashfree checkout is not available.");
+            }
+
+            const cashfree = window.Cashfree({
+                mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox",
+            });
+            const checkoutResult = await cashfree.checkout({
+                paymentSessionId,
+                redirectTarget: "_self",
+            });
+
+            if (checkoutResult?.error) {
+                throw new Error(checkoutResult.error.message || "Cashfree checkout could not be opened.");
+            }
 
         } catch (error) {
 
@@ -314,15 +328,14 @@ const Checkout = () => {
 
                             <div className="eehook-payment-title">
 
-                                Stripe Secure Payment
+                                Cashfree Secure Payment
 
                             </div>
 
                             <p>
 
-                                Visa, Mastercard, Apple Pay,
-                                Google Pay and other cards
-                                are supported.
+                                Pay securely with the payment methods
+                                available in Cashfree checkout.
 
                             </p>
 
@@ -544,7 +557,7 @@ const Checkout = () => {
 
                         <p className="eehook-payment-note">
 
-                            You will be redirected securely to Stripe
+                            You will be redirected securely to Cashfree
                             to complete your payment.
 
                         </p>

@@ -32,16 +32,16 @@ const PaymentSuccess = () => {
         };
 
         const verifyPayment = async () => {
-            const sessionId = searchParams.get("session_id");
+            const cashfreeOrderId = searchParams.get("order_id");
 
-            if (!sessionId) {
+            if (!cashfreeOrderId) {
                 showFailure({ message: PAYMENT_MESSAGES.invalidSession, title: "Payment Not Completed" });
                 return;
             }
 
             try {
-                const response = await client.get("payment/payment-success/", {
-                    params: { session_id: sessionId },
+                const response = await client.get("payment/cashfree-success/", {
+                    params: { order_id: cashfreeOrderId },
                 });
 
                 if (response.status !== 200) {
