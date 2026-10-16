@@ -29,6 +29,12 @@ const getHeroImageUrl = (image) => image === defaultHeroImage || image === defau
   ? image
   : getImageUrl(image);
 
+const getHeroCopy = (...values) => {
+  return values
+    .map((value) => String(value ?? "").trim())
+    .find((text) => text && text !== ".") || "";
+};
+
 const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBanner: providedSideBanner }) => {
 
   // An empty homepage response is not an intentional override. Keep the
@@ -149,25 +155,25 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
               <div className="hero-overlay"></div>
 
               <div className="hero-content">
+                {getHeroCopy(slide.subtitle, slide.eyebrow) && (
+                  <span className="hero-subtitle">
+                    {getHeroCopy(slide.subtitle, slide.eyebrow)}
+                  </span>
+                )}
 
-                <span className="hero-subtitle">
-                  {slide.subtitle || slide.eyebrow}
-                </span>
+                {getHeroCopy(slide.title, slide.heading) && (
+                  <h1>{getHeroCopy(slide.title, slide.heading)}</h1>
+                )}
 
-                <h1>
-                  {slide.title || slide.heading}
-                </h1>
+                {getHeroCopy(slide.description, slide.text) && (
+                  <p>{getHeroCopy(slide.description, slide.text)}</p>
+                )}
 
-                <p>
-                  {slide.description || slide.text}
-                </p>
-
-                <Link
-                  to="/shop"
-                  className="shop-btn-premium"
-                >
-                  {slide.button_text} <span className="arrow">→</span>
-                </Link>
+                {getHeroCopy(slide.button_text) && (
+                  <Link to="/shop" className="shop-btn-premium">
+                    {getHeroCopy(slide.button_text)} <span className="arrow">→</span>
+                  </Link>
+                )}
 
               </div>
 
