@@ -199,11 +199,11 @@
 /* Elegant Title */
 .product-title {
     font-family: Inter, Arial, Helvetica, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #2b2b2b;
     margin: 0 0 8px 0;
-    line-height: 1.35;
+    line-height: 1.4;
     overflow-wrap: anywhere;
     word-break: break-word;
 
@@ -408,7 +408,7 @@
     }
 
     .product-title {
-        font-size: 15px;
+        font-size: 14px;
     }
 }
 

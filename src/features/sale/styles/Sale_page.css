@@ -37,11 +37,12 @@
 }
 
 .page_title {
-    font-size: 2.4rem;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 1.75rem;
+    line-height: 1.25;
     font-weight: 600;
     color: #FF9000;
     margin-bottom: 10px;
-    font-family: "Playfair Display", serif;
 }
 
 .title_description {
@@ -93,7 +94,7 @@
 
 @media (max-width:643px) {
     .page_head h1 {
-        font-size: 32px;
+        font-size: 1.5rem;
     }
 
     .page_head p {
@@ -157,7 +158,9 @@
 
     margin-bottom: 18px;
 
-    font-size: 22px;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
 
     font-weight: 600;
 
@@ -198,6 +201,9 @@
     cursor: pointer;
 
     text-align: left;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
     width: 100%;
     transition: .3s;
 }
@@ -252,6 +258,9 @@
     color: #4B636D;
 
     padding: 12px;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
 
     border-radius: 8px;
 
