@@ -433,16 +433,18 @@
 }
 
 .size-btn:hover:not(:disabled) {
-    border-color: #111;
-    background: #F9F9F9;
+    border-color: #d88a1a;
+    background: #fff8ed;
+    box-shadow: 0 3px 9px rgba(216, 138, 26, 0.16);
+    transform: translateY(-1px);
 }
 
 .active-size {
     border: 2px solid #e77600 !important;
-    color: #111;
-    background: #fffafa;
-    font-weight: 500;
-    box-shadow: 0 0 3px rgba(231,118,0,0.5);
+    color: #8a4b00;
+    background: #fff0d8;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(231, 118, 0, 0.14), 0 5px 12px rgba(231, 118, 0, 0.2);
 }
 
 .size-btn:disabled, .disabled-size {
@@ -708,7 +710,6 @@
 }
 .active-color-img {
     border: 2px solid #e77600;
-    box-shadow: 0 0 3px rgba(231,118,0,0.5);
     padding: 3px;
 }
 .fallback-color {
