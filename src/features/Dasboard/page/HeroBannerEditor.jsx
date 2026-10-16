@@ -16,6 +16,7 @@ const fields = [
     { name: "display_order", label: "Display order", required: true, type: "integer", min: 0 },
     { name: "is_active", label: "Is active", type: "boolean" },
 ];
+const optionalTextFields = new Set(["subtitle", "title", "description", "button_text"]);
 
 const idOf = (row) => row?.id ?? row?.pk ?? row?.uuid;
 const errorMap = (error) => { const data = error?.response?.data; return data && typeof data === "object" ? Object.fromEntries(Object.entries(data).map(([key, value]) => [key, Array.isArray(value) ? value.join(", ") : String(value)])) : {}; };
@@ -47,6 +48,7 @@ export default function HeroBannerEditor({ schema = {} }) {
         Object.entries(values).forEach(([key, value]) => {
             if (["id", "pk", "created_at", "updated_at"].includes(key)) return;
             if (key === "image") { if (value instanceof File) form.append(key, value); return; }
+            if (optionalTextFields.has(key)) { form.append(key, value ?? ""); return; }
             if (value !== undefined && value !== null && value !== "") form.append(key, value);
         });
         return form;
