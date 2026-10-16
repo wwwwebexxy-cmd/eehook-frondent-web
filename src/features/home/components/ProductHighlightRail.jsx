@@ -38,10 +38,8 @@ export default function ProductHighlightRail({ highlights = [] }) {
     }), [highlights, now]);
     const current = items.length ? items[activeIndex % items.length] : null;
     const hasCountdown = items.some((item) => item?.highlight_type === "countdown" && item?.ends_at);
-
-    useEffect(() => {
-        setActiveIndex((index) => (items.length ? index % items.length : 0));
-    }, [items.length]);
+    const currentId = current?.id;
+    const rotationSeconds = Math.max(2, Number(current?.rotation_seconds) || 4);
 
     useEffect(() => {
         if (!hasCountdown) return undefined;
@@ -50,11 +48,10 @@ export default function ProductHighlightRail({ highlights = [] }) {
     }, [hasCountdown]);
 
     useEffect(() => {
-        if (!current || items.length < 2) return undefined;
-        const seconds = Math.max(2, Number(current.rotation_seconds) || 4);
-        const timer = window.setTimeout(() => setActiveIndex((index) => (index + 1) % items.length), seconds * 1000);
+        if (!currentId || items.length < 2) return undefined;
+        const timer = window.setTimeout(() => setActiveIndex((index) => (index + 1) % items.length), rotationSeconds * 1000);
         return () => window.clearTimeout(timer);
-    }, [current?.id, current?.rotation_seconds, items.length]);
+    }, [currentId, items.length, rotationSeconds]);
 
     if (!current) return null;
 
