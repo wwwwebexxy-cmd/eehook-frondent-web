@@ -78,6 +78,26 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
 
   // Top Promo Carousel Logic
   const [currentPromo, setCurrentPromo] = useState(0);
+  const [imageRatios, setImageRatios] = useState({});
+
+  const rememberImageRatio = (key, event) => {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+
+    if (!naturalWidth || !naturalHeight) return;
+
+    const ratio = naturalWidth / naturalHeight;
+
+    setImageRatios((current) => (
+      current[key] === ratio ? current : { ...current, [key]: ratio }
+    ));
+  };
+
+  const activeHero = heroSlides[currentSlide] || heroSlides[0];
+  const activePromo = promoBanners[currentPromo] || promoBanners[0];
+  const heroRatio = imageRatios[`hero-${activeHero?.id ?? currentSlide}`] || (16 / 7);
+  const sideBannerKey = heroSideBanner?.id ?? heroSideBanner?.image ?? "default";
+  const sideRatio = imageRatios[`side-${sideBannerKey}`] || (16 / 7);
+  const promoRatio = imageRatios[`promo-${activePromo?.id ?? currentPromo}`] || (16 / 3);
 
   useEffect(() => {
     if (promoBanners.length === 0) return;
@@ -103,7 +123,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     <div className="hero-page-wrapper">
       
       {/* Top Promo Carousel (Visa Banner Equivalent) */}
-      {promoBanners.length > 0 && <div className="top-promo-carousel">
+      {promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
         <button className="promo-nav-btn left" onClick={prevPromo}>‹</button>
         
         <div className="promo-slides">
@@ -117,6 +137,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                   <img 
                     src={getImageUrl(promo.image)} 
                     alt="Promo Banner" 
+                    onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }} 
                   />
                 </a>
@@ -124,6 +145,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 <img 
                   src={getImageUrl(promo.image)} 
                   alt="Promo Banner" 
+                  onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }} 
                 />
               )}
@@ -134,7 +156,10 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
         <button className="promo-nav-btn right" onClick={nextPromo}>›</button>
       </div>}
 
-      <section className={`hero-split-layout ${heroSideBanner?.image ? "" : "single"}`}>
+      <section
+        className={`hero-split-layout ${heroSideBanner?.image ? "" : "single"}`}
+        style={{ "--hero-ratio": heroRatio, "--side-ratio": sideRatio }}
+      >
         
         {/* Main Carousel (Left) */}
         <div className="hero-carousel-section">
@@ -150,6 +175,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 src={getHeroImageUrl(slide.image || slide.banner_image || slide.image_url)}
                 alt={slide.title || slide.heading || "Featured collection"}
                 className="hero-image"
+                onLoad={(event) => rememberImageRatio(`hero-${slide.id ?? index}`, event)}
               />
 
               <div className="hero-overlay"></div>
@@ -210,10 +236,20 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           <div className="fixed-banner-content">
              {heroSideBanner?.link ? (
                <a href={heroSideBanner.link} target="_blank" rel="noopener noreferrer">
-                 <img src={getHeroImageUrl(heroSideBanner.image)} alt="Promotional Banner" className="fixed-banner-image" />
+                 <img
+                   src={getHeroImageUrl(heroSideBanner.image)}
+                   alt="Promotional Banner"
+                   className="fixed-banner-image"
+                   onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
+                 />
                </a>
              ) : (
-                 <img src={getHeroImageUrl(heroSideBanner?.image)} alt="Promotional Banner" className="fixed-banner-image" />
+                 <img
+                   src={getHeroImageUrl(heroSideBanner?.image)}
+                   alt="Promotional Banner"
+                   className="fixed-banner-image"
+                   onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
+                 />
              )}
           </div>
         </div>}
