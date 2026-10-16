@@ -8,11 +8,11 @@ import "../styles/HeroBannerEditor.css";
 
 const emptyBanner = { subtitle: "", title: "", description: "", image: null, button_text: "Explore Collection", display_order: 1, is_active: true };
 const fields = [
-    { name: "subtitle", label: "Subtitle", required: true },
-    { name: "title", label: "Title", required: true },
-    { name: "description", label: "Description", required: true, type: "textarea" },
+    { name: "subtitle", label: "Subtitle" },
+    { name: "title", label: "Title" },
+    { name: "description", label: "Description", type: "textarea" },
     { name: "image", label: "Image", required: true, type: "image" },
-    { name: "button_text", label: "Button text", required: true },
+    { name: "button_text", label: "Button text" },
     { name: "display_order", label: "Display order", required: true, type: "integer", min: 0 },
     { name: "is_active", label: "Is active", type: "boolean" },
 ];
