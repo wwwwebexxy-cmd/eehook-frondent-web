@@ -38,7 +38,8 @@ const resources = {
     units: { label: "Units", group: "Catalog", fields: ["unit_type", "name"], columns: ["unit_type", "name"] },
     products: { label: "Products", group: "Catalog", fields: ["name", "description", "key_features", "category", "subcategory", "offer", "seller_name", "shipping_fee", "estimated_delivery_time", "warranty_info", "current_viewers_count", "promotional_banner_image", "promotional_banner_link", "is_active"], columns: ["id", "name", "category", "subcategory", "product_image", "seller_name", "is_active"] },
     "product-variants": { label: "Product Variants", group: "Catalog", fields: ["product", "color", "sku", "price_type", "price", "stock"], columns: ["product", "color", "sku", "price_type", "price", "stock"] },
-    "product-highlights": { label: "Product Highlights", itemLabel: "Product Highlight", group: "Marketing", fields: ["product", "highlight_type", "text", "icon_key", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "highlight_type", "text", "icon_key", "display_order", "rotation_seconds", "is_active"] },
+    "product-highlights": { label: "Product Highlights", itemLabel: "Product Highlight", group: "Marketing", fields: ["product", "highlight_type", "text", "icon_key", "background_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "highlight_type", "text", "icon_key", "background_color", "display_order", "rotation_seconds", "is_active"] },
+    "product-messages": { label: "Product Messages", itemLabel: "Product Message", group: "Marketing", fields: ["product", "message_type", "text", "background_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "message_type", "text", "background_color", "display_order", "rotation_seconds", "is_active"] },
     "product-variant-units": { label: "Variant Sizes / Units", group: "Catalog", fields: ["variant", "unit_type", "unit", "sku", "price", "stock"], columns: ["variant", "unit_type", "unit", "sku", "price", "stock"] },
     "product-images": { label: "Product Images", group: "Catalog", fields: ["variant", "image", "is_primary", "position"], columns: ["variant", "image", "is_primary", "position"] },
     wishlists: { label: "Wishlists", group: "Customers", fields: ["user", "variant", "variant_unit"], columns: ["user", "variant", "variant_unit"] },
@@ -65,7 +66,7 @@ const navGroups = [
     { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
     { title: "Dashboard", items: ["coupons", "welcome-bonuses"].map((key) => ({ key, label: resources[key].label, icon: FiTag })) },
     { title: "Token Blacklist", items: [{ key: "token-blacklist/outstanding-tokens", label: "Outstanding Tokens", icon: FiShield }, { key: "token-blacklist/blacklisted-tokens", label: "Blacklisted Tokens", icon: FiArchive }] },
-    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "product-highlights", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key === "product-highlights" ? FiActivity : key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "product-highlights", "product-messages", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key === "product-highlights" ? FiActivity : key === "product-messages" ? FiTruck : key.includes("banner") ? FiImage : FiTag })) },
 ];
 
 const TRUST_BENEFIT_ICON_OPTIONS = [
@@ -86,6 +87,9 @@ const columnLabel = (resource, key) => ({
 const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
 const resourceFallbackFields = (resource, fieldNames) => {
     const fields = fallbackFields(resource, fieldNames);
+    if (["product-highlights", "product-messages"].includes(resource)) {
+        return fields.map((field) => field.name === "background_color" ? { ...field, type: "color", label: "Background color" } : field);
+    }
     if (resource !== "trust-benefits") return fields;
     return fields.map((field) => {
         if (field.name === "icon_key") return { ...field, type: "choice", choices: TRUST_BENEFIT_ICON_OPTIONS, label: "Icon" };
@@ -147,6 +151,13 @@ function fieldsFromSchema(schema, resource) {
             const name = field.name || field.key;
             if (name === "icon_key") return { ...field, type: "choice", choices: TRUST_BENEFIT_ICON_OPTIONS, label: "Icon" };
             if (name === "display_order") return { ...field, type: "integer", label: "Display order", min: 0, step: 1 };
+            return field;
+        });
+    }
+    if (["product-highlights", "product-messages"].includes(resource)) {
+        return fields.map((field) => {
+            const name = field.name || field.key;
+            if (name === "background_color") return { ...field, type: "color", label: "Background color" };
             return field;
         });
     }
@@ -292,6 +303,7 @@ export default function OrderDashboard() {
     const isWelcomeBonusView = pathKey === "welcome-bonuses" && Boolean(detailId) && location.pathname.endsWith("/view");
     const isTrustBenefitEditor = pathKey === "trust-benefits" && (location.pathname.endsWith("/new") || isEditRoute);
     const isProductHighlightEditor = pathKey === "product-highlights" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isProductMessageEditor = pathKey === "product-messages" && (location.pathname.endsWith("/new") || isEditRoute);
     const isOrderEditor = pathKey === "orders" && Boolean(detailId) && isEditRoute;
     const isGenericEditPage = Boolean(detailId) && isEditRoute && Boolean(resources[pathKey]) && !["products", "orders", "hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "welcome-bonuses", "trust-benefits"].includes(pathKey);
     const isReadOnlyResourceView = Boolean(detailId) && !isEditRoute && pathKey !== "products" && pathKey !== "orders" && pathKey !== "welcome-bonuses" && Boolean(resources[pathKey]);
@@ -328,7 +340,7 @@ export default function OrderDashboard() {
             <div className="admin-sidebar-footer"><div className="admin-user"><span>{(getAuthValue("first_name") || "S").slice(0, 1).toUpperCase()}</span><div><strong>{getAuthValue("first_name") || "Super Admin"}</strong><small>Super Admin</small></div></div><button className="admin-nav-item admin-logout-button" onClick={logout}><FiLogOut /><span>Sign out</span></button></div>
         </aside>
         {sidebarOpen && <button className="admin-scrim" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
-        <main className="admin-content"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><FiMenu /></button><div><p className="admin-eyebrow">SUPER ADMIN / {currentTitle.toUpperCase()}</p><h1>{currentTitle}</h1></div><div className="admin-top-actions"><button type="button" className={`admin-button secondary refresh-action ${refreshing ? "is-refreshing" : ""}`} onClick={refreshDashboard} disabled={refreshing} aria-label="Refresh dashboard"><FiRefreshCw aria-hidden="true" /> <span>{refreshing ? "Refreshing..." : "Refresh"}</span></button><FiActivity className="admin-live" title="Live admin workspace" aria-label="Live admin workspace" /></div></header>{forbidden && <div className="admin-access-alert" role="alert"><FiSettings /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button type="button" onClick={() => setForbidden(false)} aria-label="Dismiss access alert"><FiX /></button></div>}{isProductEditor ? <ProductEditor /> : isProductView ? <ProductView /> : isHeroBannerEditor ? <HeroBannerEditor schema={schema} /> : isPromoBannerEditor ? <PromoBannerEditor /> : isHeroSideBannerEditor ? <HeroSideBannerEditor /> : isCouponEditor ? <CouponEditor /> : isCouponUsageEditor ? <CouponUsageEditor /> : isWelcomeBonusEditor ? <WelcomeBonusEditor /> : isTrustBenefitEditor || isProductHighlightEditor ? <ResourceEditorPage resource={pathKey} id={isEditRoute ? detailId : undefined} schema={schema} /> : isWelcomeBonusView ? <WelcomeBonusPage /> : isOrderEditor ? <OrderEditPage id={detailId} /> : detailId && pathKey === "orders" ? <OrderDetail id={detailId} /> : isGenericEditPage ? <ResourceEditorPage resource={pathKey} id={detailId} schema={schema} /> : isReadOnlyResourceView ? <ReadOnlyResourcePage resource={pathKey} id={detailId} schema={schema} /> : pathKey === "overview" ? <Overview data={overview} loading={overviewLoading} /> : pathKey === "welcome-bonuses" ? <WelcomeBonusPage /> : pathKey === "token-blacklist/outstanding-tokens" ? <TokenBlacklistPage type="outstanding" /> : pathKey === "token-blacklist/blacklisted-tokens" ? <TokenBlacklistPage type="blacklisted" /> : resources[pathKey] ? <ResourcePage key={pathKey} resource={pathKey} schema={schema} /> : <Overview data={overview} loading={overviewLoading} />}</main>
+        <main className="admin-content"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><FiMenu /></button><div><p className="admin-eyebrow">SUPER ADMIN / {currentTitle.toUpperCase()}</p><h1>{currentTitle}</h1></div><div className="admin-top-actions"><button type="button" className={`admin-button secondary refresh-action ${refreshing ? "is-refreshing" : ""}`} onClick={refreshDashboard} disabled={refreshing} aria-label="Refresh dashboard"><FiRefreshCw aria-hidden="true" /> <span>{refreshing ? "Refreshing..." : "Refresh"}</span></button><FiActivity className="admin-live" title="Live admin workspace" aria-label="Live admin workspace" /></div></header>{forbidden && <div className="admin-access-alert" role="alert"><FiSettings /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button type="button" onClick={() => setForbidden(false)} aria-label="Dismiss access alert"><FiX /></button></div>}{isProductEditor ? <ProductEditor /> : isProductView ? <ProductView /> : isHeroBannerEditor ? <HeroBannerEditor schema={schema} /> : isPromoBannerEditor ? <PromoBannerEditor /> : isHeroSideBannerEditor ? <HeroSideBannerEditor /> : isCouponEditor ? <CouponEditor /> : isCouponUsageEditor ? <CouponUsageEditor /> : isWelcomeBonusEditor ? <WelcomeBonusEditor /> : isTrustBenefitEditor || isProductHighlightEditor || isProductMessageEditor ? <ResourceEditorPage resource={pathKey} id={isEditRoute ? detailId : undefined} schema={schema} /> : isWelcomeBonusView ? <WelcomeBonusPage /> : isOrderEditor ? <OrderEditPage id={detailId} /> : detailId && pathKey === "orders" ? <OrderDetail id={detailId} /> : isGenericEditPage ? <ResourceEditorPage resource={pathKey} id={detailId} schema={schema} /> : isReadOnlyResourceView ? <ReadOnlyResourcePage resource={pathKey} id={detailId} schema={schema} /> : pathKey === "overview" ? <Overview data={overview} loading={overviewLoading} /> : pathKey === "welcome-bonuses" ? <WelcomeBonusPage /> : pathKey === "token-blacklist/outstanding-tokens" ? <TokenBlacklistPage type="outstanding" /> : pathKey === "token-blacklist/blacklisted-tokens" ? <TokenBlacklistPage type="blacklisted" /> : resources[pathKey] ? <ResourcePage key={pathKey} resource={pathKey} schema={schema} /> : <Overview data={overview} loading={overviewLoading} />}</main>
     </div>;
 }
 
@@ -479,7 +491,7 @@ function ResourcePage({ resource, schema }) {
     const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setCouponProduct(""); setCouponCategory(""); setCouponDiscountType(""); setCouponActive(""); setPage(1); };
     const openView = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/view`);
     const openEdit = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/edit`);
-    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "trust-benefits", "product-highlights"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create", initialValues: resource === "trust-benefits" ? { is_active: true, display_order: 1 } : {} });
+    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "trust-benefits", "product-highlights", "product-messages"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create", initialValues: resource === "trust-benefits" ? { is_active: true, display_order: 1 } : {} });
     const toggleCoupon = async (row) => {
         if (togglingId) return;
         const couponId = recordId(row);
@@ -648,7 +660,7 @@ function ResourceEditorPage({ resource, id, schema }) {
     const config = resources[resource];
     const navigate = useNavigate();
     const editing = Boolean(id);
-    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", display_order: 0, rotation_seconds: 4, is_active: true } : {});
+    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : {});
     const [references, setReferences] = useState({});
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
@@ -764,7 +776,7 @@ function OrderEditPage({ id }) {
 
 function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
     const config = resources[resource];
-    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
+    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
@@ -860,7 +872,7 @@ function unwrapListForReference(payload) {
 }
 
 function normalizeResourceValues(values, resource) {
-    if (resource === "product-highlights") {
+    if (["product-highlights", "product-messages"].includes(resource)) {
         return Object.fromEntries(Object.entries(values).map(([key, value]) => [
             key,
             key === "ends_at" && typeof value === "string" && value

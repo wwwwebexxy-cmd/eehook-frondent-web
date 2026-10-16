@@ -107,6 +107,8 @@ function Router() {
                 <Route path="eehook-dashboard/trust-benefits/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/product-highlights/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/product-highlights/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/product-messages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/product-messages/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/welcome-bonuses/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/welcome-bonuses/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupon-usages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />

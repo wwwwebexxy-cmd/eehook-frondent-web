@@ -12,6 +12,7 @@ import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getHomepageProductPricing } from "../utils/productPricing";
 import ProductHighlightRail from "./ProductHighlightRail";
+import ProductMessageRail from "./ProductMessageRail";
 
 const MAX_PRODUCTS_PER_SECTION = 16;
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
@@ -159,6 +160,7 @@ function New_Arrival_Home({
                                             </div>
                                         </div>
                                         <ProductHighlightRail highlights={item.marketing_highlights} />
+                                        <ProductMessageRail messages={item.product_messages} />
                                     </div>
                                 </article>
                             );

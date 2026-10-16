@@ -56,13 +56,16 @@ export default function ProductHighlightRail({ highlights = [] }) {
     if (!current) return null;
 
     const Icon = ICONS[current.icon_key] || FiTag;
+    const backgroundColor = /^#[0-9A-Fa-f]{6}$/.test(current.background_color || "")
+        ? current.background_color
+        : "#EAF4FF";
     const countdown = current.highlight_type === "countdown" && current.ends_at
         ? formatRemaining(current.ends_at, now)
         : "";
     const label = countdown ? `${current.text} ${countdown}` : current.text;
 
     return (
-        <div className="product-highlight-rail" aria-live="polite" aria-atomic="true">
+        <div className="product-highlight-rail" style={{ "--product-highlight-bg": backgroundColor }} aria-live="polite" aria-atomic="true">
             <span className="product-highlight-icon" aria-hidden="true"><Icon /></span>
             <span className="product-highlight-label">{label}</span>
         </div>
