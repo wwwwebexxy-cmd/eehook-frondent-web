@@ -38,6 +38,7 @@ const resources = {
     units: { label: "Units", group: "Catalog", fields: ["unit_type", "name"], columns: ["unit_type", "name"] },
     products: { label: "Products", group: "Catalog", fields: ["name", "description", "key_features", "category", "subcategory", "offer", "seller_name", "shipping_fee", "estimated_delivery_time", "warranty_info", "current_viewers_count", "promotional_banner_image", "promotional_banner_link", "is_active"], columns: ["id", "name", "category", "subcategory", "product_image", "seller_name", "is_active"] },
     "product-variants": { label: "Product Variants", group: "Catalog", fields: ["product", "color", "sku", "price_type", "price", "stock"], columns: ["product", "color", "sku", "price_type", "price", "stock"] },
+    "product-highlights": { label: "Product Highlights", itemLabel: "Product Highlight", group: "Marketing", fields: ["product", "highlight_type", "text", "icon_key", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "highlight_type", "text", "icon_key", "display_order", "rotation_seconds", "is_active"] },
     "product-variant-units": { label: "Variant Sizes / Units", group: "Catalog", fields: ["variant", "unit_type", "unit", "sku", "price", "stock"], columns: ["variant", "unit_type", "unit", "sku", "price", "stock"] },
     "product-images": { label: "Product Images", group: "Catalog", fields: ["variant", "image", "is_primary", "position"], columns: ["variant", "image", "is_primary", "position"] },
     wishlists: { label: "Wishlists", group: "Customers", fields: ["user", "variant", "variant_unit"], columns: ["user", "variant", "variant_unit"] },
@@ -64,7 +65,7 @@ const navGroups = [
     { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
     { title: "Dashboard", items: ["coupons", "welcome-bonuses"].map((key) => ({ key, label: resources[key].label, icon: FiTag })) },
     { title: "Token Blacklist", items: [{ key: "token-blacklist/outstanding-tokens", label: "Outstanding Tokens", icon: FiShield }, { key: "token-blacklist/blacklisted-tokens", label: "Blacklisted Tokens", icon: FiArchive }] },
-    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "product-highlights", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key === "product-highlights" ? FiActivity : key.includes("banner") ? FiImage : FiTag })) },
 ];
 
 const TRUST_BENEFIT_ICON_OPTIONS = [
@@ -477,7 +478,7 @@ function ResourcePage({ resource, schema }) {
     const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setCouponProduct(""); setCouponCategory(""); setCouponDiscountType(""); setCouponActive(""); setPage(1); };
     const openView = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/view`);
     const openEdit = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/edit`);
-    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "trust-benefits"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create", initialValues: resource === "trust-benefits" ? { is_active: true, display_order: 1 } : {} });
+    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "trust-benefits", "product-highlights"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create", initialValues: resource === "trust-benefits" ? { is_active: true, display_order: 1 } : {} });
     const toggleCoupon = async (row) => {
         if (togglingId) return;
         const couponId = recordId(row);
@@ -646,7 +647,7 @@ function ResourceEditorPage({ resource, id, schema }) {
     const config = resources[resource];
     const navigate = useNavigate();
     const editing = Boolean(id);
-    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : {});
+    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", display_order: 0, rotation_seconds: 4, is_active: true } : {});
     const [references, setReferences] = useState({});
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
@@ -762,7 +763,7 @@ function OrderEditPage({ id }) {
 
 function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
     const config = resources[resource];
-    const [values, setValues] = useState(() => normalizeResourceValues({ ...(row || {}), ...initialValues }, resource));
+    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
@@ -858,6 +859,19 @@ function unwrapListForReference(payload) {
 }
 
 function normalizeResourceValues(values, resource) {
+    if (resource === "product-highlights") {
+        return Object.fromEntries(Object.entries(values).map(([key, value]) => [
+            key,
+            key === "ends_at" && typeof value === "string" && value
+                ? (() => {
+                    const parsed = new Date(value);
+                    if (Number.isNaN(parsed.getTime())) return value;
+                    const pad = (number) => String(number).padStart(2, "0");
+                    return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+                })()
+                : value,
+        ]));
+    }
     if (resource !== "offers") return values;
     return Object.fromEntries(Object.entries(values).map(([key, value]) => [
         key,

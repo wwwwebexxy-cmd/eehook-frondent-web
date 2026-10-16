@@ -11,6 +11,7 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getHomepageProductPricing } from "../utils/productPricing";
+import ProductHighlightRail from "./ProductHighlightRail";
 
 const MAX_PRODUCTS_PER_SECTION = 16;
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
@@ -157,6 +158,7 @@ function New_Arrival_Home({
                                                 <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>
                                         </div>
+                                        <ProductHighlightRail highlights={item.marketing_highlights} />
                                     </div>
                                 </article>
                             );
