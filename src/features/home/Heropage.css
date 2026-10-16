@@ -542,3 +542,69 @@
 }
 
 }
+
+/* Compact hero controls across mobile, tablet, and desktop screens. */
+.hero-page-wrapper .shop-btn-premium {
+    width: fit-content;
+    max-width: 100%;
+    min-height: 0;
+    padding: clamp(2px, .2vw, 3px) clamp(4px, .4vw, 7px);
+    gap: clamp(2px, .2vw, 3px);
+    font-size: clamp(8px, .65vw, 9px);
+    line-height: 1.1;
+    letter-spacing: .25px;
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255, 255, 255, .75);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+
+.hero-page-wrapper .shop-btn-premium:hover,
+.hero-page-wrapper .shop-btn-premium:focus-visible,
+.hero-page-wrapper .shop-btn-premium:active {
+    background: #ff9000;
+    border-color: #ff9000;
+    color: #fff;
+    box-shadow: none;
+    transform: none;
+}
+
+.hero-page-wrapper .shop-btn-premium .arrow {
+    position: static;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+.hero-page-wrapper .shop-btn-premium:hover .arrow {
+    transform: translateX(2px);
+}
+
+.hero-page-wrapper .hero-dots {
+    bottom: 4px;
+    gap: 0;
+}
+
+/* Keep the click area larger than the visible indicator. */
+.hero-page-wrapper .modern-dot {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+.hero-page-wrapper .modern-dot::after {
+    content: "";
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .4);
+}
+
+.hero-page-wrapper .active-modern-dot::after {
+    background: #fff;
+    transform: scale(1.2);
+}
