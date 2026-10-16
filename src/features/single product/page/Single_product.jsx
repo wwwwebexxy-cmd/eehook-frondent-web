@@ -863,16 +863,16 @@ function Single_product() {
                     <div className="stock-status">
                         {selectedVariant?.price_type === 'single' ? (
                             (availableStock <= 0 ? (
-                                <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
+                                <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of stock</span>
                             ) : (
-                                <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {availableStock}</span>
+                                <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In stock</span>
                             ))
                         ) : (!selectedSizeVariant ? (
                             <span className="stock" style={{ fontSize: '14px', color: '#555' }}>Please select options to view stock</span>
                         ) : availableStock <= 0 ? (
-                            <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
+                            <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of stock</span>
                         ) : (
-                            <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {availableStock}</span>
+                            <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In stock</span>
                         ))}
                     </div>
 
