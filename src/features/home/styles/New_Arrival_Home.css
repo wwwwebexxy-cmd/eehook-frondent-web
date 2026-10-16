@@ -323,16 +323,20 @@
 .newHome-product-title {
     font-family: Arial, Helvetica, sans-serif;
     line-height: 1.25;
-    font-size: 16px;
+    font-size: clamp(11px, calc(8px + 0.3vw), 15px);
     font-weight: 400;
     color: #000000;
     margin: 10px 0;
-
-    height: 20px;
+    min-width: 0;
+    min-height: 2.5em;
+    height: auto;
     display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: auto;
 }
 
 
@@ -511,8 +515,9 @@
     }
 
     .newHome-product-title {
-        font-size: 15px;
-        height: 19px;
+        font-size: clamp(0.68rem, 3.4vw, 0.9rem);
+        min-height: 2.5em;
+        height: auto;
     }
 
     .price-area .product-price {

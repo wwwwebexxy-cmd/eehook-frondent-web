@@ -148,7 +148,9 @@ function New_Arrival_Home({
 
                                     <div className="product-details">
                                         <span className="product-tag">{item.category?.name || item.brand?.name || "EXCLUSIVE"}</span>
-                                        <h3 className="newHome-product-title">{item.description || item.name}</h3>
+                                        <h3 className="newHome-product-title" title={item.name || "Product"}>
+                                            {item.name || item.description || "Product"}
+                                        </h3>
                                         <div className="product-meta">
                                             <div className="price-area">
                                                 {originalPrice !== null && <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>}
