@@ -124,20 +124,26 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
 
             return <article className="product_card" key={product.id} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
                 <div className="product_img">
+                    {(product.marketing_highlights?.length || (hasOffer && hasValue(product.discount_percentage))) ? (
+                        <div className="product-image-topbar">
+                            <ProductHighlightRail highlights={product.marketing_highlights} placement="badge" />
+                            {hasOffer && hasValue(product.discount_percentage) && <div className="offer-badge">{product.discount_percentage}% OFF</div>}
+                        </div>
+                    ) : null}
+                    <div className="product-image-stage">
+                        <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} />
+                        <button
+                            type="button"
+                            className="quick-add-bar"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                openProduct();
+                            }}
+                        >
+                            VIEW PRODUCT
+                        </button>
+                    </div>
                     <button className={`favorite_btn ${isWishlisted ? "active" : ""}`} onClick={(event) => addToWishlist(product, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}><FaHeart /></button>
-                    <ProductHighlightRail highlights={product.marketing_highlights} placement="badge" />
-                    {hasOffer && hasValue(product.discount_percentage) && <div className="offer-badge">{product.discount_percentage}% OFF</div>}
-                    <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} />
-                    <button
-                        type="button"
-                        className="quick-add-bar"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            openProduct();
-                        }}
-                    >
-                        VIEW PRODUCT
-                    </button>
                 </div>
                 <div className="product_info">
                     <span className="product-category">{product.category?.name || product.brand?.name || ""}</span>

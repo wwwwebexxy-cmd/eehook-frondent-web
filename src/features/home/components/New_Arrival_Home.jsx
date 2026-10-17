@@ -141,12 +141,18 @@ function New_Arrival_Home({
                             return (
                                 <article key={item.id} className="new-product-card">
                                     <div className="image-container" onClick={() => navigate(`/single/${item.id}`)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") navigate(`/single/${item.id}`); }}>
-                                        <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
-                                        <ProductHighlightRail highlights={item.marketing_highlights} placement="badge" />
-                                        {hasOffer && <span className="badge-offer">{discountPercentage}% OFF</span>}
-                                        {showNewBadge && item.is_active && <span className="badge-new">NEW</span>}
+                                        {(item.marketing_highlights?.length || hasOffer || (showNewBadge && item.is_active)) ? (
+                                            <div className="product-image-topbar">
+                                                <ProductHighlightRail highlights={item.marketing_highlights} placement="badge" />
+                                                {hasOffer && <span className="badge-offer">{discountPercentage}% OFF</span>}
+                                                {showNewBadge && item.is_active && <span className="badge-new">NEW</span>}
+                                            </div>
+                                        ) : null}
+                                        <div className="product-image-stage">
+                                            <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
+                                            <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(`/single/${item.id}`); }}>VIEW PRODUCT</button>
+                                        </div>
                                         <button type="button" className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`} onClick={(event) => addToWishlist(item, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}>{isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}</button>
-                                        <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(`/single/${item.id}`); }}>VIEW PRODUCT</button>
                                     </div>
 
                                     <div className="product-details">

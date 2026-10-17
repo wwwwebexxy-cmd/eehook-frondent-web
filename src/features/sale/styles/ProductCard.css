@@ -66,6 +66,30 @@
     overflow: hidden;
     border-radius: 6px;
     background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-image-topbar {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+    min-height: 0;
+    padding: 9px 48px 6px 12px;
+    background: #f7f7f7;
+}
+
+.product-image-stage {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+    background: #f7f7f7;
 }
 
 .product_img img {
@@ -76,37 +100,37 @@
 }
 
 .product_img .product-highlight-rail--badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 4;
+    position: static;
+    z-index: auto;
     display: block;
     width: max-content;
-    max-width: calc(100% - 64px);
+    max-width: none;
+    flex: 0 0 auto;
     min-height: 0;
     margin: 0;
-    padding: 6px 10px;
+    padding: 5px 9px;
     border: 0;
     border-radius: 4px;
     background: var(--product-highlight-bg, #1B4D44);
     color: var(--product-highlight-color, #FFFFFF);
     box-shadow: 0 3px 8px rgba(23, 59, 53, .16);
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: .02em;
-    line-height: 1.1;
+    line-height: 1;
     pointer-events: none;
 }
 
 .product_img .product-highlight-rail--badge .product-highlight-label {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
     white-space: nowrap;
 }
 
-.product_img .product-highlight-rail--badge ~ .offer-badge {
-    top: 48px;
+.product-image-topbar .offer-badge {
+    position: static;
+    margin: 0;
 }
 
 /* .product_card:hover .product_img img {
@@ -477,29 +501,24 @@
     }
 
     .offer-badge {
-        position: absolute;
-        top: 9px;
-        left: 3px;
         background: #4B636D;
         color: #FFFFFF;
         padding: 6px 12px;
         border-radius: 20px;
         font-size: 9px;
         font-weight: 600;
-        z-index: 5;
         letter-spacing: .5px;
     }
 
     .product_img .product-highlight-rail--badge {
-        top: 9px;
-        left: 3px;
-        max-width: calc(100% - 48px);
+        max-width: none;
         padding: 5px 8px;
         font-size: 9px;
     }
 
-    .product_img .product-highlight-rail--badge ~ .offer-badge {
-        top: 42px;
+    .product-image-topbar {
+        gap: 4px;
+        padding: 7px 38px 5px 3px;
     }
 
     .quick-add-bar {
