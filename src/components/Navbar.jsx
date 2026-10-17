@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./../Navbar.css";
 import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
-import { FaShoppingBag, FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaShoppingBag, FaAngleDown, FaAngleUp, FaAngleRight } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
 import { FaHeart } from "react-icons/fa6";
@@ -10,7 +10,6 @@ import { AiOutlineDoubleRight } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import navbarlogo from './../assets/navbar-logo.png';
 
-import eehook from '../assets/eehook.jpeg'
 import WishlistQuery from "../features/wishlist/queries/WishlistQuery.jsx";
 import Offer_Query from "../hooks/offers/queries/Offer_Query.jsx";
 import Cart_query from "../features/cart/queries/Cart_query.jsx";
@@ -325,19 +324,26 @@ const cartLength = cart.total_items ?? 0;
 
 
             {/* Mobile Drawer Side Menu Overlay */}
+            <button
+                type="button"
+                className={`mobile-menu-overlay ${menuOpen ? "show" : ""}`}
+                onClick={closeMenu}
+                aria-label="Close navigation menu"
+                aria-hidden={!menuOpen}
+            />
             <div id="mobile-navigation" className={`mobile_menu ${menuOpen ? "show" : ""}`}>
                 <div className="mobile_header">
                     <NavLink to='/' className="logo-link" style={{ marginTop: '5px' }}>
-                        <img src={eehook} alt="Logo" className="navbar-logo" />
+                        <img src={navbarlogo} alt="Logo" className="navbar-logo" />
                     </NavLink>
                     <button type="button" className="mobile-close-button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><IoClose size={25} /></button>
                 </div>
                 <ul>
-                    <li><NavLink to="/" onClick={closeMenu}>HOME</NavLink></li>
-                    <li><NavLink to="/shop" onClick={closeMenu}>SHOP</NavLink></li>
+                    <li><NavLink to="/" end className="mobile-menu-link" onClick={closeMenu}><span>Home</span><FaAngleRight aria-hidden="true" /></NavLink></li>
+                    <li><NavLink to="/shop" className="mobile-menu-link" onClick={closeMenu}><span>Shop</span><FaAngleRight aria-hidden="true" /></NavLink></li>
                     <li>
                         <button type="button" className="mobile-category-toggle" onClick={() => setCategoryOpen(!categoryOpen)} aria-expanded={categoryOpen}>
-                        <span>CATEGORIES</span>
+                        <span>Categories</span>
                         <span>{categoryOpen ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />}
                         </span>
                         </button>
@@ -345,8 +351,8 @@ const cartLength = cart.total_items ?? 0;
                     {categoryOpen && (
                         <li className="mobile_categories">
                             {categories.map((cat) => (
-                                <NavLink key={cat.id} to={`/shop?category=${cat.id}`} onClick={() => { setHoveredCategory(cat); setHoveredSubcategory(null); closeMenu(); }}>
-                                    {cat.name}
+                                <NavLink key={cat.id} to={`/shop?category=${cat.id}`} className="mobile-submenu-link" onClick={() => { setHoveredCategory(cat); setHoveredSubcategory(null); closeMenu(); }}>
+                                    <span>{cat.name}</span><FaAngleRight aria-hidden="true" />
                                 </NavLink>
                             ))}
                         </li>
@@ -354,13 +360,13 @@ const cartLength = cart.total_items ?? 0;
 
                     {offerActive && (
 
-                        <li><NavLink to="/shop?offer=true" onClick={closeMenu}>OFFERS</NavLink></li>
+                        <li><NavLink to="/shop?offer=true" className="mobile-menu-link" onClick={closeMenu}><span>Offers</span><FaAngleRight aria-hidden="true" /></NavLink></li>
                     )}
 
-                    <li><NavLink to="/shop?sort=new" onClick={closeMenu}>NEW ARRIVALS</NavLink></li>
+                    <li><NavLink to="/shop?sort=new" className="mobile-menu-link" onClick={closeMenu}><span>New Arrivals</span><FaAngleRight aria-hidden="true" /></NavLink></li>
 
-                    <li><NavLink to="/about" onClick={closeMenu}>ABOUT US</NavLink></li>
-                    <li><NavLink to="/contact" onClick={closeMenu}>CONTACT US</NavLink></li>
+                    <li><NavLink to="/about" className="mobile-menu-link" onClick={closeMenu}><span>About Us</span><FaAngleRight aria-hidden="true" /></NavLink></li>
+                    <li><NavLink to="/contact" className="mobile-menu-link" onClick={closeMenu}><span>Contact Us</span><FaAngleRight aria-hidden="true" /></NavLink></li>
                 </ul>
             </div>
 
