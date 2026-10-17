@@ -142,6 +142,7 @@ function New_Arrival_Home({
                                 <article key={item.id} className="new-product-card">
                                     <div className="image-container" onClick={() => navigate(`/single/${item.id}`)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") navigate(`/single/${item.id}`); }}>
                                         <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
+                                        <ProductHighlightRail highlights={item.marketing_highlights} placement="badge" />
                                         {hasOffer && <span className="badge-offer">{discountPercentage}% OFF</span>}
                                         {showNewBadge && item.is_active && <span className="badge-new">NEW</span>}
                                         <button type="button" className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`} onClick={(event) => addToWishlist(item, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}>{isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}</button>
@@ -159,7 +160,6 @@ function New_Arrival_Home({
                                                 <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>
                                         </div>
-                                        <ProductHighlightRail highlights={item.marketing_highlights} />
                                         <ProductMessageRail messages={item.product_messages} />
                                     </div>
                                 </article>

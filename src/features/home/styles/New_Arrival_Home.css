@@ -363,13 +363,50 @@
     border: 1px solid color-mix(in srgb, var(--product-highlight-bg, #EAF4FF) 72%, var(--section-accent));
     border-radius: 6px;
     background: var(--product-highlight-bg, #EAF4FF);
-    color: var(--section-heading);
+    color: var(--product-highlight-color, var(--section-heading));
     font-size: clamp(9px, calc(8px + 0.15vw), 11px);
     font-weight: 700;
     letter-spacing: 0.035em;
     line-height: 1.2;
     text-transform: uppercase;
     animation: product-highlight-in 260ms ease both;
+}
+
+/* Product-specific marketing tag shown at the top of the product image. */
+.product-highlight-rail--badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 4;
+    display: block;
+    width: max-content;
+    max-width: calc(100% - 64px);
+    min-height: 0;
+    margin: 0;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--product-highlight-bg, #1B4D44);
+    color: var(--product-highlight-color, #FFFFFF);
+    box-shadow: 0 3px 8px rgba(23, 59, 53, .16);
+    font-size: clamp(9px, calc(8px + 0.15vw), 11px);
+    font-weight: 700;
+    letter-spacing: .02em;
+    line-height: 1.1;
+    text-transform: none;
+    pointer-events: none;
+}
+
+.product-highlight-rail--badge .product-highlight-label {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-container .product-highlight-rail--badge ~ .badge-offer,
+.image-container .product-highlight-rail--badge ~ .badge-new {
+    top: 49px;
 }
 
 .product-highlight-icon {
@@ -401,7 +438,7 @@
     border: 1px solid color-mix(in srgb, var(--product-message-bg, #EAF4FF) 72%, var(--section-accent));
     border-radius: 6px;
     background: var(--product-message-bg, #EAF4FF);
-    color: var(--section-heading);
+    color: var(--product-message-color, var(--section-heading));
     font-size: clamp(9px, calc(8px + 0.15vw), 11px);
     font-weight: 700;
     letter-spacing: 0.035em;
@@ -628,6 +665,19 @@
     }
 
     .badge-offer + .badge-new {
+        top: 39px;
+    }
+
+    .product-highlight-rail--badge {
+        top: 8px;
+        left: 8px;
+        max-width: calc(100% - 48px);
+        padding: 5px 8px;
+        font-size: .6rem;
+    }
+
+    .image-container .product-highlight-rail--badge ~ .badge-offer,
+    .image-container .product-highlight-rail--badge ~ .badge-new {
         top: 39px;
     }
 

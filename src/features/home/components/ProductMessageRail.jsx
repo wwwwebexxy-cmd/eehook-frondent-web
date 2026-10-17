@@ -45,13 +45,16 @@ export default function ProductMessageRail({ messages = [] }) {
     const backgroundColor = /^#[0-9A-Fa-f]{6}$/.test(current.background_color || "")
         ? current.background_color
         : "#EAF4FF";
+    const textColor = /^#[0-9A-Fa-f]{6}$/.test(current.text_color || "")
+        ? current.text_color
+        : "#173B35";
     const countdown = current.message_type === "countdown" && current.ends_at
         ? formatRemaining(current.ends_at, now)
         : "";
     const label = countdown ? `${current.text} ${countdown}` : current.text;
 
     return (
-        <div className="product-message-rail" style={{ "--product-message-bg": backgroundColor }} aria-live="polite" aria-atomic="true">
+        <div className="product-message-rail" style={{ "--product-message-bg": backgroundColor, "--product-message-color": textColor }} aria-live="polite" aria-atomic="true">
             <span className="product-message-label">{label}</span>
         </div>
     );

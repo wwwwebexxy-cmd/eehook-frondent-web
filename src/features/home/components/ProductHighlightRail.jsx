@@ -28,7 +28,7 @@ function formatRemaining(endsAt, now) {
     return parts.join(" ") || "LESS THAN 1 MINUTE";
 }
 
-export default function ProductHighlightRail({ highlights = [] }) {
+export default function ProductHighlightRail({ highlights = [], placement = "rail" }) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [now, setNow] = useState(() => Date.now());
     const items = useMemo(() => (Array.isArray(highlights) ? highlights : []).filter((item) => {
@@ -59,14 +59,22 @@ export default function ProductHighlightRail({ highlights = [] }) {
     const backgroundColor = /^#[0-9A-Fa-f]{6}$/.test(current.background_color || "")
         ? current.background_color
         : "#EAF4FF";
+    const textColor = /^#[0-9A-Fa-f]{6}$/.test(current.text_color || "")
+        ? current.text_color
+        : "#173B35";
     const countdown = current.highlight_type === "countdown" && current.ends_at
         ? formatRemaining(current.ends_at, now)
         : "";
     const label = countdown ? `${current.text} ${countdown}` : current.text;
 
     return (
-        <div className="product-highlight-rail" style={{ "--product-highlight-bg": backgroundColor }} aria-live="polite" aria-atomic="true">
-            <span className="product-highlight-icon" aria-hidden="true"><Icon /></span>
+        <div
+            className={`product-highlight-rail ${placement === "badge" ? "product-highlight-rail--badge" : ""}`}
+            style={{ "--product-highlight-bg": backgroundColor, "--product-highlight-color": textColor }}
+            aria-live="polite"
+            aria-atomic="true"
+        >
+            {placement !== "badge" && <span className="product-highlight-icon" aria-hidden="true"><Icon /></span>}
             <span className="product-highlight-label">{label}</span>
         </div>
     );

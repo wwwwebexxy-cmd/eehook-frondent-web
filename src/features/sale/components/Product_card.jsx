@@ -9,6 +9,7 @@ import showToast from "../../../utils/toast";
 import defaultImage from "../../../assets/image_not_available.png";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
+import ProductHighlightRail from "../../home/components/ProductHighlightRail";
 
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
 
@@ -124,6 +125,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
             return <article className="product_card" key={product.id} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
                 <div className="product_img">
                     <button className={`favorite_btn ${isWishlisted ? "active" : ""}`} onClick={(event) => addToWishlist(product, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}><FaHeart /></button>
+                    <ProductHighlightRail highlights={product.marketing_highlights} placement="badge" />
                     {hasOffer && hasValue(product.discount_percentage) && <div className="offer-badge">{product.discount_percentage}% OFF</div>}
                     <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} />
                     <button

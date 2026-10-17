@@ -38,8 +38,8 @@ const resources = {
     units: { label: "Units", group: "Catalog", fields: ["unit_type", "name"], columns: ["unit_type", "name"] },
     products: { label: "Products", group: "Catalog", fields: ["name", "description", "key_features", "category", "subcategory", "offer", "seller_name", "shipping_fee", "estimated_delivery_time", "warranty_info", "current_viewers_count", "promotional_banner_image", "promotional_banner_link", "is_active"], columns: ["id", "name", "category", "subcategory", "product_image", "seller_name", "is_active"] },
     "product-variants": { label: "Product Variants", group: "Catalog", fields: ["product", "color", "sku", "price_type", "price", "stock"], columns: ["product", "color", "sku", "price_type", "price", "stock"] },
-    "product-highlights": { label: "Product Highlights", itemLabel: "Product Highlight", group: "Marketing", fields: ["product", "highlight_type", "text", "icon_key", "background_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "highlight_type", "text", "icon_key", "background_color", "display_order", "rotation_seconds", "is_active"] },
-    "product-messages": { label: "Product Messages", itemLabel: "Product Message", group: "Marketing", fields: ["product", "message_type", "text", "background_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "message_type", "text", "background_color", "display_order", "rotation_seconds", "is_active"] },
+    "product-highlights": { label: "Product Highlights", itemLabel: "Product Highlight", group: "Marketing", fields: ["product", "highlight_type", "text", "icon_key", "background_color", "text_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "highlight_type", "text", "icon_key", "background_color", "text_color", "display_order", "rotation_seconds", "is_active"] },
+    "product-messages": { label: "Product Messages", itemLabel: "Product Message", group: "Marketing", fields: ["product", "message_type", "text", "background_color", "text_color", "ends_at", "display_order", "rotation_seconds", "is_active"], columns: ["product", "message_type", "text", "background_color", "text_color", "display_order", "rotation_seconds", "is_active"] },
     "product-variant-units": { label: "Variant Sizes / Units", group: "Catalog", fields: ["variant", "unit_type", "unit", "sku", "price", "stock"], columns: ["variant", "unit_type", "unit", "sku", "price", "stock"] },
     "product-images": { label: "Product Images", group: "Catalog", fields: ["variant", "image", "is_primary", "position"], columns: ["variant", "image", "is_primary", "position"] },
     wishlists: { label: "Wishlists", group: "Customers", fields: ["user", "variant", "variant_unit"], columns: ["user", "variant", "variant_unit"] },
@@ -66,7 +66,8 @@ const navGroups = [
     { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
     { title: "Dashboard", items: ["coupons", "welcome-bonuses"].map((key) => ({ key, label: resources[key].label, icon: FiTag })) },
     { title: "Token Blacklist", items: [{ key: "token-blacklist/outstanding-tokens", label: "Outstanding Tokens", icon: FiShield }, { key: "token-blacklist/blacklisted-tokens", label: "Blacklisted Tokens", icon: FiArchive }] },
-    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "product-highlights", "product-messages", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key === "product-highlights" ? FiActivity : key === "product-messages" ? FiTruck : key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Product Tags", items: ["product-highlights", "product-messages"].map((key) => ({ key, label: key === "product-highlights" ? "Product Tags" : resources[key].label, icon: key === "product-highlights" ? FiActivity : FiTruck })) },
 ];
 
 const TRUST_BENEFIT_ICON_OPTIONS = [
@@ -88,7 +89,7 @@ const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ nam
 const resourceFallbackFields = (resource, fieldNames) => {
     const fields = fallbackFields(resource, fieldNames);
     if (["product-highlights", "product-messages"].includes(resource)) {
-        return fields.map((field) => field.name === "background_color" ? { ...field, type: "color", label: "Background color" } : field);
+        return fields.map((field) => field.name === "background_color" ? { ...field, type: "color", label: "Background color" } : field.name === "text_color" ? { ...field, type: "color", label: "Font color" } : field);
     }
     if (resource !== "trust-benefits") return fields;
     return fields.map((field) => {
@@ -158,6 +159,7 @@ function fieldsFromSchema(schema, resource) {
         return fields.map((field) => {
             const name = field.name || field.key;
             if (name === "background_color") return { ...field, type: "color", label: "Background color" };
+            if (name === "text_color") return { ...field, type: "color", label: "Font color" };
             return field;
         });
     }
@@ -660,7 +662,7 @@ function ResourceEditorPage({ resource, id, schema }) {
     const config = resources[resource];
     const navigate = useNavigate();
     const editing = Boolean(id);
-    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : {});
+    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {});
     const [references, setReferences] = useState({});
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
@@ -776,7 +778,7 @@ function OrderEditPage({ id }) {
 
 function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
     const config = resources[resource];
-    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
+    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
