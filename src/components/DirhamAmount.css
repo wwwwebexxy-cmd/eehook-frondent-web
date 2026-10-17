@@ -8,10 +8,10 @@
 .currency-symbol {
     flex: 0 0 auto;
     color: currentColor;
-    width: 1.02em;
-    height: 1.02em;
-    display: inline-block;
-    vertical-align: -.16em;
+    width: .96em;
+    height: .84em;
+    display: block;
+    align-self: baseline;
 }
 
 .dirham-amount-sign {

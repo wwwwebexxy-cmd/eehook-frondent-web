@@ -5,7 +5,7 @@ function DirhamSymbol({ className = "" }) {
     return (
         <svg
             className={`currency-symbol ${className}`.trim()}
-            viewBox="0 0 128 128"
+            viewBox="8 15 112 98"
             role="img"
             aria-label="UAE dirham"
             focusable="false"
