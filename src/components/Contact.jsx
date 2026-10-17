@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./../Contact.css"
 import { getAuthValue } from "../features/auth/authUtils";
+import { WHATSAPP_NUMBER } from "../config/contact";
 
 const ContactUs = () => {
     const [formData, setFormData] = useState(() => ({
@@ -28,8 +29,6 @@ const ContactUs = () => {
             return;
         }
 
-        const whatsappNumber = "971501234567";
-
         const text = `Hello eehook Team,
 
 Name: ${name}
@@ -46,7 +45,7 @@ ${message}
 Thank you.`;
 
         const messageWindow = window.open(
-            `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`,
+            `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`,
             "_blank",
             "noopener,noreferrer"
         );

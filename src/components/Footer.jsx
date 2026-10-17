@@ -1,15 +1,12 @@
 import "./../Footer.css";
 
 // import eehook from './../assets/eehook.jpeg'
-import visa from './../assets/visa-payment.png'
-import master from './../assets/master-payment.png'
-import amc from './../assets/american-exp-payment.png'
 import footerlogo from './../assets/footer-logo.png'
-import apple from './../assets/apple-payment.png'
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, } from "react-icons/fa";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_NUMBER } from "../config/contact";
 function Footer() {
-    const whatsappUrl = `https://wa.me/971501234567?text=${encodeURIComponent("Hello")}`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello")}`;
 
 
     return (
@@ -64,7 +61,7 @@ function Footer() {
                         <h3>Contact Us</h3>
 
                         <ul className="contact">
-                            <li><a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><FaPhoneAlt /> +971 50 123 4567</a></li>
+                            <li><a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><FaPhoneAlt /> {WHATSAPP_DISPLAY_NUMBER}</a></li>
 
                             <li>
                                 <FaEnvelope />  <a href="mailto:info@eehook.com">info@eehook.com</a>
@@ -77,13 +74,11 @@ function Footer() {
                     </div>
 
                     <div className="footer-column payment">
-                        <h3>We Accept</h3>
+                        <h3>Order Options</h3>
 
-                        <div className="payment-icons">
-                            <img src={visa} alt="payments" />
-                            <img src={master} alt="" />
-                            <img src={amc} alt="" />
-                            <img src={apple} alt="" />
+                        <div className="payment-options">
+                            <span>COD</span>
+                            <span>WhatsApp</span>
                         </div>
                     </div>
 

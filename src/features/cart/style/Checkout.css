@@ -153,8 +153,9 @@
 
 .eehook-payment-card{
     display:flex;
-    align-items:flex-start;
-    gap:15px;
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
     padding:18px;
     margin-top:18px;
     border:1px solid #e6e6e6;
@@ -177,6 +178,45 @@
     font-size:14px;
     color: #4B636D;
     line-height:1.6;
+}
+
+.eehook-payment-option{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px;
+    border:1px solid #e6e6e6;
+    border-radius:10px;
+    cursor:pointer;
+    transition:border-color .25s ease,background .25s ease;
+}
+
+.eehook-payment-option:hover,
+.eehook-payment-option.active{
+    border-color:#FF9000;
+    background:#FFF8EC;
+}
+
+.eehook-payment-option input{
+    margin-top:3px;
+    accent-color:#FF9000;
+}
+
+.eehook-payment-option span{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.eehook-payment-option strong{
+    color:#4B636D;
+    font-size:14px;
+}
+
+.eehook-payment-option small{
+    color:#6b7280;
+    font-size:12px;
+    line-height:1.5;
 }
 
 .eehook-empty-box{

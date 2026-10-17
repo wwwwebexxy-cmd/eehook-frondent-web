@@ -6,11 +6,12 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 import DirhamAmount from "../../../components/DirhamAmount";
+import { WHATSAPP_NUMBER } from "../../../config/contact";
 
 const Checkout = () => {
 
     const navigate = useNavigate();
-    const PAYMENT_REQUEST_TIMEOUT = 35000;
+    const ORDER_REQUEST_TIMEOUT = 35000;
 
     const [addresses, setAddresses] = useState([]);
     const [cartItems, setCartItems] = useState([]);
@@ -26,6 +27,7 @@ const Checkout = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [checkoutError, setCheckoutError] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState("COD");
 
     const fetchAddresses = useCallback(async () => {
 
@@ -53,7 +55,7 @@ const Checkout = () => {
 
         try {
 
-            const response = await client.get("cart/", { timeout: PAYMENT_REQUEST_TIMEOUT });
+            const response = await client.get("cart/", { timeout: ORDER_REQUEST_TIMEOUT });
 
             const cartData = response.data || {};
             const inactiveItems = (Array.isArray(cartData.items) ? cartData.items : []).filter((item) => item.coupon_status === "COUPON_INACTIVE");
@@ -93,7 +95,34 @@ const Checkout = () => {
         loadCheckout();
     }, [fetchAddresses, fetchCart]);
 
-    const proceedToPayment = async () => {
+    const buildWhatsAppMessage = (orderId, address, items, total) => {
+        const itemLines = items.map((item) => {
+            const variant = item.variant_size !== null && item.size
+                ? `, ${item.unit_type || "Option"}: ${item.size}`
+                : "";
+            return `- ${item.product_name}${variant} x ${item.quantity}`;
+        });
+
+        return [
+            "Hello eehook Team,",
+            "",
+            `I placed an order via WhatsApp. Order: ORD-${String(orderId).padStart(6, "0")}`,
+            "",
+            "Items:",
+            ...itemLines,
+            "",
+            `Total: AED ${Number(total || 0).toFixed(2)}`,
+            "",
+            "Delivery address:",
+            address.full_name,
+            address.phone,
+            address.address_line,
+            `${address.city}, ${address.postal_code}`,
+            address.country,
+        ].join("\n");
+    };
+
+    const placeOrder = async () => {
 
         if (processing) return;
 
@@ -104,6 +133,10 @@ const Checkout = () => {
             return;
 
         }
+
+        const whatsappWindow = paymentMethod === "WHATSAPP"
+            ? window.open("about:blank", "_blank")
+            : null;
 
         try {
 
@@ -129,63 +162,46 @@ const Checkout = () => {
             // click represents a new user-initiated checkout operation.
             const idempotencyKey = crypto.randomUUID();
             const response = await client.post(
-                "payment/create-cashfree-order/",
+                "place-order/",
                 {
-                    address: selectedAddress
+                    address: selectedAddress,
+                    payment_method: paymentMethod,
                 },
                 {
-                    timeout: PAYMENT_REQUEST_TIMEOUT,
+                    timeout: ORDER_REQUEST_TIMEOUT,
                     headers: { "Idempotency-Key": idempotencyKey }
                 }
             );
 
-            const paymentSessionId = response.data?.payment_session_id;
-            if (!paymentSessionId || typeof window.Cashfree !== "function") {
-                throw new Error("Cashfree checkout is not available.");
+            const orderId = response.data?.order_id;
+            if (!orderId) {
+                throw new Error("The order could not be created.");
             }
 
-            const cashfree = window.Cashfree({
-                mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox",
-            });
-            // Redirect checkout navigates the current tab. Cashfree's redirect
-            // flow may keep the returned promise pending until navigation has
-            // completed, so awaiting it can leave the button stuck forever.
-            const checkoutPromise = cashfree.checkout({
-                paymentSessionId,
-                redirectTarget: "_self",
-            });
+            if (paymentMethod === "WHATSAPP") {
+                const selectedAddressDetails = addresses.find((address) => address.id === selectedAddress);
+                const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                    buildWhatsAppMessage(orderId, selectedAddressDetails, cartItems, response.data?.grand_total || cartSummary.total)
+                )}`;
 
-            // Keep handling SDK errors for browsers/in-app browsers where the
-            // redirect cannot be opened. The normal _self flow navigates away
-            // before this fallback expires.
-            const redirectTimeout = window.setTimeout(() => {
-                setCheckoutError("Cashfree checkout did not open. Please try again.");
-                setProcessing(false);
-            }, 15000);
+                if (whatsappWindow && !whatsappWindow.closed) {
+                    whatsappWindow.location.href = whatsappUrl;
+                    whatsappWindow.opener = null;
+                } else {
+                    window.location.href = whatsappUrl;
+                    return;
+                }
 
-            if (checkoutPromise && typeof checkoutPromise.then === "function") {
-                checkoutPromise
-                    .then((checkoutResult) => {
-                        window.clearTimeout(redirectTimeout);
-                        if (checkoutResult?.error) {
-                            throw new Error(checkoutResult.error.message || "Cashfree checkout could not be opened.");
-                        }
-                        // A successful redirect normally navigates away. If the
-                        // SDK resolves without navigating (for example in a
-                        // browser that blocks the redirect), release the
-                        // button so the user can retry instead of staying stuck.
-                        setProcessing(false);
-                    })
-                    .catch((error) => {
-                        window.clearTimeout(redirectTimeout);
-                        console.error(error);
-                        setCheckoutError("Unable to open Cashfree checkout. Please try again.");
-                        setProcessing(false);
-                    });
+                showToast.success("Order placed. WhatsApp is ready with your order details.");
+            } else {
+                showToast.success("COD order placed successfully.");
             }
+
+            navigate("/myorders");
 
         } catch (error) {
 
+            if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
             console.log(error);
             if (isInactiveCouponError(error)) {
                 const responseData = error.response?.data || {};
@@ -194,7 +210,7 @@ const Checkout = () => {
                 showToast.warning("This coupon is no longer active. Your cart has been updated.");
                 await fetchCart();
             } else {
-                setCheckoutError("Unable to continue payment. Please try again.");
+                setCheckoutError("Unable to place the order. Please try again.");
             }
 
             setProcessing(false);
@@ -230,7 +246,7 @@ const Checkout = () => {
 
                 <p className="eehook-checkout-subtitle">
 
-                    Complete your purchase securely.
+                    Choose Cash on Delivery or send your order through WhatsApp.
 
                 </p>
 
@@ -350,7 +366,7 @@ const Checkout = () => {
 
                         <h2>
 
-                            Payment Method
+                            Order Method
 
                         </h2>
 
@@ -358,16 +374,43 @@ const Checkout = () => {
 
                             <div className="eehook-payment-title">
 
-                                Cashfree Secure Payment
+                            Choose how to place your order
 
                             </div>
 
                             <p>
 
-                                Pay securely with the payment methods
-                                available in Cashfree checkout.
+                                Online payments are temporarily unavailable. Choose Cash on Delivery or continue through WhatsApp.
 
                             </p>
+
+                            <label className={`eehook-payment-option ${paymentMethod === "COD" ? "active" : ""}`}>
+                                <input
+                                    type="radio"
+                                    name="payment-method"
+                                    value="COD"
+                                    checked={paymentMethod === "COD"}
+                                    onChange={() => setPaymentMethod("COD")}
+                                />
+                                <span>
+                                    <strong>Cash on Delivery (COD)</strong>
+                                    <small>Pay in cash when your order is delivered.</small>
+                                </span>
+                            </label>
+
+                            <label className={`eehook-payment-option ${paymentMethod === "WHATSAPP" ? "active" : ""}`}>
+                                <input
+                                    type="radio"
+                                    name="payment-method"
+                                    value="WHATSAPP"
+                                    checked={paymentMethod === "WHATSAPP"}
+                                    onChange={() => setPaymentMethod("WHATSAPP")}
+                                />
+                                <span>
+                                    <strong>Order through WhatsApp</strong>
+                                    <small>Open WhatsApp with your order details ready to send.</small>
+                                </span>
+                            </label>
 
                         </div>
 
@@ -565,8 +608,8 @@ const Checkout = () => {
 
                         <button
                             className="eehook-checkout-btn"
-                            onClick={proceedToPayment}
-                            disabled={processing}
+                            onClick={placeOrder}
+                            disabled={processing || cartItems.length === 0}
                         >
 
                             {
@@ -575,11 +618,11 @@ const Checkout = () => {
 
                                     ?
 
-                                    "Redirecting..."
+                                    "Placing order..."
 
                                     :
 
-                                    "Proceed to Payment"
+                                    paymentMethod === "WHATSAPP" ? "Continue via WhatsApp" : "Place COD Order"
 
                             }
 
@@ -587,8 +630,9 @@ const Checkout = () => {
 
                         <p className="eehook-payment-note">
 
-                            You will be redirected securely to Cashfree
-                            to complete your payment.
+                            {paymentMethod === "WHATSAPP"
+                                ? "Your order details will open in WhatsApp for confirmation."
+                                : "Payment will be collected in cash when your order is delivered."}
 
                         </p>
 
