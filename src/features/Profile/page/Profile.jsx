@@ -19,6 +19,7 @@ const Profile = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   const [profile, setProfile] = useState({
     first_name: "",
@@ -43,11 +44,6 @@ const Profile = () => {
   const [editingId, setEditingId] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    getProfile();
-    getAddresses();
-  }, []);
 
   const getProfile = async () => {
 
@@ -128,6 +124,11 @@ const Profile = () => {
 
   };
 
+  useEffect(() => {
+    getProfile();
+    getAddresses();
+  }, []);
+
   const updateProfile = async (e) => {
 
     e.preventDefault();
@@ -149,7 +150,7 @@ const Profile = () => {
         date_of_birth: res.data.data?.date_of_birth || profile.date_of_birth
       });
 
-      
+      setIsEditingProfile(false);
       showToast.success("Profile updated successfully")
     } catch (err) {
 
@@ -342,7 +343,7 @@ const Profile = () => {
             </div>
 
             <form
-              className="profile-form"
+              className={`profile-form ${isEditingProfile ? "is-editing" : "is-readonly"}`}
               onSubmit={updateProfile}
             >
 
@@ -359,6 +360,7 @@ const Profile = () => {
                   name="first_name"
                   value={profile.first_name}
                   onChange={handleProfileChange}
+                  readOnly={!isEditingProfile}
                   required
                 />
 
@@ -394,6 +396,7 @@ const Profile = () => {
                   name="phone"
                   value={profile.phone}
                   onChange={handleProfileChange}
+                  readOnly={!isEditingProfile}
                   required
                 />
 
@@ -411,6 +414,7 @@ const Profile = () => {
                   name="gender"
                   value={profile.gender}
                   onChange={handleProfileChange}
+                  disabled={!isEditingProfile}
                   required
                 >
 
@@ -455,14 +459,16 @@ const Profile = () => {
                   name="date_of_birth"
                   value={profile.date_of_birth}
                   onChange={handleProfileChange}
+                  readOnly={!isEditingProfile}
                   required
                 />
 
               </div>
 
               <button
-                type="submit"
-                className="save-profile-btn"
+                type={isEditingProfile ? "submit" : "button"}
+                className={`save-profile-btn ${!isEditingProfile ? "edit-profile-btn" : ""}`}
+                onClick={!isEditingProfile ? () => setIsEditingProfile(true) : undefined}
                 disabled={loading}
               >
 
@@ -470,9 +476,13 @@ const Profile = () => {
 
                   "Saving..."
 
+                  : isEditingProfile ?
+
+                  "Save Changes"
+
                   :
 
-                  "Save Changes"}
+                  <><FaEdit aria-hidden="true" /> Edit</>}
 
               </button>
 

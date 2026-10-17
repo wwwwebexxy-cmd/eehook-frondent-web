@@ -256,6 +256,27 @@
 
 }
 
+.profile-form.is-readonly input,
+.profile-form.is-readonly select {
+    background: #ffffff;
+}
+
+.profile-form.is-readonly input[readonly],
+.profile-form.is-readonly select:disabled {
+    color: #5f6d72;
+    cursor: default;
+    opacity: 1;
+}
+
+.profile-form.is-editing input[readonly] {
+    background: #f2f4f1;
+    color: #7b8588;
+}
+
+.profile-form select:disabled {
+    cursor: not-allowed;
+}
+
 .full-width{
 
     grid-column:1/3;
@@ -299,6 +320,17 @@
 
     box-shadow:0 12px 25px rgba(255,144,0,.25);
 
+}
+
+.edit-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.edit-profile-btn svg {
+    font-size: 15px;
 }
 /*=========================================
       SAVED ADDRESS SECTION
