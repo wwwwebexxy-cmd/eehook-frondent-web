@@ -6,7 +6,7 @@ import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, ErrorState, Filt
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
 import useFormErrors from "../hooks/useFormErrors";
-import { createResource, deleteResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, unwrapList, updateOrderDetails, updateResource } from "../services/adminApi";
+import { createResource, deleteResource, duplicateResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, unwrapList, updateOrderDetails, updateResource } from "../services/adminApi";
 import ProductView from "./ProductView";
 import ProductEditor from "./ProductEditor";
 import HeroBannerEditor from "./HeroBannerEditor";
@@ -513,8 +513,8 @@ function ResourcePage({ resource, schema }) {
         const sourceId = recordId(row);
         setDuplicatingId(sourceId);
         try {
-            const result = await duplicateProduct(row);
-            toast.success(`Product duplicated${result.imagesSkipped ? " (images could not be copied)" : ""}`);
+            await duplicateResource("products", sourceId);
+            toast.success("Product duplicated with all images and variants");
             state.reload();
         } catch (error) {
             toast.error(getErrorMessage(error, "Could not duplicate product."));
@@ -542,94 +542,6 @@ function ResourcePage({ resource, schema }) {
     const canExport = resource === "products" || resource === "orders" || resource === "order-items";
 
     return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {itemLabel(resource)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option>{resource === "trust-benefits" && <><option value="display_order">Display order</option><option value="-display_order">Reverse display order</option></>}<option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="code">Code A-Z</option><option value="-code">Code Z-A</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></>}{resource === "coupons" && <><label className="admin-select"><span>Product</span><select value={couponProduct} onChange={(event) => { setCouponProduct(event.target.value); setPage(1); }}><option value="">All products</option>{(tableReferences.products || []).map((product) => <option key={recordId(product)} value={recordId(product)}>{recordLabel(product)}</option>)}</select></label><label className="admin-select"><span>Category</span><select value={couponCategory} onChange={(event) => { setCouponCategory(event.target.value); setPage(1); }}><option value="">All categories</option>{(tableReferences.categories || []).map((category) => <option key={recordId(category)} value={recordId(category)}>{recordLabel(category)}</option>)}</select></label><label className="admin-select"><span>Discount</span><select value={couponDiscountType} onChange={(event) => { setCouponDiscountType(event.target.value); setPage(1); }}><option value="">All types</option><option value="PERCENTAGE">Percentage</option><option value="FIXED">Fixed Amount</option></select></label><label className="admin-select"><span>Status</span><select value={couponActive} onChange={(event) => { setCouponActive(event.target.value); setPage(1); }}><option value="">All statuses</option><option value="true">Active</option><option value="false">Inactive</option></select></label></>}</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${itemLabel(resource)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${itemLabel(resource)}`} onClick={() => openEdit(row)}><FiEdit3 /></button>{resource === "products" && <button className="table-icon" title="Duplicate product" aria-label={`Duplicate ${row?.name || "product"}`} onClick={() => duplicate(row)} disabled={duplicatingId === recordId(row)}><FiCopy /></button>}{resource === "coupons" && <button className="table-icon" title={row?.is_active ? "Deactivate" : "Activate"} aria-label={`${row?.is_active ? "Deactivate" : "Activate"} coupon`} onClick={() => toggleCoupon(row)} disabled={togglingId === recordId(row)}><FiPower /></button>}{resource === "trust-benefits" && <button className="table-icon" title={row.is_active ? "Deactivate" : "Activate"} aria-label={`${row.is_active ? "Deactivate" : "Activate"} ${itemLabel(resource)}`} onClick={() => toggleActive(row)}>{row.is_active ? <FiToggleRight /> : <FiToggleLeft />}</button>}<button className="table-icon danger" title="Delete" aria-label={`Delete ${itemLabel(resource)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} initialValues={modal.initialValues} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${itemLabel(resource).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
-}
-
-function relationValue(value) {
-    return value && typeof value === "object" ? recordId(value) : value;
-}
-
-function duplicateProductPayload(product) {
-    return {
-        category: relationValue(product.category),
-        subcategory: relationValue(product.subcategory),
-        brand: relationValue(product.brand) || null,
-        offer: relationValue(product.offer) || null,
-        name: `${product.name || "Product"} (Copy)`,
-        description: product.description || "",
-        is_active: product.is_active !== false,
-        key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : product.key_features || "",
-        shipping_fee: product.shipping_fee === "" || product.shipping_fee == null ? 0 : Number(product.shipping_fee),
-        estimated_delivery_time: product.estimated_delivery_time || "",
-        seller_name: product.seller_name || "",
-        warranty_info: product.warranty_info || "",
-        current_viewers_count: 0,
-        promotional_banner_link: product.promotional_banner_link || "",
-        // Related products are intentionally reset. The copied product must
-        // never point at itself or carry a stale curated relationship.
-        related_product_mode: "none",
-        related_product_ids: [],
-    };
-}
-
-async function copyProductImage(variantId, image) {
-    if (!image?.image) return false;
-    try {
-        const response = await fetch(getImageUrl(image.image));
-        if (!response.ok) return false;
-        const blob = await response.blob();
-        const extension = blob.type.split("/")[1] || "jpg";
-        const file = new File([blob], `product-copy-${Date.now()}.${extension}`, { type: blob.type || "image/jpeg" });
-        const form = new FormData();
-        form.append("variant", String(variantId));
-        form.append("image", file);
-        form.append("position", String(image.position ?? 0));
-        form.append("is_primary", String(Boolean(image.is_primary)));
-        await createResource("product-images", form);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-async function duplicateProduct(product) {
-    const sourceId = recordId(product);
-    if (!sourceId) throw new Error("The product does not have a valid id.");
-    const productResponse = await createResource("products", duplicateProductPayload(product));
-    const duplicateId = recordId(productResponse.data);
-    if (!duplicateId) throw new Error("The duplicated product response did not contain an id.");
-
-    const variantResponse = await listResource("product-variants", { product: sourceId, page_size: 500 });
-    const sourceVariants = unwrapListForReference(variantResponse.data);
-    let imagesSkipped = 0;
-    for (const sourceVariant of sourceVariants) {
-        const variantPayload = {
-            product: duplicateId,
-            color: relationValue(sourceVariant.color) || null,
-            price_type: sourceVariant.price_type || "single",
-            price: sourceVariant.price_type === "single" ? Number(sourceVariant.price) : null,
-            stock: Number(sourceVariant.stock || 0),
-        };
-        const variantResponse = await createResource("product-variants", variantPayload);
-        const duplicateVariantId = recordId(variantResponse.data);
-        if (!duplicateVariantId) continue;
-
-        const unitResponse = await listResource("product-variant-units", { variant: recordId(sourceVariant), page_size: 500 });
-        for (const sourceUnit of unwrapListForReference(unitResponse.data)) {
-            await createResource("product-variant-units", {
-                variant: duplicateVariantId,
-                unit_type: relationValue(sourceUnit.unit_type),
-                unit: relationValue(sourceUnit.unit),
-                price: Number(sourceUnit.price),
-                stock: Number(sourceUnit.stock || 0),
-            });
-        }
-
-        const imageResponse = await listResource("product-images", { variant: recordId(sourceVariant), page_size: 500 });
-        for (const sourceImage of unwrapListForReference(imageResponse.data)) {
-            if (!(await copyProductImage(duplicateVariantId, sourceImage))) imagesSkipped += 1;
-        }
-    }
-    return { id: duplicateId, imagesSkipped };
 }
 
 function ReadOnlyResourcePage({ resource, id, schema }) {

@@ -20,6 +20,12 @@ export const updateResource = (resource, id, data) =>
 export const deleteResource = (resource, id) =>
     client.delete(resourceUrl(resource, id));
 
+export const duplicateResource = (resource, id) =>
+    client.post(`${resourceUrl(resource, id)}duplicate/`);
+
+export const setPrimaryResource = (resource, id) =>
+    client.post(`${resourceUrl(resource, id)}set-primary/`);
+
 export const toggleWelcomeBonusActive = (id) =>
     client.post(`${resourceUrl("welcome-bonuses", id)}toggle-active/`);
 

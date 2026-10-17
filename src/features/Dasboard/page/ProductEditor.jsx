@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { FiArrowDown, FiArrowUp, FiChevronDown, FiImage, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 import { ConfirmDialog, EmptyState, LoadingState, StatusPill } from "../components/AdminPrimitives";
-import { createResource, deleteResource, flattenApiErrors, getErrorMessage, getResource, listResource, updateResource } from "../services/adminApi";
+import { createResource, deleteResource, flattenApiErrors, getErrorMessage, getResource, listResource, setPrimaryResource, updateResource } from "../services/adminApi";
 import { getImageUrl } from "../../../utils/imageUrl";
 import "../styles/ProductEditor.css";
 
@@ -209,7 +209,33 @@ async function loadProduct(id) {
 function normalizeProduct(data = {}) { const productData = { ...data }; delete productData.emi_available; delete productData.emi_starting_price; const manualRelated = rows(data.manual_related_products).sort((a, b) => Number(a.position ?? 0) - Number(b.position ?? 0)); const relatedIds = (Array.isArray(data.related_product_ids) && data.related_product_ids.length ? data.related_product_ids : manualRelated.map(relationId)).map(relationId); const relatedMode = ["none", "manual", "automatic"].includes(data.related_product_mode) ? data.related_product_mode : relatedIds.length ? "manual" : "none"; return { ...emptyProduct, ...productData, category: valueOf(data.category), subcategory: valueOf(data.subcategory), brand: valueOf(data.brand), offer: valueOf(data.offer), key_features: Array.isArray(data.key_features) ? data.key_features.join("\n") : data.key_features || "", promotional_banner_image: data.promotional_banner_image || null, related_product_mode: relatedMode, related_product_ids: relatedIds, manual_related_products: manualRelated.map((item, position) => ({ ...item, id: relationId(item), position })) }; }
 function normalizeUnit(unit) { return { ...unit, sku: unit.sku || "", unit_type: valueOf(unit.unit_type), unit: valueOf(unit.unit) }; }
 function makeProductPayload(product) { const values = { ...product, key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : String(product.key_features || ""), category: product.category || null, subcategory: product.subcategory || null, brand: product.brand || null, offer: product.offer || null, shipping_fee: product.shipping_fee === "" ? 0 : Number(product.shipping_fee), current_viewers_count: product.current_viewers_count === "" ? 0 : Number(product.current_viewers_count), related_product_mode: product.related_product_mode || "none", related_product_ids: product.related_product_mode === "manual" ? (product.related_product_ids || []).map(relationId) : [] }; delete values.product_type; delete values.has_variants; delete values.variants; delete values.units; delete values.images; delete values.regions; delete values.emi_available; delete values.emi_starting_price; delete values.manual_related_products; const file = values.promotional_banner_image instanceof File ? values.promotional_banner_image : null; if (!file) { delete values.promotional_banner_image; return values; } const form = new FormData(); Object.entries(values).forEach(([key, value]) => { if (value === null || value === undefined) return; if (Array.isArray(value)) value.forEach((item) => form.append(key, String(item))); else form.append(key, value); }); form.set("promotional_banner_image", file); return form; }
-async function saveVariantImages(variantId, variant) { for (const imageId of variant.deletedImages) await deleteResource("product-images", imageId); const images = variant.images || []; const primaryIndex = Math.max(0, images.findIndex((image) => image.is_primary)); for (let position = 0; position < images.length; position += 1) { const image = images[position]; const isPrimary = position === primaryIndex; if (image.file) { const form = new FormData(); form.append("variant", variantId); form.append("image", image.file); form.append("position", String(position)); form.append("is_primary", String(isPrimary)); await createResource("product-images", form); } else if (idOf(image)) await updateResource("product-images", idOf(image), { position, is_primary: isPrimary }); } }
+async function saveVariantImages(variantId, variant) {
+    for (const imageId of variant.deletedImages) await deleteResource("product-images", imageId);
+    const images = variant.images || [];
+    if (!images.length) return;
+
+    // Save the collection first, then use the dedicated atomic endpoint to
+    // select the requested image.  The model keeps at least one primary image,
+    // so changing the primary cannot be lost while sibling rows are updated.
+    const primaryIndex = Math.max(0, images.findIndex((image) => image.is_primary));
+    let primaryImageId = null;
+    for (let position = 0; position < images.length; position += 1) {
+        const image = images[position];
+        if (image.file) {
+            const form = new FormData();
+            form.append("variant", variantId);
+            form.append("image", image.file);
+            form.append("position", String(position));
+            form.append("is_primary", "false");
+            const response = await createResource("product-images", form);
+            if (position === primaryIndex) primaryImageId = idOf(response.data);
+        } else if (idOf(image)) {
+            await updateResource("product-images", idOf(image), { position, is_primary: false });
+            if (position === primaryIndex) primaryImageId = idOf(image);
+        }
+    }
+    if (primaryImageId) await setPrimaryResource("product-images", primaryImageId);
+}
 
 function RelatedProductsSection({ mode, onModeChange, relatedProducts, search, onSearchChange, availableProducts, onSelect, onRemove, onMove, error }) {
     const normalizedMode = ["none", "manual", "automatic"].includes(mode) ? mode : "none";
