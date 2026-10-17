@@ -80,7 +80,7 @@
 }
 
 .heading-text h2 {
-    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-family: "Inter", Arial, Helvetica, sans-serif;
     font-size: 22px;
     line-height: 1.2;
     font-weight: 600;
@@ -643,7 +643,10 @@
     }
 
     .heading-text h2 {
-        font-size: clamp(2rem, 10vw, 3rem);
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        font-size: 22px;
+        line-height: 1.2;
+        font-weight: 600;
     }
 
     .heading-sub {
