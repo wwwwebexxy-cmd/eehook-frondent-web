@@ -1,9 +1,9 @@
 import "./DirhamAmount.css";
 import { formatDirhamValue } from "./dirhamFormat";
 
-function RupeeSymbol({ className = "" }) {
+function DirhamSymbol({ className = "" }) {
     return (
-        <span className={`currency-symbol ${className}`.trim()} aria-hidden="true">₹</span>
+        <span className={`currency-symbol ${className}`.trim()} aria-hidden="true">⃃</span>
     );
 }
 
@@ -22,7 +22,7 @@ export default function DirhamAmount({
     return (
         <span className={`dirham-amount ${className}`.trim()}>
             {numericValue < 0 && <span className="dirham-amount-sign">−</span>}
-            <RupeeSymbol />
+            <DirhamSymbol />
             <span className="dirham-amount-value">{formattedValue}</span>
         </span>
     );
