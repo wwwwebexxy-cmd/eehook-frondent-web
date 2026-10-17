@@ -111,7 +111,7 @@ const Checkout = () => {
             "Items:",
             ...itemLines,
             "",
-            `Total: ⃃ ${Number(total || 0).toFixed(2)}`,
+            `Total: AED ${Number(total || 0).toFixed(2)}`,
             "",
             "Delivery address:",
             address.full_name,

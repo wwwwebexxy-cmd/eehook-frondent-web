@@ -3,7 +3,21 @@ import { formatDirhamValue } from "./dirhamFormat";
 
 function DirhamSymbol({ className = "" }) {
     return (
-        <span className={`currency-symbol ${className}`.trim()} aria-hidden="true">⃃</span>
+        <svg
+            className={`currency-symbol ${className}`.trim()}
+            viewBox="0 0 128 128"
+            role="img"
+            aria-label="UAE dirham"
+            focusable="false"
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                d="M20 15h42c26 0 43 20 43 49s-17 49-43 49H20V15Zm16 15v68h25c18 0 28-13 28-34S79 30 61 30H36Z"
+            />
+            <rect fill="currentColor" x="8" y="47" width="112" height="14" rx="7" />
+            <rect fill="currentColor" x="8" y="72" width="112" height="14" rx="7" />
+        </svg>
     );
 }
 
