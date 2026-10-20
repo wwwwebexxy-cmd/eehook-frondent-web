@@ -688,9 +688,9 @@ a {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60px;
+    height: 70px;
     background: #F8F9F3;
-    border-top: 1px solid #EEEFE9eee;
+    border-top: 1px solid #EEEFE9;
     z-index: 9999;
     /* Higher than top layouts to ensure absolute placement visibility */
     justify-content: space-around;
@@ -701,21 +701,72 @@ a {
 .mobile_bottom_item {
     color: #4B636D;
     display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 3px;
     text-decoration: none;
     height: 100%;
-    width: 100%;
+    min-width: 0;
+    padding: 5px 2px 4px;
+    font-family: Inter, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .mobile_bottom_item.active {
     color: #FF9000;
 }
 
+.mobile_bottom_icon {
+    position: relative;
+    width: 34px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 17px;
+}
+
+.mobile_bottom_item.active .mobile_bottom_icon {
+    background: #eef2ff;
+    color: #496fd4;
+}
+
+.mobile_bottom_label {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+.mobile_bottom_notification .mobile_bottom_icon {
+    width: 34px;
+}
+
+.mobile_bottom_notification .welcome-bonus-notifications-mobile {
+    width: auto;
+    height: auto;
+}
+
+.mobile_bottom_notification .welcome-bonus-notifications-mobile .notification-bell {
+    width: 30px;
+    height: 30px;
+}
+
 .bottom_icon {
     position: relative;
     display: flex;
     align-items: center;
+    width: 34px;
+    height: 30px;
+    justify-content: center;
+    border-radius: 17px;
+}
+
+.mobile_bottom_item.active .bottom_icon {
+    background: #eef2ff;
+    color: #496fd4;
 }
 
 .bottom_icon span {

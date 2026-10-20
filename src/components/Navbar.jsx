@@ -6,7 +6,7 @@ import { FaShoppingBag, FaAngleDown, FaAngleUp, FaAngleRight } from "react-icons
 import { LuSearch } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
 import { FaHeart } from "react-icons/fa6";
-import { FiMenu } from "react-icons/fi";
+import { FiGrid, FiHome, FiMenu } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import navbarlogo from './../assets/navbar-logo.png';
 
@@ -372,23 +372,37 @@ const cartLength = cart.total_items ?? 0;
 
             {/* ISOLATED GLOBAL MOBILE BOTTOM NAV BAR (Always locked strictly to bottom window layer) */}
             <div className="mobile_bottom">
+                <NavLink to="/" end className="mobile_bottom_item">
+                    <span className="mobile_bottom_icon"><FiHome size={22} /></span>
+                    <span className="mobile_bottom_label">Home</span>
+                </NavLink>
+                <NavLink to="/shop" className="mobile_bottom_item">
+                    <span className="mobile_bottom_icon"><FiGrid size={22} /></span>
+                    <span className="mobile_bottom_label">Categories</span>
+                </NavLink>
                 <NavLink to="/profile" className="mobile_bottom_item">
-                    <CgProfile size={22} />
+                    <span className="mobile_bottom_icon"><CgProfile size={22} /></span>
+                    <span className="mobile_bottom_label">Account</span>
                 </NavLink>
 
-                <WelcomeBonusNotifications mobile />
+                <div className="mobile_bottom_item mobile_bottom_notification">
+                    <div className="mobile_bottom_icon"><WelcomeBonusNotifications mobile /></div>
+                    <span className="mobile_bottom_label">Bonus</span>
+                </div>
 
                 <NavLink to="/wishlist" className="mobile_bottom_item">
                     <div className="bottom_icon">
                         <FaHeart size={20} />
                         <span>{wishLength}</span>
                     </div>
+                    <span className="mobile_bottom_label">Wishlist</span>
                 </NavLink>
                 <NavLink to="/checkout" className="mobile_bottom_item">
                     <div className="bottom_icon">
                         <FaShoppingBag size={20} />
                         <span>{cartLength}</span>
                     </div>
+                    <span className="mobile_bottom_label">Cart</span>
                 </NavLink>
             </div>
         </>
