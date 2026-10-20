@@ -71,6 +71,28 @@ function getKeyFeatures(value) {
         .filter(Boolean);
 }
 
+function getStorageOption(variant) {
+    const option = variant?.sizes?.[0];
+    return option?.unit || option?.size || null;
+}
+
+function getProductHeading(name, storageLabel, colorLabel) {
+    let heading = String(name || "Product").trim();
+
+    if (storageLabel) {
+        const storagePattern = /\b\d+(?:\.\d+)?\s*(?:GB|TB)\b/gi;
+        heading = storagePattern.test(heading)
+            ? heading.replace(storagePattern, storageLabel)
+            : `${heading} ${storageLabel}`;
+    }
+
+    if (colorLabel && !heading.toLowerCase().endsWith(String(colorLabel).toLowerCase())) {
+        heading = `${heading} ${colorLabel}`;
+    }
+
+    return heading;
+}
+
 function ExpandableProductContent({ children, className = "" }) {
     const contentRef = useRef(null);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -424,7 +446,7 @@ function Single_product() {
         );
 
         setSelectedSize(
-            null
+            getStorageOption(firstVariant)
         );
 
         const image = firstVariant.images.find(img => img.is_primary) || firstVariant.images[0];
@@ -447,6 +469,13 @@ function Single_product() {
             item =>
                 (item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id)
         );
+
+    const selectedStorage = selectedSizeVariant?.unit
+        || selectedSizeVariant?.size
+        || selectedSize
+        || getStorageOption(selectedVariant);
+    const selectedStorageLabel = selectedStorage?.name || "";
+    const productHeading = getProductHeading(data.name, selectedStorageLabel, selectedColor?.name);
 
     const displayImages =
         selectedVariant?.images || [];
@@ -710,7 +739,7 @@ function Single_product() {
 
                 {/* CENTER: PRODUCT INFORMATION */}
                 <div className="info-section">
-                    <h1>{data.name}</h1>
+                    <h1>{productHeading}</h1>
 
                     {colors.length > 0 && <div className="option-block color-selection-block">
                         <h4>Color: <span className="selected-option-label" style={{ fontWeight: 'bold', color: '#111' }}>{selectedColor?.name || "Select color"}</span></h4>
@@ -727,7 +756,7 @@ function Single_product() {
                                         onClick={() => {
                                             const variant = data.variants.find(item => item.color?.id === color.id);
                                             setSelectedColor(color);
-                                            setSelectedSize(null);
+                                             setSelectedSize(getStorageOption(variant));
                                             const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
                                             setActiveImage(image?.image || null);
                                         }}
@@ -741,7 +770,7 @@ function Single_product() {
 
                     {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
                         <div className="option-block">
-                            <h4>{availableSizes?.[0]?.unit_type?.name || availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedSize?.name}</span></h4>
+                            <h4>{availableSizes?.[0]?.unit_type?.name || availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedStorageLabel || "Select option"}</span></h4>
                             <div className="sizes">
                                 {availableSizes.map((item) => {
                                     const unitObj = item.unit || item.size;
