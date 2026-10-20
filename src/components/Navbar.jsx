@@ -6,7 +6,7 @@ import { FaShoppingBag, FaAngleDown, FaAngleUp, FaAngleRight } from "react-icons
 import { LuSearch } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
 import { FaHeart } from "react-icons/fa6";
-import { AiOutlineDoubleRight } from "react-icons/ai";
+import { FiMenu } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import navbarlogo from './../assets/navbar-logo.png';
 
@@ -166,7 +166,7 @@ const cartLength = cart.total_items ?? 0;
                         aria-expanded={menuOpen}
                         aria-controls="mobile-navigation"
                     >
-                        <AiOutlineDoubleRight size={30} />
+                        <FiMenu size={30} aria-hidden="true" />
                     </button>
 
                     <div className="nav_main2">
