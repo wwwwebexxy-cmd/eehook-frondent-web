@@ -200,6 +200,7 @@ function Sale() {
                         page={page}
                         pageSize={pageSize}
                         count={data?.count}
+                        expandVariants
                         onPageChange={(nextPage) => { const next = new URLSearchParams(searchParams); next.set("page", String(nextPage)); setSearchParams(next); }}
                     />
                 </div>

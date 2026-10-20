@@ -22,6 +22,12 @@ function getFirstUnit(variant) {
     return variant.sizes?.[0] || variant.units?.[0] || null;
 }
 
+function getVariantLabel(variant) {
+    if (!variant) return "";
+    if (typeof variant.color === "string") return variant.color;
+    return variant.color?.name || variant.color_name || "";
+}
+
 function getProductSelection(product) {
     const variant = getFirstVariant(product) || (hasValue(product?.default_variant_id)
         ? { id: product.default_variant_id, price_type: hasValue(product.default_variant_unit_id) ? "multiple" : "single" }
@@ -33,43 +39,78 @@ function getProductSelection(product) {
 }
 
 function getProductImage(product, variant) {
-    return product?.image
-        || product?.product_image
-        || variant?.images?.find((item) => item.is_primary)?.image
-        || variant?.images?.[0]?.image;
+    // A variant image is color-specific. Prefer its selected primary image so
+    // a generic/product-level image cannot hide the color's primary image in
+    // category and subcategory listings.
+    return variant?.images?.find((item) => item.is_primary)?.image
+        || variant?.images?.[0]?.image
+        || product?.image
+        || product?.product_image;
 }
 
 function getAvailability(product, variant, unit) {
+    // A card can represent one color, so use that variant's stock before the
+    // aggregate product-level availability.
+    const stock = unit?.stock ?? variant?.stock ?? product?.stock;
+    if (hasValue(stock)) return Number(stock) > 0 ? "In stock" : "Out of stock";
+
     if (hasValue(product?.availability)) return String(product.availability);
     if (hasValue(product?.stock_status)) return String(product.stock_status);
-
     if (product?.in_stock === true) return "In stock";
     if (product?.in_stock === false) return "Out of stock";
-
-    const stock = product?.stock ?? unit?.stock ?? variant?.stock;
-    if (hasValue(stock)) return Number(stock) > 0 ? "In stock" : "Out of stock";
     if (product?.is_available === false) return "Out of stock";
     return "Availability varies";
 }
 
-function getPricing(product, variant) {
-    const originalPrice = product?.original_price ?? variant?.price ?? product?.starting_price;
-    const currentPrice = product?.current_price ?? product?.discounted_price ?? product?.starting_price ?? variant?.discounted_price ?? variant?.price;
-    const discountedPrice = product?.discounted_price ?? variant?.discounted_price;
-    const hasOffer = product?.has_offer === true || (hasValue(product?.discount_percentage) && Number(product.discount_percentage) > 0);
+function getPricing(product, variant, unit) {
+    const selectedPrice = unit?.price ?? variant?.price;
+    const selectedDiscountedPrice = unit?.discounted_price ?? variant?.discounted_price;
+    const originalPrice = selectedPrice ?? product?.original_price ?? product?.starting_price;
+    const currentPrice = selectedDiscountedPrice
+        ?? selectedPrice
+        ?? product?.current_price
+        ?? product?.discounted_price
+        ?? product?.starting_price;
+    const discountedPrice = selectedDiscountedPrice ?? product?.discounted_price;
+    const hasOffer = variant?.has_offer === true
+        || unit?.has_offer === true
+        || product?.has_offer === true
+        || (hasValue(product?.discount_percentage) && Number(product.discount_percentage) > 0);
 
     return { originalPrice, currentPrice, discountedPrice, hasOffer };
 }
 
-function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14, count = 0, onPageChange, showPagination = true, compact = false }) {
+function getCardItems(products, expandVariants) {
+    return products.flatMap((product) => {
+        if (!expandVariants) {
+            const { variant, unit } = getProductSelection(product);
+            return [{ product, variant, unit, key: product.id }];
+        }
+
+        const variants = Array.isArray(product?.variants) ? product.variants : [];
+        if (!variants.length) {
+            return [{ product, variant: null, unit: null, key: product.id }];
+        }
+
+        return variants.map((variant, index) => ({
+            product,
+            variant,
+            unit: getFirstUnit(variant),
+            key: `${product.id}-${variant.id || index}`,
+        }));
+    });
+}
+
+function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14, count = 0, onPageChange, showPagination = true, compact = false, expandVariants = false }) {
     const navigate = useNavigate();
     const { data: rawWishlist = [], refetch } = WishlistQuery();
     const wishdata = Array.isArray(rawWishlist) ? rawWishlist : rawWishlist?.results || [];
+    const cardItems = getCardItems(products, expandVariants);
     const totalPages = Math.max(1, Math.ceil(Number(count || products.length) / pageSize));
 
     useEffect(() => { if (!compact) window.scrollTo(0, 0); }, [compact, page]);
 
-    const addToWishlist = async (product, event) => {
+    const addToWishlist = async (product, event, selectedVariant, selectedUnit) => {
         event.stopPropagation();
 
         if (!hasAuthSession()) {
@@ -78,7 +119,9 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
             return;
         }
 
-        const { variant: firstVariant, unit: firstUnit } = getProductSelection(product);
+        const { variant: firstVariant, unit: firstUnit } = selectedVariant
+            ? { variant: selectedVariant, unit: selectedUnit }
+            : getProductSelection(product);
         if (!firstVariant || (firstVariant.price_type !== "single" && !firstUnit)) {
             showToast.error("Variant not available");
             return;
@@ -103,26 +146,31 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
         return <div className="catalog-container homepage-product-catalog"><section className="products shop-many-products">{Array.from({ length: 8 }).map((_, index) => <div className="product_card skeleton-card" key={index}><div className="product_img skeleton"></div><div className="product_info"><div className="skeleton skeleton-text category-skeleton"></div><div className="skeleton skeleton-text title-skeleton"></div><div className="skeleton skeleton-text price-skeleton"></div></div></div>)}</section></div>;
     }
     if (error) return <p className="error-state">Unable to load products. Please try again.</p>;
-    if (!products.length) return null;
+    if (!cardItems.length) return null;
 
-    return <div className="catalog-container homepage-product-catalog"><section className={`products ${products.length <= 3 ? "shop-few-products" : "shop-many-products"}`}>
-        {products.map((product) => {
-            const { variant: firstVariant, unit: firstUnit } = getProductSelection(product);
-            const isWishlisted = !!wishdata.find((item) => String(item.variant) === String(firstVariant?.id) && String(item.variant_size ?? "") === String(firstUnit?.id ?? ""));
-            const { originalPrice, currentPrice, discountedPrice, hasOffer } = getPricing(product, firstVariant);
-            const image = getProductImage(product, firstVariant);
+    return <div className="catalog-container homepage-product-catalog"><section className={`products ${cardItems.length <= 3 ? "shop-few-products" : "shop-many-products"}`}>
+        {cardItems.map(({ product, variant, unit, key }) => {
+            const isWishlisted = !!wishdata.find((item) => String(item.variant) === String(variant?.id) && String(item.variant_size ?? "") === String(unit?.id ?? ""));
+            const { originalPrice, currentPrice, discountedPrice, hasOffer } = getPricing(product, variant, unit);
+            const image = getProductImage(product, variant);
+            const variantLabel = getVariantLabel(variant);
             const displayPrice = hasOffer && hasValue(discountedPrice) ? discountedPrice : currentPrice;
             const showOriginalPrice = hasOffer && hasValue(originalPrice) && hasValue(displayPrice) && String(originalPrice) !== String(displayPrice);
-            const availability = getAvailability(product, firstVariant, firstUnit);
+            const availability = getAvailability(product, variant, unit);
 
-            const openProduct = () => navigate(`/single/${product.id}`);
+            const openProduct = () => {
+                const query = new URLSearchParams();
+                if (variant?.id) query.set("variant", String(variant.id));
+                if (unit?.id) query.set("size", String(unit.id));
+                navigate(`/single/${product.id}${query.toString() ? `?${query.toString()}` : ""}`);
+            };
             const openProductWithKeyboard = (event) => {
                 if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) return;
                 event.preventDefault();
                 openProduct();
             };
 
-            return <article className="product_card" key={product.id} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
+            return <article className="product_card" key={key} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}${variantLabel ? ` in ${variantLabel}` : ""}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
                 <div className="product_img">
                     {(product.marketing_highlights?.length || (hasOffer && hasValue(product.discount_percentage))) ? (
                         <div className="product-image-topbar">
@@ -143,11 +191,12 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                             VIEW PRODUCT
                         </button>
                     </div>
-                    <button className={`favorite_btn ${isWishlisted ? "active" : ""}`} onClick={(event) => addToWishlist(product, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}><FaHeart /></button>
+                    <button className={`favorite_btn ${isWishlisted ? "active" : ""}`} onClick={(event) => addToWishlist(product, event, variant, unit)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}><FaHeart /></button>
                 </div>
                 <div className="product_info">
                     <span className="product-category">{product.category?.name || product.brand?.name || ""}</span>
                     <h3 className="product-title">{product.name}</h3>
+                    {variantLabel && <span className="product-variant-label">Color: {variantLabel}</span>}
                     <div className="product-footer">
                         <div className="price-box">
                             {showOriginalPrice ? (

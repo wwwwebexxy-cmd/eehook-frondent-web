@@ -275,6 +275,14 @@
 
 }
 
+.product-variant-label {
+    margin: -2px 0 7px;
+    color: #6d6d6d;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
 
 .product-footer {
     display: flex;

@@ -28,10 +28,13 @@ function getProductSelection(product) {
 }
 
 function getProductImage(product) {
-    return product?.product_image
-        || product?.image
-        || product?.variants?.[0]?.images?.find((image) => image.is_primary)?.image
-        || product?.variants?.[0]?.images?.[0]?.image;
+    const firstVariant = product?.variants?.[0];
+    // Keep homepage cards consistent with category cards: use the primary
+    // image chosen for the first color before any generic product image.
+    return firstVariant?.images?.find((image) => image.is_primary)?.image
+        || firstVariant?.images?.[0]?.image
+        || product?.product_image
+        || product?.image;
 }
 
 function New_Arrival_Home({
