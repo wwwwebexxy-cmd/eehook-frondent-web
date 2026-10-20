@@ -1,20 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-function formatRemaining(endsAt, now) {
-    const remainingSeconds = Math.max(0, Math.ceil((new Date(endsAt).getTime() - now) / 1000));
-    if (remainingSeconds < 60) return "LESS THAN 1 MINUTE";
-
-    const totalMinutes = Math.ceil(remainingSeconds / 60);
-    const days = Math.floor(totalMinutes / (24 * 60));
-    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-    const minutes = totalMinutes % 60;
-    const parts = [];
-    if (days) parts.push(`${days} DAY${days === 1 ? "" : "S"}`);
-    if (hours && parts.length < 2) parts.push(`${hours} HOUR${hours === 1 ? "" : "S"}`);
-    if (minutes && parts.length < 2) parts.push(`${minutes} MINUTE${minutes === 1 ? "" : "S"}`);
-    return parts.join(" ") || "LESS THAN 1 MINUTE";
-}
-
 export default function ProductMessageRail({ messages = [] }) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [now, setNow] = useState(() => Date.now());
@@ -48,10 +33,7 @@ export default function ProductMessageRail({ messages = [] }) {
     const textColor = /^#[0-9A-Fa-f]{6}$/.test(current.text_color || "")
         ? current.text_color
         : "#173B35";
-    const countdown = current.message_type === "countdown" && current.ends_at
-        ? formatRemaining(current.ends_at, now)
-        : "";
-    const label = countdown ? `${current.text} ${countdown}` : current.text;
+    const label = current.text;
 
     return (
         <div className="product-message-rail" style={{ "--product-message-bg": backgroundColor, "--product-message-color": textColor }} aria-live="polite" aria-atomic="true">

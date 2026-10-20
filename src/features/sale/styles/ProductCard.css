@@ -71,16 +71,19 @@
 }
 
 .product-image-topbar {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 5;
     display: flex;
     align-items: center;
-    flex: 0 0 auto;
     flex-wrap: nowrap;
     gap: 6px;
     min-height: 0;
-    padding: 9px 48px 6px 12px;
-    background: #f7f7f7;
+    padding: 0 48px 6px 0;
+    background: transparent;
+    pointer-events: none;
 }
 
 .product-image-stage {
@@ -119,6 +122,7 @@
     letter-spacing: .02em;
     line-height: 1;
     pointer-events: none;
+    align-self: flex-start;
 }
 
 .product_img .product-highlight-rail--badge .product-highlight-label {
@@ -518,7 +522,7 @@
 
     .product-image-topbar {
         gap: 4px;
-        padding: 7px 38px 5px 3px;
+        padding: 0 38px 5px 0;
     }
 
     .quick-add-bar {
