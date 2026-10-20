@@ -32,17 +32,23 @@ const PaymentSuccess = () => {
         };
 
         const verifyPayment = async () => {
+            const stripeSessionId = searchParams.get("session_id");
             const cashfreeOrderId = searchParams.get("order_id");
 
-            if (!cashfreeOrderId) {
+            if (!stripeSessionId && !cashfreeOrderId) {
                 showFailure({ message: PAYMENT_MESSAGES.invalidSession, title: "Payment Not Completed" });
                 return;
             }
 
             try {
-                const response = await client.get("payment/cashfree-success/", {
-                    params: { order_id: cashfreeOrderId },
-                });
+                const response = await client.get(
+                    stripeSessionId ? "payment/payment-success/" : "payment/cashfree-success/",
+                    {
+                        params: stripeSessionId
+                            ? { session_id: stripeSessionId }
+                            : { order_id: cashfreeOrderId },
+                    },
+                );
 
                 if (response.status !== 200) {
                     showFailure({ message: PAYMENT_MESSAGES.generic, title: "Payment Not Confirmed" });

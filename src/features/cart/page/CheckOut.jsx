@@ -7,6 +7,7 @@ import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { WHATSAPP_NUMBER } from "../../../config/contact";
+import { getSafeCheckoutUrl } from "../../../lib/checkoutUrl";
 
 const Checkout = () => {
 
@@ -27,7 +28,7 @@ const Checkout = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [checkoutError, setCheckoutError] = useState("");
-    const [paymentMethod, setPaymentMethod] = useState("COD");
+    const [paymentMethod, setPaymentMethod] = useState("STRIPE");
 
     const fetchAddresses = useCallback(async () => {
 
@@ -161,6 +162,24 @@ const Checkout = () => {
             // A failed checkout attempt must never reuse a key: each button
             // click represents a new user-initiated checkout operation.
             const idempotencyKey = crypto.randomUUID();
+
+            if (paymentMethod === "STRIPE") {
+                const response = await client.post(
+                    "payment/create-checkout-session/",
+                    { address: selectedAddress },
+                    {
+                        timeout: ORDER_REQUEST_TIMEOUT,
+                        headers: { "Idempotency-Key": idempotencyKey },
+                    },
+                );
+                const checkoutUrl = getSafeCheckoutUrl(response.data?.checkout_url);
+
+                // Stripe hosts the payment page. The order is created by the
+                // verified success/webhook flow after payment succeeds.
+                window.location.assign(checkoutUrl);
+                return;
+            }
+
             const response = await client.post(
                 "place-order/",
                 {
@@ -210,7 +229,12 @@ const Checkout = () => {
                 showToast.warning("This coupon is no longer active. Your cart has been updated.");
                 await fetchCart();
             } else {
-                setCheckoutError("Unable to place the order. Please try again.");
+                setCheckoutError(
+                    error.response?.data?.message
+                        || (paymentMethod === "STRIPE"
+                            ? "Unable to start Stripe payment. Please try again."
+                            : "Unable to place the order. Please try again.")
+                );
             }
 
             setProcessing(false);
@@ -246,7 +270,7 @@ const Checkout = () => {
 
                 <p className="eehook-checkout-subtitle">
 
-                    Choose Cash on Delivery or send your order through WhatsApp.
+                    Choose Stripe, Cash on Delivery, or send your order through WhatsApp.
 
                 </p>
 
@@ -380,9 +404,23 @@ const Checkout = () => {
 
                             <p>
 
-                                Online payments are temporarily unavailable. Choose Cash on Delivery or continue through WhatsApp.
+                                Pay securely with Stripe, or choose Cash on Delivery or WhatsApp.
 
                             </p>
+
+                            <label className={`eehook-payment-option ${paymentMethod === "STRIPE" ? "active" : ""}`}>
+                                <input
+                                    type="radio"
+                                    name="payment-method"
+                                    value="STRIPE"
+                                    checked={paymentMethod === "STRIPE"}
+                                    onChange={() => setPaymentMethod("STRIPE")}
+                                />
+                                <span>
+                                    <strong>Pay securely with Stripe</strong>
+                                    <small>Complete your payment on Stripe's secure checkout page.</small>
+                                </span>
+                            </label>
 
                             <label className={`eehook-payment-option ${paymentMethod === "COD" ? "active" : ""}`}>
                                 <input
@@ -622,7 +660,11 @@ const Checkout = () => {
 
                                     :
 
-                                    paymentMethod === "WHATSAPP" ? "Continue via WhatsApp" : "Place COD Order"
+                                    paymentMethod === "STRIPE"
+                                        ? "Continue to Stripe"
+                                        : paymentMethod === "WHATSAPP"
+                                            ? "Continue via WhatsApp"
+                                            : "Place COD Order"
 
                             }
 
@@ -630,7 +672,9 @@ const Checkout = () => {
 
                         <p className="eehook-payment-note">
 
-                            {paymentMethod === "WHATSAPP"
+                            {paymentMethod === "STRIPE"
+                                ? "You will be redirected to Stripe to complete your payment securely."
+                                : paymentMethod === "WHATSAPP"
                                 ? "Your order details will open in WhatsApp for confirmation."
                                 : "Payment will be collected in cash when your order is delivered."}
 
