@@ -205,13 +205,13 @@
     bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
+    width: 66%;
     background-color: #4B636D;
     color: #FFFFFF;
     border: none;
-    padding: 11px 0;
+    padding: 6px 0;
     font-family: Inter, Arial, Helvetica, sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 1.5px;
     cursor: pointer;
@@ -445,7 +445,7 @@
 @media (max-width: 768px) {
     .quick-add-bar {
         opacity: 1;
-        padding: 9px 0;
+        padding: 5px 0;
     }
 }
 
@@ -526,13 +526,13 @@
         bottom: 7px;
         left: 50%;
         transform: translateX(-50%);
-        width: 82%;
+        width: 66%;
         background-color: #4B636D;
         color: #FFFFFF;
         border: none;
-        padding: 7px 0;
+        padding: 5px 0;
         font-family: Inter, Arial, Helvetica, sans-serif;
-        font-size: 0.5rem;
+        font-size: 0.42rem;
         font-weight: 600;
         letter-spacing: 1.5px;
         cursor: pointer;
