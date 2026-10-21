@@ -21,15 +21,15 @@
   "rewrites": [
     {
     "source": "/backend/health/",
-    "destination": "https://13-50-221-204.sslip.io/health/"
+      "destination": "https://13-50-221-204.sslip.io/eehook/health/"
     },
     {
       "source": "/backend/:path*/",
-      "destination": "https://13-50-221-204.sslip.io/:path*/"
+      "destination": "https://13-50-221-204.sslip.io/eehook/:path*/"
     },
     {
       "source": "/backend/:path*",
-      "destination": "https://13-50-221-204.sslip.io/:path*"
+      "destination": "https://13-50-221-204.sslip.io/eehook/:path*"
     },
     {
       "source": "/:path((?!backend(?:/|$)).*)",
