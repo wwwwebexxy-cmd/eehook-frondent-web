@@ -50,6 +50,7 @@ function Router() {
                     </ProtectedRoute>
                 } />
 
+                <Route path="/single/:slug/:id/p" element={<Single_product />} />
                 <Route path="/single/:id" element={<Single_product />} />
 
                 <Route path="checkout" element={

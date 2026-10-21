@@ -13,6 +13,7 @@ import DirhamAmount from "../../../components/DirhamAmount";
 import { getHomepageProductPricing } from "../utils/productPricing";
 import ProductHighlightRail from "./ProductHighlightRail";
 import ProductMessageRail from "./ProductMessageRail";
+import { getProductDetailsPath } from "../../../utils/productUrl";
 
 const MAX_PRODUCTS_PER_SECTION = 16;
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
@@ -137,13 +138,14 @@ function New_Arrival_Home({
                     <div className="new-arrivals-grid">
                         {displayData.map((item) => {
                             const { variant, size } = getProductSelection(item);
+                            const productDetailsPath = getProductDetailsPath(item);
                             const isWishlisted = wishlist.some((wishlistItem) => String(wishlistItem.variant) === String(variant?.id) && String(wishlistItem.variant_size ?? "") === String(size?.id ?? ""));
                             const image = getProductImage(item);
                             const { currentPrice, originalPrice, discountPercentage, hasOffer } = getHomepageProductPricing(item, variant);
 
                             return (
                                 <article key={item.id} className="new-product-card">
-                                    <div className="image-container" onClick={() => navigate(`/single/${item.id}`)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") navigate(`/single/${item.id}`); }}>
+                                    <div className="image-container" onClick={() => navigate(productDetailsPath)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") navigate(productDetailsPath); }}>
                                         {(item.marketing_highlights?.length || hasOffer || (showNewBadge && item.is_active)) ? (
                                             <div className="product-image-topbar">
                                                 <ProductHighlightRail highlights={item.marketing_highlights} placement="badge" />
@@ -153,7 +155,7 @@ function New_Arrival_Home({
                                         ) : null}
                                         <div className="product-image-stage">
                                             <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
-                                            <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(`/single/${item.id}`); }}>VIEW PRODUCT</button>
+                                            <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(productDetailsPath); }}>VIEW PRODUCT</button>
                                         </div>
                                         <button type="button" className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`} onClick={(event) => addToWishlist(item, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}>{isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}</button>
                                     </div>

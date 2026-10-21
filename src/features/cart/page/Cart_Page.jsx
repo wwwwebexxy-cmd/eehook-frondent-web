@@ -8,6 +8,7 @@ import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 import DirhamAmount from "../../../components/DirhamAmount";
+import { getProductDetailsPath } from "../../../utils/productUrl";
 
 function Cart_page() {
 
@@ -288,7 +289,7 @@ function Cart_page() {
 
                                             onClick={() =>
                                                 navigate(
-                                                    `/single/${cart.product}`,
+                                                    getProductDetailsPath({ name: cart.name, id: cart.product }),
                                                     {
                                                         state: {
                                                             variantId: cart.variant,

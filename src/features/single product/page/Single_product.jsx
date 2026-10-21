@@ -36,6 +36,7 @@ import {
 import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
+import { getProductDetailsPath, slugifyProductName } from "../../../utils/productUrl";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -164,7 +165,7 @@ function Single_product() {
 
     const navigate = useNavigate();
 
-    const { id } = useParams();
+    const { id, slug } = useParams();
 
     const [searchParams] = useSearchParams();
 
@@ -206,6 +207,18 @@ function Single_product() {
     const couponRequestPending = useRef(false);
 
     const productId = data?.id || id;
+
+    useEffect(() => {
+        if (isLoading || error || !data?.id) return;
+
+        const canonicalPath = getProductDetailsPath(data);
+        const expectedSlug = slugifyProductName(data.name);
+        const hasCanonicalParams = String(id) === String(data.id) && slug === expectedSlug;
+        if (!hasCanonicalParams) {
+            const query = searchParams.toString();
+            navigate(`${canonicalPath}${query ? `?${query}` : ""}`, { replace: true });
+        }
+    }, [data, error, id, isLoading, navigate, searchParams, slug]);
 
     const { data: relatedProductsResponse } = useQuery({
         queryKey: ["related-products", id],
@@ -959,7 +972,7 @@ function Single_product() {
                             const relatedProductId = product?.id ?? product?.pk ?? product?.uuid;
                             const image = relatedProductImage(product);
                             return (
-                                <NavLink className="product-related-product-card" to={`/single/${relatedProductId}`} key={relatedProductId}>
+                                <NavLink className="product-related-product-card" to={getProductDetailsPath(product, relatedProductId)} key={relatedProductId}>
                                     <div className="product-related-product-image">
                                         <img src={image ? getImageUrl(image) : defaultImage} alt={product?.name || "Related product"} onError={(event) => { event.currentTarget.src = defaultImage; }} />
                                     </div>

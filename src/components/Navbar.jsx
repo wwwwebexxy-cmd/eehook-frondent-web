@@ -18,6 +18,7 @@ import Homepage_Query from "../features/home/queries/Homepage_Query.jsx";
 import Product_Query from "../features/sale/queries/Product_Query.jsx";
 import { getImageUrl } from "../utils/imageUrl.js";
 import WelcomeBonusNotifications from "../features/welcomeBonus/components/WelcomeBonusNotifications.jsx";
+import { getProductDetailsPath } from "../utils/productUrl.js";
 
 function SearchSuggestions({ products, loading, onSelect }) {
     if (loading) {
@@ -134,7 +135,7 @@ const cartLength = cart.total_items ?? 0;
 
     const selectSuggestion = (product) => {
         const productId = product?.id ?? product?.pk;
-        if (productId) navigate(`/single/${productId}`);
+        if (productId) navigate(getProductDetailsPath(product, productId));
         else goToSearch();
         setSearchOpen(false);
         setSearchText("");

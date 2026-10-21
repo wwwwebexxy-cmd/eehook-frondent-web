@@ -10,6 +10,7 @@ import defaultImage from "../../../assets/image_not_available.png";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
 import ProductHighlightRail from "../../home/components/ProductHighlightRail";
+import { getProductDetailsPath } from "../../../utils/productUrl";
 
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
 
@@ -162,7 +163,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                 const query = new URLSearchParams();
                 if (variant?.id) query.set("variant", String(variant.id));
                 if (unit?.id) query.set("size", String(unit.id));
-                navigate(`/single/${product.id}${query.toString() ? `?${query.toString()}` : ""}`);
+                navigate(`${getProductDetailsPath(product)}${query.toString() ? `?${query.toString()}` : ""}`);
             };
             const openProductWithKeyboard = (event) => {
                 if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) return;
