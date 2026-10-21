@@ -144,6 +144,13 @@
     padding: clamp(20px, 2.4vw, 34px);
 }
 
+.account-side-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: clamp(16px, 2vw, 24px);
+}
+
 .profile-card,
 .default-address-card,
 .address-card,
@@ -787,6 +794,13 @@
     margin-top: clamp(28px, 4vw, 52px);
 }
 
+.account-side-column .quick-links {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 0;
+    order: -1;
+}
+
 .quick-card {
     display: flex;
     align-items: center;
@@ -844,6 +858,10 @@
 
     .default-address-card {
         min-height: 0;
+    }
+
+    .account-side-column .quick-links {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
@@ -933,6 +951,11 @@
     .quick-links {
         grid-template-columns: minmax(0, 1fr);
         margin-top: 32px;
+    }
+
+    .account-side-column .quick-links {
+        grid-template-columns: minmax(0, 1fr);
+        margin-top: 0;
     }
 
     .modal-overlay {
