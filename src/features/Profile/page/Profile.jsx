@@ -11,7 +11,7 @@ import {
   FaSignOutAlt
 } from "react-icons/fa";
 import client, { logoutSession } from "../../../lib/ApiClient";
-import "../styles/user.css";
+import "../styles/account.css";
 import showToast from "../../../utils/toast";
 
 const Profile = () => {
@@ -237,6 +237,17 @@ const Profile = () => {
 
     }
 
+  };
+
+  const handleAddressSubmit = (event) => {
+    event.preventDefault();
+
+    if (editingId) {
+      updateAddress();
+      return;
+    }
+
+    addAddress();
   };
 
   const deleteAddress = async (id) => {
@@ -543,6 +554,7 @@ const Profile = () => {
             </div>
 
             <button
+                type="button"
                 className="change-address-btn"
                 onClick={() => editAddress(getDefaultAddress())}
             >
@@ -566,6 +578,7 @@ const Profile = () => {
             </p>
 
             <button
+                type="button"
                 className="add-address-small"
                 onClick={() => {
                     resetAddressForm();
@@ -595,6 +608,7 @@ const Profile = () => {
           </div>
 
           <button
+            type="button"
             className="add-address-btn"
             onClick={() => {
               resetAddressForm();
@@ -629,6 +643,7 @@ const Profile = () => {
               </p>
 
               <button
+                type="button"
                 className="add-first-address"
                 onClick={() => {
                   resetAddressForm();
@@ -751,168 +766,160 @@ const Profile = () => {
         </div>
 
         {showModal && (
-
           <div
             className="modal-overlay"
+            role="presentation"
             onClick={() => {
               setShowModal(false);
               resetAddressForm();
             }}
           >
-
             <div
               className="address-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="address-modal-title"
               onClick={(e) => e.stopPropagation()}
             >
-
               <div className="modal-header">
-
-                <h2>
-
-                  {editingId ?
-
-                    "Update Address"
-
-                    :
-
-                    "Add New Address"}
-
+                <h2 id="address-modal-title">
+                  {editingId ? "Update Address" : "Add New Address"}
                 </h2>
 
                 <button
+                  type="button"
                   className="close-modal"
+                  aria-label="Close address form"
                   onClick={() => {
                     setShowModal(false);
                     resetAddressForm();
                   }}
                 >
-
                   ×
-
                 </button>
-
               </div>
 
-              <div className="modal-form">
-
+              <form className="modal-form" onSubmit={handleAddressSubmit}>
                 <div className="modal-grid">
+                  <div className="modal-field">
+                    <label htmlFor="address-full-name">Full Name</label>
+                    <input
+                      id="address-full-name"
+                      type="text"
+                      name="full_name"
+                      placeholder="Enter full name"
+                      value={addressData.full_name}
+                      onChange={handleAddressChange}
+                      autoComplete="name"
+                      required
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    name="full_name"
-                    placeholder="Full Name"
-                    value={addressData.full_name}
-                    onChange={handleAddressChange}
-                    required
-                  />
+                  <div className="modal-field">
+                    <label htmlFor="address-phone">Phone Number</label>
+                    <input
+                      id="address-phone"
+                      type="tel"
+                      name="phone"
+                      placeholder="Enter phone number"
+                      value={addressData.phone}
+                      onChange={handleAddressChange}
+                      autoComplete="tel"
+                      required
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    name="phone"
-                    placeholder="Phone Number"
-                    value={addressData.phone}
-                    onChange={handleAddressChange}
-                    required
-                  />
+                  <div className="modal-field">
+                    <label htmlFor="address-city">City</label>
+                    <input
+                      id="address-city"
+                      type="text"
+                      name="city"
+                      placeholder="Enter city"
+                      value={addressData.city}
+                      onChange={handleAddressChange}
+                      autoComplete="address-level2"
+                      required
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="City"
-                    value={addressData.city}
-                    onChange={handleAddressChange}
-                    required
-                  />
+                  <div className="modal-field">
+                    <label htmlFor="address-postal-code">Postal Code</label>
+                    <input
+                      id="address-postal-code"
+                      type="text"
+                      name="postal_code"
+                      placeholder="Enter postal code"
+                      value={addressData.postal_code}
+                      onChange={handleAddressChange}
+                      autoComplete="postal-code"
+                      required
+                    />
+                  </div>
 
-                  
+                  <div className="modal-field modal-field--wide">
+                    <label htmlFor="address-country">Country</label>
+                    <input
+                      id="address-country"
+                      type="text"
+                      name="country"
+                      placeholder="Enter country"
+                      value={addressData.country}
+                      onChange={handleAddressChange}
+                      autoComplete="country-name"
+                      required
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    name="postal_code"
-                    placeholder="Postal Code"
-                    value={addressData.postal_code}
-                    onChange={handleAddressChange}
-                    required
-                  />
-
-                  <input
-                    type="text"
-                    name="country"
-                    placeholder="Country"
-                    value={addressData.country}
-                    onChange={handleAddressChange}
-                    required
-                  />
-
+                  <div className="modal-field modal-field--wide">
+                    <label htmlFor="address-line">Street Address</label>
+                    <textarea
+                      id="address-line"
+                      name="address_line"
+                      placeholder="House number, street, area"
+                      value={addressData.address_line}
+                      onChange={handleAddressChange}
+                      autoComplete="street-address"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <textarea
-                  name="address_line"
-                  placeholder="Street Address"
-                  value={addressData.address_line}
-                  onChange={handleAddressChange}
-                  required
-                />
-
                 <label className="default-check">
-
                   <input
                     type="checkbox"
                     name="is_default"
                     checked={addressData.is_default}
                     onChange={handleAddressChange}
-                    required
                   />
-
                   Set as Default Address
-
                 </label>
 
                 <div className="modal-actions">
-
                   <button
+                    type="button"
                     className="cancel-btn"
                     onClick={() => {
                       setShowModal(false);
                       resetAddressForm();
                     }}
                   >
-
                     Cancel
-
                   </button>
 
-                  <button
-                    className="save-btn"
-                    onClick={() =>
-                      editingId
-                        ? updateAddress()
-                        : addAddress()
-                    }
-                  >
-
-                    {editingId ?
-
-                      "Update Address"
-
-                      :
-
-                      "Save Address"}
-
+                  <button type="submit" className="save-btn">
+                    {editingId ? "Update Address" : "Save Address"}
                   </button>
-
                 </div>
-
-              </div>
-
+              </form>
             </div>
-
           </div>
-
         )}
         <div className="quick-links">
 
-          <div className="quick-card"
+          <button
+            type="button"
+            className="quick-card"
             onClick={() => navigate("/myorders")}
           >
 
@@ -938,9 +945,11 @@ const Profile = () => {
 
             </div>
 
-          </div>
+          </button>
 
-          <div className="quick-card"
+          <button
+            type="button"
+            className="quick-card"
             onClick={() => navigate("/wishlist")}
           >
 
@@ -966,9 +975,10 @@ const Profile = () => {
 
             </div>
 
-          </div>
+          </button>
 
-          <div
+          <button
+            type="button"
             className="quick-card logout-card"
             onClick={logout}
           >
@@ -995,7 +1005,7 @@ const Profile = () => {
 
             </div>
 
-          </div>
+          </button>
 
         </div>
 
