@@ -21,15 +21,15 @@
   "rewrites": [
     {
     "source": "/backend/health/",
-    "destination": "https://16.16.204.58/health/"
+    "destination": "https://13-50-221-204.sslip.io/health/"
     },
     {
       "source": "/backend/:path*/",
-      "destination": "https://16.16.204.58/:path*/"
+      "destination": "https://13-50-221-204.sslip.io/:path*/"
     },
     {
       "source": "/backend/:path*",
-      "destination": "https://16.16.204.58/:path*"
+      "destination": "https://13-50-221-204.sslip.io/:path*"
     },
     {
       "source": "/:path((?!backend(?:/|$)).*)",
