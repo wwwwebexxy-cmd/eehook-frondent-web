@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../styles/Myorders.css";
 import { getImageUrl } from "../../../utils/imageUrl";
 import DirhamAmount from "../../../components/DirhamAmount";
+import { getProductDetailsPath } from "../../../utils/productUrl";
 
 const MyOrders = () => {
 
@@ -274,9 +276,14 @@ const MyOrders = () => {
 
                                 {order.items?.map((item) => (
 
-                                    <div
+                                    <Link
                                         className="order-product"
                                         key={item.id}
+                                        to={getProductDetailsPath({
+                                            name: item.product_name,
+                                            id: item.product,
+                                        })}
+                                        aria-label={`View ${item.product_name || "product"} details`}
                                     >
 
                                         <div className="order-product-image">
@@ -348,7 +355,7 @@ const MyOrders = () => {
 
                                         </div>
 
-                                    </div>
+                                    </Link>
 
                                 ))}
 
