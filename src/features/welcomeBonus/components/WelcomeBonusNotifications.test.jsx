@@ -68,4 +68,26 @@ describe("Welcome Bonus notifications", () => {
         expect(document.body.textContent).not.toContain("PRIVATE-WELCOME-CODE");
         expect(JSON.stringify(localStorage)).not.toContain("PRIVATE-WELCOME-CODE");
     });
+
+    it("keeps the notification count badge when an existing notification is already read", async () => {
+        payload = {
+            unread_count: 0,
+            notifications: [{ ...payload.notifications[0], is_read: true, can_claim: false }],
+        };
+        render(<WelcomeBonusNotifications />);
+        expect(await screen.findByLabelText("Notifications, 1 notification")).toBeVisible();
+        expect(screen.getByText("1")).toBeVisible();
+    });
+
+    it("clears an expired notification when the server removes it on refresh", async () => {
+        mocks.get.mockReset();
+        mocks.get.mockImplementationOnce(response).mockResolvedValueOnce({ data: { unread_count: 0, notifications: [] } });
+        render(<WelcomeBonusNotifications />);
+
+        expect(await screen.findByLabelText("Notifications, 1 unread")).toBeVisible();
+        window.dispatchEvent(new Event("focus"));
+
+        await waitFor(() => expect(screen.getByLabelText("Notifications")).toBeVisible());
+        expect(screen.queryByText("1")).not.toBeInTheDocument();
+    });
 });

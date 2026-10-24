@@ -11,6 +11,7 @@ import { hasAuthSession } from "../../auth/authUtils";
 import "../styles/WelcomeBonusNotifications.css";
 
 const MASKED_CODE = "••••••••••••••••";
+const NOTIFICATION_REFRESH_INTERVAL_MS = 60_000;
 
 function isAuthenticated() {
     return hasAuthSession();
@@ -63,7 +64,18 @@ export default function WelcomeBonusNotifications({ mobile = false }) {
 
     useEffect(() => {
         const timer = window.setTimeout(() => { void refresh(); }, 0);
-        return () => window.clearTimeout(timer);
+        const refreshWhenVisible = () => {
+            if (!document.hidden) void refresh();
+        };
+        const interval = window.setInterval(refreshWhenVisible, NOTIFICATION_REFRESH_INTERVAL_MS);
+        window.addEventListener("focus", refreshWhenVisible);
+        document.addEventListener("visibilitychange", refreshWhenVisible);
+        return () => {
+            window.clearTimeout(timer);
+            window.clearInterval(interval);
+            window.removeEventListener("focus", refreshWhenVisible);
+            document.removeEventListener("visibilitychange", refreshWhenVisible);
+        };
     }, []);
 
     useEffect(() => {
@@ -129,18 +141,25 @@ export default function WelcomeBonusNotifications({ mobile = false }) {
         }
     };
 
+    const notificationCount = notifications.length;
+    const notificationAriaLabel = unreadCount > 0
+        ? `Notifications, ${unreadCount} unread`
+        : notificationCount > 0
+            ? `Notifications, ${notificationCount} notification${notificationCount === 1 ? "" : "s"}`
+            : "Notifications";
+
     return <div className={`welcome-bonus-notifications ${mobile ? "welcome-bonus-notifications-mobile" : ""}`}>
         <button
             type="button"
             ref={triggerRef}
             className="notification-bell"
             onClick={openPanel}
-            aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+            aria-label={notificationAriaLabel}
             aria-expanded={open}
             aria-haspopup="dialog"
         >
             <FiBell aria-hidden="true" />
-            {unreadCount > 0 && <span className="notification-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+            {notificationCount > 0 && <span className="notification-badge">{notificationCount > 99 ? "99+" : notificationCount}</span>}
         </button>
         {open && <section className="notification-panel" ref={panelRef} role="dialog" aria-label="Welcome Bonus notifications">
             <header className="notification-panel-header"><div><strong>Notifications</strong><span>{unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}` : "All caught up"}</span></div><button type="button" onClick={() => setOpen(false)} aria-label="Close notifications"><FiX /></button></header>
