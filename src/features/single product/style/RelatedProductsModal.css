@@ -19,7 +19,7 @@
 .related-product-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 10px 0 0; color: #536269; font-size: 13px; }
 .related-product-price strong { color: #111; font-size: 17px; }
 .related-product-price s { color: #6d7476; }
-.related-product-price span { color: #b12704; font-weight: 600; }
+.related-product-price .related-product-savings { flex-basis: 100%; color: #b12704; font-size: 10px; font-weight: 700; line-height: 1.1; }
 .related-option-field { display: grid; gap: 5px; max-width: 280px; margin-top: 12px; color: #384c53; font-size: 12px; font-weight: 600; }
 .related-option-field select { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid #b7c7cb; border-radius: 6px; background: #fff; color: #182b31; font: inherit; }
 .related-option-field select:focus-visible, .related-products-modal button:focus-visible, .related-product-check:focus-within { outline: 3px solid rgba(0, 113, 133, .28); outline-offset: 2px; }

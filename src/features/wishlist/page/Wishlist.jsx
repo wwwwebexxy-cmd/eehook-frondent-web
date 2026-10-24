@@ -111,6 +111,8 @@ export default function Wishlist() {
 
                                         <div className="wishlist-price-box">
 
+                                            {Number(item.discount_percentage) > 0 && <span className="wishlist-price-savings">Save {item.discount_percentage}%</span>}
+
                                             <span className="wishlist-old-price">
                                                 <DirhamAmount value={item.original_price} />
                                             </span>

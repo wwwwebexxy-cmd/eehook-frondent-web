@@ -168,6 +168,7 @@ function New_Arrival_Home({
                                         <ProductMessageRail messages={item.product_messages} />
                                         <div className="product-meta">
                                             <div className="price-area">
+                                                {hasOffer && discountPercentage > 0 && <span className="price-savings">Save {discountPercentage}%</span>}
                                                 {originalPrice !== null && <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>}
                                                 <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>

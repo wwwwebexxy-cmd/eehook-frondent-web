@@ -291,6 +291,13 @@ body {
     gap:3px;
 }
 
+.wishlist-price-savings{
+    color:#cc0c39;
+    font-size:10px;
+    font-weight:700;
+    line-height:1.1;
+}
+
 .wishlist-old-price{
     font-size:14px;
     color:#888;

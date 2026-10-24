@@ -405,6 +405,16 @@
     gap: 4px;
 }
 
+.price-savings {
+    display: block;
+    color: #cc0c39;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: .2px;
+}
+
 .old-price {
     font-family: Inter, Arial, Helvetica, sans-serif;
     color: #8a8a8a;

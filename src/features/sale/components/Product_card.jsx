@@ -157,6 +157,9 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
             const variantLabel = getVariantLabel(variant);
             const displayPrice = hasOffer && hasValue(discountedPrice) ? discountedPrice : currentPrice;
             const showOriginalPrice = hasOffer && hasValue(originalPrice) && hasValue(displayPrice) && String(originalPrice) !== String(displayPrice);
+            const savingsPercentage = showOriginalPrice
+                ? Math.round(((Number(originalPrice) - Number(displayPrice)) / Number(originalPrice)) * 100)
+                : 0;
             const availability = getAvailability(product, variant, unit);
 
             const openProduct = () => {
@@ -200,6 +203,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                     {variantLabel && <span className="product-variant-label">Color: {variantLabel}</span>}
                     <div className="product-footer">
                         <div className="price-box">
+                            {savingsPercentage > 0 && <span className="price-savings">Save {savingsPercentage}%</span>}
                             {showOriginalPrice ? (
                                 <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>
                             ) : null}

@@ -94,6 +94,13 @@ function getProductHeading(name, storageLabel, colorLabel) {
     return heading;
 }
 
+function getSavingsPercentage(originalPrice, currentPrice) {
+    const original = Number(originalPrice);
+    const current = Number(currentPrice);
+    if (!Number.isFinite(original) || !Number.isFinite(current) || original <= 0 || current >= original) return 0;
+    return Math.round(((original - current) / original) * 100);
+}
+
 function ExpandableProductContent({ children, className = "" }) {
     const contentRef = useRef(null);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -483,6 +490,13 @@ function Single_product() {
                 (item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id)
         );
 
+    const selectedPriceInfo = selectedVariant?.price_type === 'single'
+        ? selectedVariant
+        : (selectedSizeVariant || availableSizes?.[0]);
+    const selectedCurrentPrice = Number(selectedPriceInfo?.discounted_price ?? selectedPriceInfo?.price ?? 0);
+    const selectedOriginalPrice = Number(selectedPriceInfo?.price ?? 0);
+    const selectedSavingsPercentage = getSavingsPercentage(selectedOriginalPrice, selectedCurrentPrice);
+
     const selectedStorage = selectedSizeVariant?.unit
         || selectedSizeVariant?.size
         || selectedSize
@@ -815,9 +829,11 @@ function Single_product() {
                             // Product and cart prices are backend-owned. Coupon validation only
                             // updates the applied state; it must not change this price locally.
                             const finalPrice = currentPrice;
+                            const discountPercentage = getSavingsPercentage(originalPrice, finalPrice);
 
                             return (
                                 <div>
+                                    {discountPercentage > 0 && <span className="price-savings single-product-price-savings">Save {discountPercentage}%</span>}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
                                             <DirhamAmount value={finalPrice} />
@@ -826,9 +842,6 @@ function Single_product() {
                                             <>
                                                 <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
                                                     <DirhamAmount value={originalPrice} />
-                                                </span>
-                                                <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                                                    Save <DirhamAmount value={originalPrice - finalPrice} />
                                                 </span>
                                             </>
                                         )}
@@ -901,7 +914,8 @@ function Single_product() {
                     </div>
 
                     <div className="price-right-section" style={{ marginBottom: '15px' }}>
-                        <span className="price-value"><DirhamAmount value={Number(selectedVariant?.price_type === 'single' ? (selectedVariant?.discounted_price || selectedVariant?.price || 0) : ((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0))} /></span>
+                        {selectedSavingsPercentage > 0 && <span className="price-savings single-product-price-savings">Save {selectedSavingsPercentage}%</span>}
+                        <span className="price-value"><DirhamAmount value={selectedCurrentPrice} /></span>
                     </div>
 
                     <div className="stock-status">

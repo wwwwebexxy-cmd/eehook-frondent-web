@@ -581,6 +581,14 @@
     gap:2px;
 }
 
+.price-area .price-savings {
+    color: #cc0c39;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: .2px;
+}
+
 .price-area .old-price{
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-size:13px;
