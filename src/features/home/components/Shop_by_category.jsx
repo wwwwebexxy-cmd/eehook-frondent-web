@@ -149,6 +149,32 @@ function Shop_by_category({ categories: providedCategories }) {
         }
     }, [categories]);
 
+    useEffect(() => {
+        const container = categorySliderRef.current;
+        if (!container || categoryItems.length < 2) return undefined;
+
+        let animationFrame;
+        let previousTime;
+        const pixelsPerSecond = 24;
+
+        const moveCategories = (time) => {
+            if (previousTime === undefined) previousTime = time;
+            const elapsed = Math.min(time - previousTime, 50);
+            previousTime = time;
+
+            container.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
+            const loopPoint = container.scrollWidth / 2;
+            if (loopPoint > 0 && container.scrollLeft >= loopPoint) {
+                container.scrollLeft -= loopPoint;
+            }
+
+            animationFrame = window.requestAnimationFrame(moveCategories);
+        };
+
+        animationFrame = window.requestAnimationFrame(moveCategories);
+        return () => window.cancelAnimationFrame(animationFrame);
+    }, [categoryItems.length]);
+
 
     useEffect(() => {
         checkSubCategoryScroll();
@@ -261,10 +287,10 @@ function Shop_by_category({ categories: providedCategories }) {
                     ref={categorySliderRef}
                 >
 
-                    {categoryItems.map((item) => (
+                    {(categoryItems.length > 1 ? [...categoryItems, ...categoryItems] : categoryItems).map((item, index) => (
 
                         <div
-                            key={item.id}
+                            key={`${item.id}-${index}`}
                             className={
                                 `
                             category-card
