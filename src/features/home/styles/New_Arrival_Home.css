@@ -247,13 +247,13 @@
 
     position: absolute;
 
-    right: 15px;
+    right: 10px;
 
-    top: 15px;
+    top: 10px;
 
-    width: 35px;
+    width: 30px;
 
-    height: 35px;
+    height: 30px;
 
     border-radius: 50%;
 
@@ -276,7 +276,7 @@
 
 .heart-icon {
 
-    width: 18px;
+    width: 16px;
 
     color: #4B636D;
 
@@ -438,6 +438,14 @@
 .product-image-topbar .badge-new {
     position: static;
     margin: 0;
+}
+
+.product-image-topbar .badge-offer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .product-highlight-icon {
