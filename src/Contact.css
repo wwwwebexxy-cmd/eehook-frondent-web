@@ -84,17 +84,17 @@
     min-width: 0;
     background: #F8F9F3;
     border-radius: 20px;
-    padding: 50px;
+    padding: 34px 38px;
     box-shadow: 0 12px 35px rgba(0,0,0,.06);
 }
 
 .input-group {
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 7px;
     color: #4B636D;
     font-weight: 500;
 }
@@ -119,6 +119,7 @@
 
 .input-group textarea {
     resize: none;
+    height: 118px;
 }
 
 .input-group input:focus,
@@ -135,7 +136,7 @@
 .whatsapp-btn {
 
     width: 100%;
-    padding: 18px;
+    padding: 14px;
 
     border: none;
     border-radius: 12px;
@@ -206,7 +207,7 @@ padding:100px 20px;
 
 .contact-form{
 
-padding:30px 20px;
+    padding:24px 20px;
 
 }
 
