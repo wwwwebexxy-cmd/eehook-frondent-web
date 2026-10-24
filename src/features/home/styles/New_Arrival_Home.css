@@ -586,6 +586,9 @@
     font-size:13px;
     color:#888;
     text-decoration:line-through;
+    text-decoration-thickness: 1.5px;
+    text-decoration-color: currentColor;
+    text-decoration-skip-ink: none;
     font-weight:500;
 }
 
