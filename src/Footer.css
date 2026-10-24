@@ -149,7 +149,8 @@
 @media(max-width:768px) {
 
     .footer {
-        padding: 24px 14px 18px;
+        /* Keep the last footer row clear of the fixed mobile navigation. */
+        padding: 24px 14px calc(18px + 70px);
     }
 
     .footer-container {
@@ -198,6 +199,25 @@
         justify-content: flex-end;
     }
 
+    .footer-column.payment {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding-top: 2px;
+    }
+
+    .footer-column.payment .payment-options {
+        justify-content: center;
+    }
+
+    .payment-options span {
+        padding: 5px 9px;
+        font-size: 11px;
+    }
+
+    .copyright {
+        margin-bottom: 70px;
+    }
+
     .footer-column a {
         gap: 5px;
     }
@@ -213,7 +233,7 @@
     }
 
     .footer {
-        padding: 20px 12px 14px;
+        padding: 20px 12px calc(14px + 70px);
     }
 
     .footer-column.brand {
@@ -250,7 +270,7 @@
 
 @media(max-width:320px) {
     .footer {
-        padding: 18px 9px 12px;
+        padding: 18px 9px calc(12px + 70px);
     }
 
     .footer-container {
