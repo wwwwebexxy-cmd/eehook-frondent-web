@@ -1083,3 +1083,250 @@
         transition: none;
     }
 }
+
+/* Minimal account refinement */
+
+.profile-page {
+    --account-shadow: none;
+    padding-top: clamp(96px, 7vw, 112px);
+    padding-bottom: clamp(92px, 7vw, 120px);
+}
+
+.profile-banner {
+    min-height: 0;
+    margin-bottom: 28px;
+    padding: 0 0 22px;
+    border-bottom: 1px solid var(--account-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--account-ink);
+}
+
+.profile-banner::before,
+.profile-banner::after {
+    display: none;
+}
+
+.profile-avatar {
+    width: 58px;
+    height: 58px;
+    border: 1px solid var(--account-border);
+    background: var(--account-orange-soft);
+    color: var(--account-orange-dark);
+    font-size: 24px;
+    box-shadow: none;
+}
+
+.profile-banner h1 {
+    color: var(--account-ink);
+    font-size: clamp(24px, 2.6vw, 32px);
+}
+
+.profile-banner p {
+    margin-top: 5px;
+    color: var(--account-muted);
+    font-size: 13px;
+}
+
+.profile-banner strong {
+    color: var(--account-ink);
+}
+
+.profile-top-grid {
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.profile-card,
+.default-address-card,
+.address-card,
+.quick-card {
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.profile-card:hover,
+.default-address-card:hover,
+.address-card:hover,
+.quick-card:hover {
+    box-shadow: 0 8px 20px rgba(48, 74, 84, 0.06);
+    transform: none;
+}
+
+.profile-card,
+.default-address-card {
+    padding: 22px;
+}
+
+.profile-card > .card-title {
+    margin-bottom: 20px;
+}
+
+.card-title {
+    gap: 9px;
+}
+
+.card-title svg,
+.title-icon {
+    font-size: 20px;
+}
+
+.card-title h3 {
+    font-size: 18px;
+}
+
+.profile-form {
+    gap: 14px;
+}
+
+.input-group label,
+.modal-field label {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.input-group input,
+.input-group select {
+    height: 44px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.save-profile-btn,
+.add-address-btn,
+.change-address-btn,
+.add-address-small,
+.add-first-address,
+.edit-address-btn,
+.delete-address-btn,
+.cancel-btn,
+.save-btn {
+    border-radius: 8px;
+}
+
+.save-profile-btn {
+    min-height: 44px;
+    font-size: 13px;
+}
+
+.default-address {
+    gap: 16px;
+    padding-top: 18px;
+}
+
+.address-header {
+    margin-bottom: 16px;
+}
+
+.address-title h2 {
+    font-size: clamp(21px, 2.3vw, 28px);
+}
+
+.address-title p {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.add-address-btn {
+    min-height: 42px;
+    padding: 0 15px;
+    font-size: 12px;
+}
+
+.address-grid {
+    gap: 14px;
+}
+
+.address-card {
+    min-height: 0;
+    padding: 18px;
+}
+
+.address-card-top {
+    margin-bottom: 14px;
+}
+
+.address-body {
+    margin-bottom: 18px;
+}
+
+.address-buttons {
+    gap: 8px;
+}
+
+.edit-address-btn,
+.delete-address-btn {
+    min-height: 38px;
+    font-size: 11px;
+}
+
+.quick-links {
+    gap: 10px;
+    margin-top: 28px;
+}
+
+.account-side-column .quick-links {
+    gap: 10px;
+}
+
+.quick-card {
+    min-height: 76px;
+    padding: 14px;
+    gap: 12px;
+}
+
+.quick-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+.quick-card h3 {
+    font-size: 14px;
+}
+
+.quick-card p {
+    margin-top: 3px;
+    font-size: 11px;
+}
+
+@media (max-width: 640px) {
+    .profile-page {
+        padding: 90px 12px 104px;
+    }
+
+    .profile-banner {
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+    }
+
+    .profile-avatar {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+    }
+
+    .profile-banner h1 {
+        font-size: 23px;
+    }
+
+    .profile-card,
+    .default-address-card {
+        padding: 18px;
+    }
+
+    .card-title h3 {
+        font-size: 17px;
+    }
+
+    .address-header {
+        gap: 10px;
+    }
+
+    .quick-card {
+        min-height: 68px;
+        padding: 12px;
+    }
+}
