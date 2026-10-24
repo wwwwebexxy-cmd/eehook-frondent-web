@@ -32,7 +32,7 @@ const resources = {
     users: { label: "Users", group: "Customers", fields: ["email", "password", "first_name", "last_name", "role", "is_staff", "is_active"], columns: ["email", "first_name", "last_name", "role", "last_login", "is_active"] },
     categories: { label: "Categories", group: "Catalog", fields: ["name", "image", "is_active"], columns: ["name", "image", "is_active"] },
     subcategories: { label: "Subcategories", group: "Catalog", fields: ["category", "name", "image", "is_active"], columns: ["id", "category", "name", "image", "is_active"] },
-    offers: { label: "Offers", group: "Catalog", fields: ["title", "description", "image", "discount_percentage", "start_date", "end_date", "is_active"], columns: ["title", "discount_percentage", "start_date", "end_date", "is_active"] },
+    offers: { label: "Offers", group: "Catalog", fields: ["title", "description", "image", "discount_type", "discount_percentage", "fixed_amount", "start_date", "end_date", "is_active"], columns: ["title", "discount_type", "discount_value", "start_date", "end_date", "is_active"] },
     brands: { label: "Brands", itemLabel: "Brand", group: "Catalog", fields: ["name"], columns: ["name"] },
     colors: { label: "Colors", group: "Catalog", fields: ["name", "code"], columns: ["name", "code"] },
     "unit-types": { label: "Unit Types", group: "Catalog", fields: ["name"], columns: ["name"] },
@@ -87,8 +87,29 @@ const columnLabel = (resource, key) => ({
     orders: { customer_name: "Customer" },
 }[resource]?.[key] || titleize(key));
 const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
+const normalizeOfferFields = (fields) => fields.map((field) => {
+    const name = field.name || field.key;
+    if (name === "discount_type") return { ...field, type: "choice", required: true, label: "Discount type", choices: [["PERCENTAGE", "Percentage"], ["FIXED", "Price / Fixed amount"]] };
+    if (name === "discount_percentage") return { ...field, type: "number", required: true, label: "Discount percentage (%)", min: 0.01, max: 100, step: 0.01 };
+    if (name === "fixed_amount") return { ...field, type: "number", required: true, label: "Discount price", min: 0.01, step: 0.01 };
+    if (name === "start_date") return { ...field, type: "date", label: "Start date" };
+    if (name === "end_date") return { ...field, type: "date", label: "Expiry date" };
+    return field;
+});
+const visibleResourceFields = (fields, resource, values) => resource !== "offers"
+    ? fields
+    : fields.filter((field) => {
+        const name = field.name || field.key;
+        const discountType = String(values?.discount_type || "PERCENTAGE").toUpperCase();
+        return name !== "discount_percentage" || discountType !== "FIXED";
+    }).filter((field) => {
+        const name = field.name || field.key;
+        const discountType = String(values?.discount_type || "PERCENTAGE").toUpperCase();
+        return name !== "fixed_amount" || discountType === "FIXED";
+    });
 const resourceFallbackFields = (resource, fieldNames) => {
     const fields = fallbackFields(resource, fieldNames);
+    if (resource === "offers") return normalizeOfferFields(fields);
     if (["product-highlights", "product-messages"].includes(resource)) {
         return fields.map((field) => field.name === "background_color" ? { ...field, type: "color", label: "Background color" } : field.name === "text_color" ? { ...field, type: "color", label: "Font color" } : field);
     }
@@ -164,6 +185,7 @@ function fieldsFromSchema(schema, resource) {
             return field;
         });
     }
+    if (resource === "offers") return normalizeOfferFields(fields);
     return fields;
 }
 
@@ -480,7 +502,14 @@ function ResourcePage({ resource, schema }) {
             return resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences);
         },
     }));
-    const columns = resource === "coupons" ? [
+    const columns = resource === "offers" ? [
+        { key: "title", label: "Title", render: (row) => row?.title || "—" },
+        { key: "discount_type", label: "Discount type", render: (row) => String(row?.discount_type || "PERCENTAGE").toUpperCase() === "FIXED" ? "Price / Fixed amount" : "Percentage" },
+        { key: "discount_value", label: "Discount", render: (row) => couponDiscount(row) },
+        { key: "start_date", label: "Start Date", render: (row) => date(row?.start_date) },
+        { key: "end_date", label: "Expiry Date", render: (row) => date(row?.end_date) },
+        { key: "is_active", label: "Status", render: (row) => <StatusPill value={row?.is_active ? "Active" : "Inactive"} /> },
+    ] : resource === "coupons" ? [
         { key: "copy", label: "Copy", render: (row) => <button type="button" className="table-copy-button" title="Copy coupon code" onClick={async () => { if (!row?.code) return; try { await navigator.clipboard.writeText(row.code); toast.success("Coupon code copied"); } catch { toast.error("Could not copy coupon code"); } }}><FiCopy /> Copy</button> },
         { key: "code", label: "Coupon Code", render: (row) => row?.code || "—" },
         { key: "applicability_type", label: "Apply To", render: (row) => couponApplyTo(row) },
@@ -575,13 +604,14 @@ function ResourceEditorPage({ resource, id, schema }) {
     const config = resources[resource];
     const navigate = useNavigate();
     const editing = Boolean(id);
-    const [values, setValues] = useState(() => resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {});
+    const [values, setValues] = useState(() => resource === "offers" ? { discount_type: "PERCENTAGE", is_active: true } : resource === "trust-benefits" ? { display_order: 1, is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {});
     const [references, setReferences] = useState({});
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const fallback = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
     const errors = useFormErrors(requestError);
+    const visibleFallback = visibleResourceFields(fallback, resource, values);
     useEffect(() => {
         let active = true;
         if (!editing) return () => { active = false; };
@@ -596,7 +626,14 @@ function ResourceEditorPage({ resource, id, schema }) {
         Promise.all(names.map((name) => listResource(name, { page_size: 500 }).then((response) => [name, unwrapReferenceRows(response.data)]).catch(() => [name, []]))).then((entries) => { if (active) setReferences(Object.fromEntries(entries)); });
         return () => { active = false; };
     }, [fallback]);
-    const setValue = (name, value) => setValues((current) => ({ ...current, [name]: value }));
+    const setValue = (name, value) => setValues((current) => {
+        if (resource !== "offers" || name !== "discount_type") return { ...current, [name]: value };
+        return {
+            ...current,
+            discount_type: value,
+            ...(String(value).toUpperCase() === "FIXED" ? { discount_percentage: "" } : { fixed_amount: "" }),
+        };
+    });
     const save = async (event) => {
         event.preventDefault();
         setSaving(true);
@@ -614,7 +651,7 @@ function ResourceEditorPage({ resource, id, schema }) {
         } finally { setSaving(false); }
     };
     if (loading) return <div className="admin-page"><LoadingState label="Loading record editor..." /></div>;
-    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${itemLabel(resource)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${itemLabel(resource)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{visibleFallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
 }
 
 function OrderEditPage({ id }) {
@@ -691,12 +728,13 @@ function OrderEditPage({ id }) {
 
 function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
     const config = resources[resource];
-    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
+    const [values, setValues] = useState(() => normalizeResourceValues({ ...(resource === "offers" ? { discount_type: "PERCENTAGE", is_active: true } : resource === "product-highlights" ? { highlight_type: "message", icon_key: "tag", background_color: "#1B4D44", text_color: "#FFFFFF", display_order: 0, rotation_seconds: 4, is_active: true } : resource === "product-messages" ? { message_type: "text", background_color: "#EAF4FF", text_color: "#173B35", display_order: 0, rotation_seconds: 4, is_active: true } : {}), ...(row || {}), ...initialValues }, resource));
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
     const [productMode, setProductMode] = useState(row?.product_type || (row?.has_variants ? "multiple" : "single"));
-    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "date" }; return field; }) : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const visibleFallback = visibleResourceFields(fallback, resource, values);
     const errors = useFormErrors(requestError);
     const readOnly = mode === "view";
     useEffect(() => {
@@ -721,7 +759,14 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
         if (!referenceNames.length) return;
         Promise.all(referenceNames.map((name) => listResource(name, { page_size: 100 })).map((request, index) => request.then((response) => [referenceNames[index], unwrapReferenceRows(response.data)]).catch(() => [referenceNames[index], []]))).then((entries) => setReferences(Object.fromEntries(entries)));
     }, [fallback, resource]);
-    const setValue = (name, value) => setValues((current) => ({ ...current, [name]: value }));
+    const setValue = (name, value) => setValues((current) => {
+        if (resource !== "offers" || name !== "discount_type") return { ...current, [name]: value };
+        return {
+            ...current,
+            discount_type: value,
+            ...(String(value).toUpperCase() === "FIXED" ? { discount_percentage: "" } : { fixed_amount: "" }),
+        };
+    });
     const submit = async (event) => {
         event.preventDefault();
         if (readOnly) return onClose();
@@ -754,7 +799,7 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
             setSaving(false);
         }
     };
-    return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${itemLabel(resource)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use the dedicated product editor to manage variants and images.</small></fieldset>}<div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form></div></Modal>;
+    return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${itemLabel(resource)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use the dedicated product editor to manage variants and images.</small></fieldset>}<div className="admin-form-grid">{visibleFallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form></div></Modal>;
 }
 
 async function validateUniqueUnit(resource, values, row) {
