@@ -1,0 +1,71 @@
+/* Keep every multiple-price field visible at desktop, laptop, and mobile widths. */
+.editor-unit-row {
+    grid-template-columns:
+        minmax(110px, 1fr)
+        minmax(110px, 1fr)
+        minmax(140px, 1.2fr)
+        minmax(100px, .8fr)
+        minmax(100px, .8fr)
+        38px;
+    min-width: 0;
+}
+
+.editor-unit-row > *,
+.unit-editor-row > * {
+    min-width: 0;
+}
+
+.editor-unit-row > .product-error {
+    grid-column: 1 / -1;
+}
+
+.unit-editor-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) 38px;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .editor-unit-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .unit-editor-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .unit-editor-row .table-icon {
+        grid-column: 2;
+        justify-self: end;
+    }
+}
+
+@media (max-width: 760px) {
+    .editor-unit-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .editor-unit-row > .product-error {
+        grid-column: 1 / -1;
+    }
+
+    .unit-editor-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
+    .editor-unit-row,
+    .unit-editor-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .editor-unit-row > .product-error {
+        grid-column: 1;
+    }
+
+    .editor-unit-row > .table-icon,
+    .unit-editor-row .table-icon {
+        grid-column: 1;
+        justify-self: start;
+    }
+}

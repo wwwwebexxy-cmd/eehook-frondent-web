@@ -6,6 +6,7 @@ import { ConfirmDialog, EmptyState, LoadingState, StatusPill } from "../componen
 import { createResource, deleteResource, flattenApiErrors, getErrorMessage, getResource, listResource, setPrimaryResource, updateResource } from "../services/adminApi";
 import { getImageUrl } from "../../../utils/imageUrl";
 import "../styles/ProductEditor.css";
+import "../styles/VariantResponsive.css";
 
 const emptyProduct = {
     name: "", description: "", key_features: "", category: "", subcategory: "", brand: "", offer: "",

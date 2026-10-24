@@ -26,6 +26,7 @@ import DirhamAmount from "../../../components/DirhamAmount";
 import "../styles/AdminDashboard.css";
 import "../styles/LogoutTheme.css";
 import "../styles/AdminPolish.css";
+import "../styles/VariantResponsive.css";
 
 const resources = {
     users: { label: "Users", group: "Customers", fields: ["email", "password", "first_name", "last_name", "role", "is_staff", "is_active"], columns: ["email", "first_name", "last_name", "role", "last_login", "is_active"] },
