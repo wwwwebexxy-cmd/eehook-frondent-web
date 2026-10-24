@@ -395,7 +395,7 @@
 }
 
 .top-promo-carousel {
-    height: clamp(64px, 12vw, 92px);
+    height: auto;
     min-height: 0;
     margin: 0;
 }
@@ -464,7 +464,7 @@
 }
 
 .top-promo-carousel {
-    height: clamp(68px, 20vw, 92px);
+    height: auto;
     min-height: 0;
 }
 
@@ -506,7 +506,7 @@
 @media(max-width:320px){
 
 .top-promo-carousel {
-    height: clamp(64px, 21vw, 72px);
+    height: auto;
     min-height: 0;
 }
 
