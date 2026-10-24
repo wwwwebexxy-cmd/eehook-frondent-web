@@ -6,8 +6,10 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getProductDetailsPath } from "../../../utils/productUrl";
 import showToast from "../../../utils/toast";
+import { FiDownload } from "react-icons/fi";
 
 const formatOrderNumber = (id) => `EHK26/${String(id).padStart(4, "0")}`;
+const isPaidOrder = (order) => String(order?.payment_status || "").toLowerCase() === "paid";
 
 const MyOrders = () => {
 
@@ -406,14 +408,17 @@ const MyOrders = () => {
 
                                 </div>
 
-                                {order.payment_status === "Paid" && (
+                                {isPaidOrder(order) && (
                                     <button
                                         type="button"
                                         className="order-invoice-button"
                                         onClick={() => downloadInvoice(order.id)}
                                         disabled={downloadingInvoice === order.id}
+                                        aria-label={`Download invoice for ${formatOrderNumber(order.id)}`}
+                                        title="Download invoice"
                                     >
-                                        {downloadingInvoice === order.id ? "Preparing..." : "Invoice PDF"}
+                                        <FiDownload aria-hidden="true" />
+                                        {downloadingInvoice === order.id ? "Preparing..." : "Download invoice"}
                                     </button>
                                 )}
 

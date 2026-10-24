@@ -349,13 +349,25 @@
 
 .order-invoice-button{
     flex:0 0 auto;
-    padding:8px 10px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    min-height:34px;
+    padding:8px 11px;
     border:1px solid #f28a13;
     border-radius:7px;
     background:#fff7ec;
     color:#a85f08;
-    font:600 10px/1.2 "Poppins",sans-serif;
+    font:600 11px/1.2 "Poppins",sans-serif;
     cursor:pointer;
+    white-space:nowrap;
+}
+
+.order-invoice-button svg{
+    width:14px;
+    height:14px;
+    flex:0 0 auto;
 }
 
 .order-invoice-button:hover:not(:disabled){
@@ -668,6 +680,7 @@
     }
 
     .order-invoice-button{
+        min-height:32px;
         padding:7px 8px;
         font-size:9px;
     }
