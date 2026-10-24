@@ -1191,3 +1191,21 @@
     }
 }
 
+.order-detail-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .order-detail-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .order-detail-actions .admin-button {
+        flex: 1 1 180px;
+    }
+}

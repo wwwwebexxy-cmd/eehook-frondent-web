@@ -5,6 +5,7 @@ import "../styles/Myorders.css";
 import { getImageUrl } from "../../../utils/imageUrl";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getProductDetailsPath } from "../../../utils/productUrl";
+import showToast from "../../../utils/toast";
 
 const formatOrderNumber = (id) => `EHK26/${String(id).padStart(4, "0")}`;
 
@@ -13,6 +14,7 @@ const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [downloadingInvoice, setDownloadingInvoice] = useState(null);
 
     async function fetchOrders() {
 
@@ -47,6 +49,33 @@ const MyOrders = () => {
         }
 
     }
+
+    const downloadInvoice = async (orderId) => {
+        if (downloadingInvoice) return;
+        setDownloadingInvoice(orderId);
+        try {
+            const response = await client.get(`/my-orders/${orderId}/invoice/`, { responseType: "blob" });
+            const blob = response.data instanceof Blob
+                ? response.data
+                : new Blob([response.data], { type: "application/pdf" });
+            const contentDisposition = response.headers?.["content-disposition"] || "";
+            const filename = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1]
+                || `EHK26-${String(orderId).padStart(4, "0")}-tax-invoice.pdf`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast.success("Tax invoice PDF downloaded");
+        } catch (requestError) {
+            showToast.error(requestError?.response?.data?.message || "Could not download the tax invoice.");
+        } finally {
+            setDownloadingInvoice(null);
+        }
+    };
 
     useEffect(() => {
 
@@ -376,6 +405,17 @@ const MyOrders = () => {
                                     </strong>
 
                                 </div>
+
+                                {order.payment_status === "Paid" && (
+                                    <button
+                                        type="button"
+                                        className="order-invoice-button"
+                                        onClick={() => downloadInvoice(order.id)}
+                                        disabled={downloadingInvoice === order.id}
+                                    >
+                                        {downloadingInvoice === order.id ? "Preparing..." : "Invoice PDF"}
+                                    </button>
+                                )}
 
                             </footer>
 
