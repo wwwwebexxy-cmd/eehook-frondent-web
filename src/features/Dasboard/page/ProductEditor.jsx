@@ -269,7 +269,83 @@ function VariantCard({ variant, index, colors, unitTypes, units, fieldErrors, on
 }
 
 function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd, onRemove, onChange }) {
-    return <div className="unit-table"><div className="variant-subheading"><div><strong>Variant Units</strong>{errors[`variant_${variantIndex}_units`] && <small className="product-error">{errors[`variant_${variantIndex}_units`]}</small>}</div><button type="button" className="admin-button secondary" onClick={onAdd}><FiPlus /> Add Unit</button></div>{units.map((unit, index) => { const filteredUnits = unitOptions.filter((option) => !unit.unit_type || String(option.unitType) === String(unit.unit_type)); const prefix = `variant_${variantIndex}_unit_${index}`; return <div className="editor-unit-row" key={idOf(unit) || index}><select value={unit.unit_type || ""} onChange={(event) => { const nextType = event.target.value; const valid = unitOptions.some((option) => String(option.value) === String(unit.unit) && String(option.unitType) === String(nextType)); onChange(index, "unit_type", nextType); if (!valid) onChange(index, "unit", ""); }}><option value="">Unit Type *</option>{unitTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><select value={unit.unit || ""} onChange={(event) => onChange(index, "unit", event.target.value)}><option value="">Unit *</option>{filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><TextField label="SKU" value={unit.sku} onChange={(value) => onChange(index, "sku", value)} error={errors[`${prefix}_sku`]} hint="SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M" /><input type="number" min="0.01" step="0.01" placeholder="Price *" value={unit.price ?? ""} onChange={(event) => onChange(index, "price", event.target.value)} /><input type="number" min="0" step="1" placeholder="Stock *" value={unit.stock ?? ""} onChange={(event) => onChange(index, "stock", event.target.value)} /><button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit"><FiTrash2 /></button>{errors[`${prefix}_unit_type`] && <small className="product-error">{errors[`${prefix}_unit_type`]}</small>}{errors[`${prefix}_unit`] && <small className="product-error">{errors[`${prefix}_unit`]}</small>}{errors[`${prefix}_price`] && <small className="product-error">{errors[`${prefix}_price`]}</small>}{errors[`${prefix}_stock`] && <small className="product-error">{errors[`${prefix}_stock`]}</small>}</div>; })}</div>;
+    return (
+        <div className="unit-table">
+            <div className="variant-subheading">
+                <div>
+                    <strong>Variant Units</strong>
+                    {errors[`variant_${variantIndex}_units`] && (
+                        <small className="product-error">{errors[`variant_${variantIndex}_units`]}</small>
+                    )}
+                </div>
+                <button type="button" className="admin-button secondary" onClick={onAdd}>
+                    <FiPlus /> Add Unit
+                </button>
+            </div>
+            {units.map((unit, index) => {
+                const filteredUnits = unitOptions.filter(
+                    (option) => !unit.unit_type || String(option.unitType) === String(unit.unit_type),
+                );
+                const prefix = `variant_${variantIndex}_unit_${index}`;
+                return (
+                    <div className="editor-unit-row" key={idOf(unit) || index}>
+                        <select
+                            value={unit.unit_type || ""}
+                            onChange={(event) => {
+                                const nextType = event.target.value;
+                                const valid = unitOptions.some(
+                                    (option) => String(option.value) === String(unit.unit) && String(option.unitType) === String(nextType),
+                                );
+                                onChange(index, "unit_type", nextType);
+                                if (!valid) onChange(index, "unit", "");
+                            }}
+                        >
+                            <option value="">Unit Type *</option>
+                            {unitTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                        </select>
+                        <select value={unit.unit || ""} onChange={(event) => onChange(index, "unit", event.target.value)}>
+                            <option value="">Unit *</option>
+                            {filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                        </select>
+                        <TextField
+                            label="SKU"
+                            value={unit.sku}
+                            onChange={(value) => onChange(index, "sku", value)}
+                            error={errors[`${prefix}_sku`]}
+                            hint="SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M"
+                        />
+                        <label className="variant-unit-field">
+                            <span>Price</span>
+                            <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                value={unit.price ?? ""}
+                                onChange={(event) => onChange(index, "price", event.target.value)}
+                            />
+                        </label>
+                        <label className="variant-unit-field">
+                            <span>Stock</span>
+                            <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={unit.stock ?? ""}
+                                onChange={(event) => onChange(index, "stock", event.target.value)}
+                            />
+                        </label>
+                        <button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit">
+                            <FiTrash2 />
+                        </button>
+                        {errors[`${prefix}_unit_type`] && <small className="product-error">{errors[`${prefix}_unit_type`]}</small>}
+                        {errors[`${prefix}_unit`] && <small className="product-error">{errors[`${prefix}_unit`]}</small>}
+                        {errors[`${prefix}_price`] && <small className="product-error">{errors[`${prefix}_price`]}</small>}
+                        {errors[`${prefix}_stock`] && <small className="product-error">{errors[`${prefix}_stock`]}</small>}
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 function changeVariantType(variants, setVariants, index, nextType) { const variant = variants[index]; if (variant.price_type === nextType) return; if (nextType === "single" && variant.units.length && !window.confirm("Switching to Single Price will clear the unit rows. Continue?")) return; setVariants((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, price_type: nextType, units: nextType === "single" ? [] : item.units, deletedUnits: nextType === "single" ? [...item.deletedUnits, ...item.units.map(idOf).filter(Boolean)] : item.deletedUnits, price: nextType === "multiple" ? "" : item.price, stock: nextType === "multiple" ? 0 : item.stock } : item)); }
