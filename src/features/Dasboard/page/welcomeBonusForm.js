@@ -24,6 +24,7 @@ export function welcomeBonusPayload(values) {
         applicability_type: values.applicability_type,
         product: productWise ? Number(values.product) || values.product : null,
         category: productWise ? null : Number(values.category) || values.category,
+        subcategory: productWise ? null : Number(values.subcategory) || values.subcategory || null,
         discount_type: values.discount_type,
         discount_percentage: percentage ? Number(values.discount_percentage) : null,
         fixed_amount: percentage ? null : Number(values.fixed_amount),

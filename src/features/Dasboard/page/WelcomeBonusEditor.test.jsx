@@ -12,8 +12,13 @@ describe("Welcome Bonus form contract", () => {
 
     it("produces a Welcome Bonus payload without a redemption-code field", () => {
         const payload = welcomeBonusPayload(validValues);
-        expect(payload).toMatchObject({ name: "New customer offer", applicability_type: "PRODUCT", product: 5, category: null, discount_type: "PERCENTAGE", discount_percentage: 15, fixed_amount: null, is_active: true });
+        expect(payload).toMatchObject({ name: "New customer offer", applicability_type: "PRODUCT", product: 5, category: null, subcategory: null, discount_type: "PERCENTAGE", discount_percentage: 15, fixed_amount: null, is_active: true });
         expect(payload).not.toHaveProperty("code");
         expect(payload).not.toHaveProperty("redemption_code");
+    });
+
+    it("includes the selected subcategory for a category-wise bonus", () => {
+        const payload = welcomeBonusPayload({ ...validValues, applicability_type: "CATEGORY", product: "", category: "7", subcategory: "11" });
+        expect(payload).toMatchObject({ applicability_type: "CATEGORY", product: null, category: 7, subcategory: 11 });
     });
 });
