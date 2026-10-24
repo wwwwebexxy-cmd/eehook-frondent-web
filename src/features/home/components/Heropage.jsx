@@ -35,6 +35,12 @@ const getHeroCopy = (...values) => {
     .find((text) => text && text !== ".") || "";
 };
 
+const normalizeBannerList = (value) => {
+  if (Array.isArray(value)) return value.filter((banner) => banner?.image);
+  if (Array.isArray(value?.results)) return value.results.filter((banner) => banner?.image);
+  return value?.image ? [value] : [];
+};
+
 const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBanner: providedSideBanner }) => {
 
   // An empty homepage response is not an intentional override. Keep the
@@ -51,13 +57,17 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
   const { data: rawPromoBanners } = PromoBanners_Query({ enabled: !hasPromoBanners });
   const promoBanners = hasPromoBanners ? providedPromoBanners : (Array.isArray(rawPromoBanners) ? rawPromoBanners : []);
 
-  const hasSideBanner = providedSideBanner !== undefined;
-  const { data: queriedSideBanner } = HeroSideBanner_Query({ enabled: !hasSideBanner });
-  const heroSideBanner = hasSideBanner
-    ? providedSideBanner
-    : (queriedSideBanner?.image ? queriedSideBanner : DEFAULT_SIDE_BANNER);
+  const hasSideBanners = providedSideBanner !== undefined;
+  const { data: queriedSideBanner } = HeroSideBanner_Query({ enabled: !hasSideBanners });
+  const configuredSideBanners = hasSideBanners
+    ? normalizeBannerList(providedSideBanner)
+    : normalizeBannerList(queriedSideBanner);
+  const sideBanners = configuredSideBanners.length > 0
+    ? configuredSideBanners
+    : (hasSideBanners ? [] : [DEFAULT_SIDE_BANNER]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSideBanner, setCurrentSideBanner] = useState(0);
 
   // Auto Slide
   useEffect(() => {
@@ -94,8 +104,14 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
 
   const activeHero = heroSlides[currentSlide] || heroSlides[0];
   const activePromo = promoBanners[currentPromo] || promoBanners[0];
+  const normalizedSideBannerIndex = sideBanners.length
+    ? currentSideBanner % sideBanners.length
+    : 0;
+  const activeSideBanner = sideBanners.length
+    ? sideBanners[normalizedSideBannerIndex]
+    : null;
   const heroRatio = imageRatios[`hero-${activeHero?.id ?? currentSlide}`] || (16 / 7);
-  const sideBannerKey = heroSideBanner?.id ?? heroSideBanner?.image ?? "default";
+  const sideBannerKey = activeSideBanner?.id ?? activeSideBanner?.image ?? "default";
   const sideRatio = imageRatios[`side-${sideBannerKey}`] || (16 / 7);
   const promoRatio = imageRatios[`promo-${activePromo?.id ?? currentPromo}`] || (16 / 3);
 
@@ -107,6 +123,16 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     }, 4000);
     return () => clearInterval(promoTimer);
   }, [promoBanners.length]);
+
+  useEffect(() => {
+    if (sideBanners.length < 2) return undefined;
+
+    const sideBannerTimer = setInterval(() => {
+      setCurrentSideBanner((previous) => (previous + 1) % sideBanners.length);
+    }, 5000);
+
+    return () => clearInterval(sideBannerTimer);
+  }, [sideBanners.length]);
 
   const nextPromo = () => setCurrentPromo((prev) => (prev === promoBanners.length - 1 ? 0 : prev + 1));
   const prevPromo = () => setCurrentPromo((prev) => (prev === 0 ? promoBanners.length - 1 : prev - 1));
@@ -157,7 +183,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
       </div>}
 
       <section
-        className={`hero-split-layout ${heroSideBanner?.image ? "" : "single"}`}
+        className={`hero-split-layout ${activeSideBanner?.image ? "" : "single"}`}
         style={{ "--hero-ratio": heroRatio, "--side-ratio": sideRatio }}
       >
         
@@ -231,27 +257,42 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           </div>
         </div>
 
-        {/* Fixed Side Banner (Right) */}
-        {heroSideBanner?.image && <div className="hero-fixed-banner-section">
+        {/* Rotating Side Banners (Right) */}
+        {activeSideBanner?.image && <div className="hero-fixed-banner-section" aria-label="Promotional side banners">
           <div className="fixed-banner-content">
-             {heroSideBanner?.link ? (
-               <a href={heroSideBanner.link} target="_blank" rel="noopener noreferrer">
+             {activeSideBanner?.link ? (
+               <a href={activeSideBanner.link} target="_blank" rel="noopener noreferrer">
                  <img
-                   src={getHeroImageUrl(heroSideBanner.image)}
+                   key={sideBannerKey}
+                   src={getHeroImageUrl(activeSideBanner.image)}
                    alt="Promotional Banner"
-                   className="fixed-banner-image"
+                   className="fixed-banner-image side-banner-slide"
                    onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
                  />
                </a>
              ) : (
                  <img
-                   src={getHeroImageUrl(heroSideBanner?.image)}
+                   key={sideBannerKey}
+                   src={getHeroImageUrl(activeSideBanner.image)}
                    alt="Promotional Banner"
-                   className="fixed-banner-image"
+                   className="fixed-banner-image side-banner-slide"
                    onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
                  />
              )}
           </div>
+          {sideBanners.length > 1 && (
+            <div className="side-banner-dots" aria-label="Choose promotional side banner">
+              {sideBanners.map((banner, index) => (
+                <button
+                  type="button"
+                  key={banner.id ?? index}
+                  className={index === normalizedSideBannerIndex ? "active" : ""}
+                  onClick={() => setCurrentSideBanner(index)}
+                  aria-label={`Show side banner ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>}
 
       </section>
