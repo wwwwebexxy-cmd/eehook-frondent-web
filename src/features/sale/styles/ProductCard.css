@@ -114,7 +114,7 @@
     margin: 0;
     padding: 5px 9px;
     border: 0;
-    border-radius: 999px 0 0 999px;
+    border-radius: 999px 0 0 0;
     background: var(--product-highlight-bg, #1B4D44);
     color: var(--product-highlight-color, #FFFFFF);
     box-shadow: 0 3px 8px rgba(23, 59, 53, .16);
