@@ -6,7 +6,7 @@ import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, ErrorState, Filt
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
 import useFormErrors from "../hooks/useFormErrors";
-import { createResource, deleteResource, duplicateResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, unwrapList, updateOrderDetails, updateResource } from "../services/adminApi";
+import { createResource, deleteResource, downloadOrderPackageLabel, duplicateResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, unwrapList, updateOrderDetails, updateResource } from "../services/adminApi";
 import ProductView from "./ProductView";
 import ProductEditor from "./ProductEditor";
 import HeroBannerEditor from "./HeroBannerEditor";
@@ -877,12 +877,39 @@ function OrderDetail({ id }) {
 }
 
 function OrderDetailContent({ order, id, navigate }) {
+    const [downloadingLabel, setDownloadingLabel] = useState(false);
     const items = order.items || order.order_items || [];
     const shippingLines = [order.address_name, order.address_line, order.city, order.postcode, order.country].filter(Boolean);
     const lineTotal = (item) => item.total_price ?? Number(item.price || 0) * Number(item.quantity || 0);
+    const downloadLabel = async () => {
+        if (downloadingLabel) return;
+        setDownloadingLabel(true);
+        try {
+            const response = await downloadOrderPackageLabel(id);
+            const blob = response.data instanceof Blob
+                ? response.data
+                : new Blob([response.data], { type: "application/pdf" });
+            const contentDisposition = response.headers?.["content-disposition"] || "";
+            const filename = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1]
+                || `EHK26-${String(id).padStart(4, "0")}-package-label.pdf`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            toast.success("Package label PDF downloaded");
+        } catch (error) {
+            toast.error(getErrorMessage(error, "Could not download the package label."));
+        } finally {
+            setDownloadingLabel(false);
+        }
+    };
     return <div className="admin-page">
         <button className="admin-back-link" onClick={() => navigate("/eehook-dashboard/orders")}>Back to orders</button>
-        <PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} />
+        <PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} action={<button type="button" className="admin-button secondary" onClick={downloadLabel} disabled={downloadingLabel}><FiBox /> {downloadingLabel ? "Preparing label..." : "Package label PDF"}</button>} />
         <div className="admin-detail-grid">
             <DetailCard title="Customer" icon={<FiUsers />}><strong>{order.customer_name || "Guest customer"}</strong><span>{order.customer_email || "No email provided"}</span></DetailCard>
             <DetailCard title="Shipping address" icon={<FiTruck />}>{shippingLines.length ? shippingLines.map((line, index) => <span key={`${line}-${index}`}>{line}</span>) : <span>No shipping address provided</span>}</DetailCard>

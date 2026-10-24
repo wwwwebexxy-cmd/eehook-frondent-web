@@ -45,6 +45,8 @@ export const blacklistToken = (id) =>
 // responses contain model fields only, not customer/address/line-item data.
 export const getOrderDetails = (id) => client.get(`/orders/${id}/`);
 export const updateOrderDetails = (id, data) => client.patch(`/orders/${id}/`, data);
+export const downloadOrderPackageLabel = (id) =>
+    client.get(`/orders/${id}/package-label/`, { responseType: "blob" });
 
 export const unwrapList = (payload) => {
     if (Array.isArray(payload)) return { rows: payload, count: payload.length };
