@@ -894,7 +894,9 @@ function Single_product() {
                 <div className="purchase-panel eehook-purchase-panel">
 
                     <div className="delivery-time-section">
-                        <div className="shipping-fee">+ <DirhamAmount value={data.shipping_fee || "13.00"} /> Shipping</div>
+                        {Number(data?.shipping_fee || 0) > 0 && (
+                            <div className="shipping-fee">+ <DirhamAmount value={data.shipping_fee} /> Shipping</div>
+                        )}
                         <div className="delivery-date">Delivery <strong>{data.estimated_delivery_time || "09 Sep - 10 Sep"}</strong></div>
                     </div>
 

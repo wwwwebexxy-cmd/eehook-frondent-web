@@ -417,17 +417,19 @@ function Cart_page() {
 
                             </div>
 
-                            <div className="price-row">
+                            {shipping > 0 && (
+                                <div className="price-row">
 
-                                <span>
-                                    Shipping
-                                </span>
+                                    <span>
+                                        Shipping
+                                    </span>
 
-                                <span>
-                                    <DirhamAmount value={shipping} />
-                                </span>
+                                    <span>
+                                        <DirhamAmount value={shipping} />
+                                    </span>
 
-                            </div>
+                                </div>
+                            )}
 
                             <div className="total-row">
 

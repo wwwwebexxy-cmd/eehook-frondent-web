@@ -584,25 +584,23 @@ const Checkout = () => {
 
                             </div> */}
 
-                            <div className="eehook-summary-row">
+                            {cartSummary.shipping > 0 && (
+                                <div className="eehook-summary-row">
 
-                                <span>
+                                    <span>
 
-                                    Shipping
+                                        Shipping
 
-                                </span>
+                                    </span>
 
-                                <span>
+                                    <span>
 
-                                    {
-                                        cartSummary.shipping === 0
-                                            ? "FREE"
-                                            : <DirhamAmount value={cartSummary.shipping} />
-                                    }
+                                        <DirhamAmount value={cartSummary.shipping} />
 
-                                </span>
+                                    </span>
 
-                            </div>
+                                </div>
+                            )}
 
                             <div className="eehook-summary-row">
 
