@@ -165,13 +165,13 @@ function New_Arrival_Home({
                                         <h3 className="newHome-product-title" title={item.name || "Product"}>
                                             {item.name || item.description || "Product"}
                                         </h3>
+                                        <ProductMessageRail messages={item.product_messages} />
                                         <div className="product-meta">
                                             <div className="price-area">
                                                 {originalPrice !== null && <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>}
                                                 <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>
                                         </div>
-                                        <ProductMessageRail messages={item.product_messages} />
                                     </div>
                                 </article>
                             );
