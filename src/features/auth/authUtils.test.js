@@ -40,11 +40,13 @@ describe("auth session storage", () => {
     it("clears both current and legacy credential stores during logout", () => {
         saveAuthSession({ user: { id: 12, role: "Customer" } });
         localStorage.setItem("refresh", "legacy-refresh-token");
+        localStorage.setItem("user", JSON.stringify({ id: 12, email: "old@example.com" }));
 
         clearAuthSession();
 
         expect(hasAuthSession()).toBe(false);
         expect(sessionStorage.getItem("access_token")).toBeNull();
         expect(localStorage.getItem("refresh")).toBeNull();
+        expect(localStorage.getItem("user")).toBeNull();
     });
 });

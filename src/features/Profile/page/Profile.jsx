@@ -287,7 +287,7 @@ const Profile = () => {
   };
 
   const logout = async () => {
-    await logoutSession();
+    await logoutSession("customer");
     navigate("/login", { replace: true });
   };
   return (

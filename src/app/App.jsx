@@ -13,6 +13,8 @@ function App() {
 
     const location = useLocation();
     const [authReady, setAuthReady] = useState(false);
+    const normalizedPath = location.pathname.toLowerCase();
+    const isAdminPage = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");
 
     useEffect(() => {
         let active = true;
@@ -20,6 +22,7 @@ function App() {
         // an available API connection. A cold EC2/proxy or a CORS outage
         // should show the public app after a short bounded wait.
         client.get("auth/session/", {
+            params: { scope: isAdminPage ? "admin" : "customer" },
             skipAuthRefresh: true,
             skipAuthRedirect: true,
             timeout: 5000,
@@ -34,12 +37,9 @@ function App() {
                 if (active) setAuthReady(true);
             });
         return () => { active = false; };
-    }, []);
+    }, [isAdminPage]);
 
     if (!authReady) return <div aria-live="polite" aria-label="Loading application" className="app-loading"><div className="app-loading-card" aria-hidden="true"><span className="skeleton app-loading-logo" /><span className="skeleton app-loading-line wide" /><span className="skeleton app-loading-line" /></div></div>;
-
-    const normalizedPath = location.pathname.toLowerCase();
-    const isAdminPage = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");
 
     return (
         <>

@@ -26,6 +26,15 @@ function isAuthRequest(config = {}) {
     return /(?:^|\/)login\/?$|google-login|token\/refresh|logout/.test(String(config.url || ""));
 }
 
+export function getAuthScope(pathname = typeof window === "undefined" ? "" : window.location.pathname) {
+    const normalizedPath = String(pathname || "").toLowerCase();
+    return normalizedPath.startsWith("/eehook-dashboard")
+        || normalizedPath.startsWith("/order-dashboard")
+        || normalizedPath.startsWith("/orderdashboard")
+        ? "admin"
+        : "customer";
+}
+
 function readCookie(name) {
     if (typeof document === "undefined") return "";
     const encodedName = `${encodeURIComponent(name)}=`;
@@ -53,7 +62,7 @@ async function refreshAccessToken() {
         refreshPromise = ensureCsrf()
             .then((csrfToken) => axios.post(
                 `${API_URL}/token/refresh/`,
-                {},
+                { scope: getAuthScope() },
                 { withCredentials: true, headers: csrfToken ? { "X-CSRFToken": csrfToken } : {} },
             )
                 .then(assertJsonApiResponse)
@@ -126,9 +135,9 @@ client.interceptors.response.use(
     }
 );
 
-export async function logoutSession() {
+export async function logoutSession(scope = getAuthScope()) {
     try {
-        await client.post("logout/", {}, { skipAuthRefresh: true });
+        await client.post("logout/", { scope }, { skipAuthRefresh: true });
     } catch {
         // Local credentials are cleared even when the server cannot be reached.
     } finally {

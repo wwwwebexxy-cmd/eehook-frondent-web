@@ -332,7 +332,7 @@ export default function OrderDashboard() {
     }, [loadDashboard]);
 
     const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/eehook-dashboard" : `/eehook-dashboard/${key}`); };
-    const logout = async () => { await logoutSession(); navigate("/login", { replace: true }); };
+    const logout = async () => { await logoutSession("admin"); navigate("/eehook-dashboard/admin-login", { replace: true }); };
     const refreshDashboard = () => { if (refreshing) return; setRefreshing(true); window.setTimeout(() => window.location.reload(), 220); };
     const currentTitle = pathKey === "overview" ? "Overview" : resources[pathKey]?.label || "Admin Dashboard";
 

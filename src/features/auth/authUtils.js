@@ -1,4 +1,25 @@
-const AUTH_SESSION_KEYS = ["access", "refresh", "access_token", "refresh_token", "authenticated", "admin_user", "user_id", "email", "first_name", "is_staff", "is_superuser", "role", "permissions"];
+const AUTH_SESSION_KEYS = [
+    "access",
+    "refresh",
+    "access_token",
+    "refresh_token",
+    "authenticated",
+    "admin_user",
+    "user_id",
+    "email",
+    "first_name",
+    "is_staff",
+    "is_superuser",
+    "role",
+    "permissions",
+    // Remove keys used by older storefront builds so an old account cannot
+    // reappear after logout or session migration.
+    "user",
+    "currentUser",
+    "userData",
+    "authUser",
+    "isLoggedIn",
+];
 
 function sessionStore() {
     return typeof window === "undefined" ? null : window.sessionStorage;
