@@ -70,4 +70,20 @@ describe("getHomepageProductPricing", () => {
             hasOffer: false,
         });
     });
+
+    it("returns fixed-offer savings for the home card label", () => {
+        const pricing = getHomepageProductPricing({
+            original_price: 1000,
+            discounted_price: 875,
+            discount_percentage: 12.5,
+            offer_discount_type: "FIXED",
+            has_offer: true,
+        });
+
+        expect(pricing).toMatchObject({
+            discountAmount: 125,
+            isFixedOffer: true,
+            hasOffer: true,
+        });
+    });
 });

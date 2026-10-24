@@ -141,7 +141,10 @@ function New_Arrival_Home({
                             const productDetailsPath = getProductDetailsPath(item);
                             const isWishlisted = wishlist.some((wishlistItem) => String(wishlistItem.variant) === String(variant?.id) && String(wishlistItem.variant_size ?? "") === String(size?.id ?? ""));
                             const image = getProductImage(item);
-                            const { currentPrice, originalPrice, discountPercentage, hasOffer } = getHomepageProductPricing(item, variant);
+                            const { currentPrice, originalPrice, discountPercentage, discountAmount, isFixedOffer, hasOffer } = getHomepageProductPricing(item, variant);
+                            const savingsLabel = isFixedOffer
+                                ? <><DirhamAmount value={discountAmount} /> OFF</>
+                                : `${discountPercentage}% OFF`;
 
                             return (
                                 <article key={item.id} className="new-product-card">
@@ -149,7 +152,7 @@ function New_Arrival_Home({
                                         {(item.marketing_highlights?.length || hasOffer || (showNewBadge && item.is_active)) ? (
                                             <div className="product-image-topbar">
                                                 <ProductHighlightRail highlights={item.marketing_highlights} placement="badge" />
-                                                {hasOffer && <span className="badge-offer">{discountPercentage}% OFF</span>}
+                                                {hasOffer && <span className="badge-offer">{savingsLabel}</span>}
                                                 {showNewBadge && item.is_active && <span className="badge-new">NEW</span>}
                                             </div>
                                         ) : null}
@@ -168,7 +171,7 @@ function New_Arrival_Home({
                                         <ProductMessageRail messages={item.product_messages} />
                                         <div className="product-meta">
                                             <div className="price-area">
-                                                {hasOffer && discountPercentage > 0 && <span className="price-savings">Save {discountPercentage}%</span>}
+                                                {hasOffer && discountAmount > 0 && <span className="price-savings">Save {isFixedOffer ? <DirhamAmount value={discountAmount} /> : `${discountPercentage}%`}</span>}
                                                 {originalPrice !== null && <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>}
                                                 <span className="product-price"><DirhamAmount value={currentPrice} fallback="Price unavailable" /></span>
                                             </div>

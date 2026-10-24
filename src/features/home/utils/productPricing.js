@@ -17,6 +17,7 @@ const toPercentage = (value) => {
 };
 
 const roundedPercentage = (value) => Math.round(value * 100) / 100;
+const roundedAmount = (value) => Math.round(value * 100) / 100;
 
 /**
  * Prepares display-only pricing from values already supplied by the backend.
@@ -59,11 +60,15 @@ export function getHomepageProductPricing(product = {}, variant = null, now = ne
         && currentPrice !== null
         && currentPrice < originalPrice
         && (calculatedDiscount !== null || hasReportedOffer);
+    const offerDiscountType = String(product?.offer_discount_type ?? product?.offer?.discount_type ?? "PERCENTAGE").toUpperCase();
+    const discountAmount = hasOffer ? roundedAmount(originalPrice - currentPrice) : null;
 
     return {
         currentPrice,
         originalPrice: hasOffer ? originalPrice : null,
         discountPercentage: hasOffer ? (calculatedDiscount ?? reportedDiscount) : null,
+        discountAmount,
+        isFixedOffer: hasOffer && offerDiscountType === "FIXED",
         hasOffer,
     };
 }
