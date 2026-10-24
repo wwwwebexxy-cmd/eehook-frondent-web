@@ -130,3 +130,36 @@
 .related-products-search-results p { padding: 11px; }
 .related-products-limit { padding: 10px 11px; border: 1px solid #efd8bd; border-radius: 7px; background: #fff9f1; color: #90662d; }
 @media (max-width: 520px) { .related-products-manual { padding: 12px; } .related-products-manual-heading { flex-direction: column; } .related-products-selected-list li { align-items: flex-start; flex-wrap: wrap; } .related-products-selected-list strong { flex: 1 1 calc(100% - 36px); white-space: normal; } .related-products-item-actions { width: 100%; margin-left: 33px; } }
+
+/* Keep the stock field as a full column; the delete action gets its own track. */
+.product-editor-page .editor-unit-row {
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(160px, 1.15fr) minmax(120px, 1fr) minmax(120px, 1fr) 38px;
+}
+
+@media (max-width: 900px) {
+  .product-editor-page .editor-unit-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .product-editor-page .editor-unit-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-editor-page .editor-unit-row .table-icon {
+    grid-column: 2;
+    justify-self: end;
+  }
+}
+
+@media (max-width: 420px) {
+  .product-editor-page .editor-unit-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .product-editor-page .editor-unit-row .table-icon {
+    grid-column: 1;
+    justify-self: start;
+  }
+}
