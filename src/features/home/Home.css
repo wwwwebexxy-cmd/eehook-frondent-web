@@ -681,18 +681,29 @@
 }
 
 .homepage-benefits-heading {
+    display: block;
     justify-content: center;
     text-align: center;
 }
 
 .homepage-benefits-heading > div {
+    display: flex;
+    justify-content: center;
     width: 100%;
+}
+
+.homepage-benefits-heading h2 {
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
 }
 
 .homepage-benefits-grid {
     display: grid;
     width: min(100%, 1280px);
     margin: 0 auto;
+    justify-content: center;
+    justify-items: stretch;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
@@ -829,7 +840,9 @@
     .homepage-category-section,
     .homepage-section,
     .homepage-benefits {
-        width: min(100% - 24px, 1640px);
+        width: calc(100% - 24px);
+        max-width: 1640px;
+        margin-inline: auto;
     }
 
     .homepage-category-section {
@@ -861,7 +874,10 @@
     }
 
     .homepage-benefits-grid {
-        grid-template-columns: minmax(0, 330px);
+        width: 100%;
+        max-width: 330px;
+        margin-inline: auto;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .homepage-brand-card {
@@ -889,6 +905,15 @@
 }
 
 @media(max-width:380px) {
+
+    .homepage-benefits {
+        width: calc(100% - 20px);
+    }
+
+    .homepage-benefits-heading h2 {
+        font-size: clamp(1.55rem, 8vw, 2rem);
+        line-height: 1.15;
+    }
 
     .hero_quote h1 {
 
