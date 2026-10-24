@@ -138,7 +138,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                     src={getImageUrl(promo.image)} 
                     alt="Promo Banner" 
                     onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                    style={{ width: "100%", height: "100%" }}
                   />
                 </a>
               ) : (
@@ -146,7 +146,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                   src={getImageUrl(promo.image)} 
                   alt="Promo Banner" 
                   onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                  style={{ width: "100%", height: "100%" }}
                 />
               )}
             </div>

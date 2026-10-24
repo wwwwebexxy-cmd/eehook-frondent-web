@@ -365,21 +365,21 @@
 @media(max-width:768px){
 .hero-split-layout {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     height: auto;
 }
 
 .hero-carousel-section {
-    flex: 0 0 72%;
-    width: auto;
+    flex: 0 0 auto;
+    width: 100%;
     height: auto;
     min-height: 0;
     aspect-ratio: var(--hero-ratio, 16 / 7);
 }
 
 .hero-fixed-banner-section {
-    flex: 1;
-    width: auto;
+    flex: 0 0 auto;
+    width: 100%;
     height: auto;
     min-height: 0;
     aspect-ratio: var(--side-ratio, 16 / 7);
@@ -388,6 +388,19 @@
 .top-promo-carousel {
     height: auto;
     min-height: 0;
+}
+
+.promo-slide img,
+.hero-image,
+.fixed-banner-image {
+    object-fit: contain;
+    object-position: center;
+    transform: none;
+    background: #f8f9fa;
+}
+
+.hero-slide.active .hero-image {
+    transform: none;
 }
 
 .hero-content{
@@ -432,12 +445,12 @@
 
 .hero-carousel-section {
     min-height: 0;
-    aspect-ratio: var(--hero-ratio, 4 / 3);
+    aspect-ratio: var(--hero-ratio, 16 / 7);
 }
 
 .hero-fixed-banner-section {
     min-height: 0;
-    aspect-ratio: var(--side-ratio, 4 / 3);
+    aspect-ratio: var(--side-ratio, 16 / 7);
 }
 
 .top-promo-carousel {
@@ -493,12 +506,12 @@
 
 .hero-carousel-section {
     min-height: 0;
-    aspect-ratio: var(--hero-ratio, 4 / 3);
+    aspect-ratio: var(--hero-ratio, 16 / 7);
 }
 
 .hero-fixed-banner-section {
     min-height: 0;
-    aspect-ratio: var(--side-ratio, 4 / 3);
+    aspect-ratio: var(--side-ratio, 16 / 7);
 }
 
 .hero-content {
