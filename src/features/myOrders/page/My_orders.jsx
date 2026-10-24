@@ -6,6 +6,8 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getProductDetailsPath } from "../../../utils/productUrl";
 
+const formatOrderNumber = (id) => `EHK26/${String(id).padStart(4, "0")}`;
+
 const MyOrders = () => {
 
     const [orders, setOrders] = useState([]);
@@ -249,7 +251,7 @@ const MyOrders = () => {
                                 <div className="order-reference">
 
                                     <span className="order-number">
-                                        Order #{order.id}
+                                        Order Number: {formatOrderNumber(order.id)}
                                     </span>
 
                                     <span className="order-separator">
