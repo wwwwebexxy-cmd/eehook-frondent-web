@@ -84,8 +84,8 @@
 ========================================= */
 
 .orders-list{
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
     gap:22px;
 }
 
@@ -94,18 +94,21 @@
    ORDER CARD
 ========================================= */
 
-.order-card{
+.order-product-entry{
     width:100%;
     overflow:hidden;
-    background: #F8F9F3;
+    background:#fff;
     border:1px solid #e5e5e5;
     border-radius:12px;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
     transition:
         border-color .2s ease,
         box-shadow .2s ease;
 }
 
-.order-card:hover{
+.order-product-entry:hover{
     border-color:#d8c5cc;
     box-shadow:0 8px 28px rgba(0,0,0,.045);
 }
@@ -115,9 +118,9 @@
    ORDER HEADER
 ========================================= */
 
-.order-card-header{
+.order-product-order-meta{
     min-height:64px;
-    padding:16px 22px;
+    padding:14px 16px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -125,6 +128,7 @@
     min-width:0;
     background:#F8F9F3;
     border-bottom:1px solid #ededed;
+    flex-wrap:wrap;
 }
 
 .order-reference{
@@ -205,32 +209,24 @@
    PRODUCTS
 ========================================= */
 
-.order-products{
-    display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr));
-    gap:18px;
-    padding:20px 22px;
-}
-
 .order-product{
     min-width:0;
+    flex:1;
     display:flex;
     flex-direction:column;
     align-items:stretch;
     gap:12px;
-    padding:12px;
+    padding:16px;
     color:inherit;
     text-decoration:none;
-    border:1px solid #EEEFE9;
-    border-radius:8px;
+    border:0;
+    border-radius:0;
     background:#fff;
     transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .order-product:hover{
-    border-color:#d8c5cc;
-    box-shadow:0 6px 18px rgba(0,0,0,.06);
-    transform:translateY(-2px);
+    background:#fffdfa;
 }
 
 .order-product:focus-visible{
@@ -317,9 +313,9 @@
    ORDER FOOTER
 ========================================= */
 
-.order-card-footer{
+.order-product-order-footer{
     min-height:68px;
-    padding:15px 22px;
+    padding:12px 16px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -463,18 +459,13 @@
         font-size:18px;
     }
 
-    .order-card{
+    .order-product-entry{
         border-radius:10px;
     }
 
-    .order-card-header{
+    .order-product-order-meta{
         min-height:58px;
         padding:14px 16px;
-    }
-
-    .order-products{
-        gap:12px;
-        padding:16px;
     }
 
     .order-product{
@@ -499,7 +490,7 @@
         font-size:12px;
     }
 
-    .order-card-footer{
+    .order-product-order-footer{
         min-height:60px;
         padding:13px 16px;
     }
@@ -560,7 +551,7 @@
 
     /* ORDER TOP */
 
-    .order-card-header{
+    .order-product-order-meta{
         min-height:52px;
         padding:11px 12px;
         gap:8px;
@@ -589,11 +580,6 @@
 
 
     /* PRODUCT ROW */
-
-    .order-products{
-        gap:8px;
-        padding:10px 12px;
-    }
 
     .order-product{
         gap:7px;
@@ -637,7 +623,7 @@
 
     /* FOOTER */
 
-    .order-card-footer{
+    .order-product-order-footer{
         min-height:52px;
         padding:10px 12px;
         gap:10px;

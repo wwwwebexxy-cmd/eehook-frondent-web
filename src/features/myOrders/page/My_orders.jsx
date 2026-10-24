@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../styles/Myorders.css";
@@ -14,13 +14,7 @@ const MyOrders = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-
-        fetchOrders();
-
-    }, []);
-
-    const fetchOrders = async () => {
+    async function fetchOrders() {
 
         try {
 
@@ -52,7 +46,17 @@ const MyOrders = () => {
 
         }
 
-    };
+    }
+
+    useEffect(() => {
+
+        const timer = window.setTimeout(() => {
+            void fetchOrders();
+        }, 0);
+
+        return () => window.clearTimeout(timer);
+
+    }, []);
 
 
     const getStatusClass = (status) => {
@@ -110,6 +114,10 @@ const MyOrders = () => {
         );
 
     };
+
+    const orderProducts = orders.flatMap((order) =>
+        (order.items || []).map((item) => ({ order, item }))
+    );
 
 
     if (loading) {
@@ -239,14 +247,14 @@ const MyOrders = () => {
 
                 <div className="orders-list">
 
-                    {orders.map((order) => (
+                    {orderProducts.map(({ order, item }) => (
 
                         <article
-                            className="order-card"
-                            key={order.id}
+                            className="order-product-entry"
+                            key={`${order.id}-${item.id}`}
                         >
 
-                            <div className="order-card-header">
+                            <div className="order-product-order-meta">
 
                                 <div className="order-reference">
 
@@ -274,97 +282,74 @@ const MyOrders = () => {
                             </div>
 
 
-                            <div className="order-products">
+                            <Link
+                                className="order-product"
+                                to={getProductDetailsPath({
+                                    name: item.product_name,
+                                    id: item.product,
+                                })}
+                                aria-label={`View ${item.product_name || "product"} details`}
+                            >
 
-                                {order.items?.map((item) => (
+                                <div className="order-product-image">
 
-                                    <Link
-                                        className="order-product"
-                                        key={item.id}
-                                        to={getProductDetailsPath({
-                                            name: item.product_name,
-                                            id: item.product,
-                                        })}
-                                        aria-label={`View ${item.product_name || "product"} details`}
-                                    >
+                                    <img
+                                        src={
+                                            item.product_image
+                                                ? getImageUrl(item.product_image)
+                                                : "/images/no-image.png"
+                                        }
+                                        alt={item.product_name || "Product"}
+                                    />
 
-                                        <div className="order-product-image">
-
-                                            <img
-                                                src={
-                                                    item.product_image
-                                                        ? getImageUrl(
-                                                            item.product_image
-                                                        )
-                                                        : "/images/no-image.png"
-                                                }
-                                                alt={
-                                                    item.product_name ||
-                                                    "Product"
-                                                }
-                                            />
-
-                                        </div>
+                                </div>
 
 
-                                        <div className="order-product-info">
+                                <div className="order-product-info">
 
-                                            <h2>
-                                                {item.product_name}
-                                            </h2>
-
-
-                                            <div className="order-product-meta">
-
-                                                {item.color && (
-
-                                                    <span>
-                                                        {item.color}
-                                                    </span>
-
-                                                )}
-
-                                                {item.size && (
-
-                                                    <>
-
-                                                        {item.color && (
-                                                            <i>•</i>
-                                                        )}
-
-                                                        <span>
-                                                            {item.unit_type ? `${item.unit_type}: ${item.size}` : item.size}
-                                                        </span>
-
-                                                    </>
-
-                                                )}
-
-                                            </div>
+                                    <h2>
+                                        {item.product_name}
+                                    </h2>
 
 
-                                            <div className="order-product-quantity">
+                                    <div className="order-product-meta">
 
+                                        {item.color && (
+                                            <span>
+                                                {item.color}
+                                            </span>
+                                        )}
+
+                                        {item.size && (
+                                            <>
+                                                {item.color && <i>•</i>}
                                                 <span>
-                                                    Qty
+                                                    {item.unit_type ? `${item.unit_type}: ${item.size}` : item.size}
                                                 </span>
+                                            </>
+                                        )}
 
-                                                <strong>
-                                                    {item.quantity || 1}
-                                                </strong>
-
-                                            </div>
-
-                                        </div>
-
-                                    </Link>
-
-                                ))}
-
-                            </div>
+                                    </div>
 
 
-                            <footer className="order-card-footer">
+                                    <div className="order-product-quantity">
+
+                                        <span>
+                                            Qty
+                                        </span>
+
+                                        <strong>
+                                            {item.quantity || 1}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </Link>
+
+
+                            <footer className="order-product-order-footer">
 
                                 <div className="order-items-total">
 
