@@ -155,7 +155,7 @@ function Shop_by_category({ categories: providedCategories }) {
 
         let animationFrame;
         let previousTime;
-        const pixelsPerSecond = 24;
+        const pixelsPerSecond = 36;
 
         const moveCategories = (time) => {
             if (previousTime === undefined) previousTime = time;
@@ -163,9 +163,15 @@ function Shop_by_category({ categories: providedCategories }) {
             previousTime = time;
 
             container.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
-            const loopPoint = container.scrollWidth / 2;
-            if (loopPoint > 0 && container.scrollLeft >= loopPoint) {
-                container.scrollLeft -= loopPoint;
+            const repeatedFirstItem = container.children[categoryItems.length];
+            if (repeatedFirstItem) {
+                const containerRect = container.getBoundingClientRect();
+                const loopPoint = repeatedFirstItem.getBoundingClientRect().left
+                    - containerRect.left
+                    + container.scrollLeft;
+                if (loopPoint > 0 && container.scrollLeft >= loopPoint) {
+                    container.scrollLeft -= loopPoint;
+                }
             }
 
             animationFrame = window.requestAnimationFrame(moveCategories);

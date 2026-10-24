@@ -91,7 +91,7 @@
     gap: clamp(18px, 1.8vw, 36px);
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     justify-content: space-evenly;
     scrollbar-width: none;
     padding: 8px 58px 12px;
