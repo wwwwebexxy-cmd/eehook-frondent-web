@@ -19,29 +19,27 @@
 .promo-slides {
     width: 100%;
     height: 100%;
-    position: relative;
+    display: flex;
+    transition: transform .85s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
 }
 
 .promo-slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(24px);
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition:
-        opacity .85s ease,
-        transform .85s cubic-bezier(.22, 1, .36, 1),
-        visibility 0s linear .85s;
 }
 
 .promo-slide.active {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0);
-    transition-delay: 0s;
 }
 
 .promo-slide img {
@@ -114,6 +112,14 @@
     height: 100%;
 }
 
+.hero-slides-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform .95s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
+}
+
 .hero-split-layout.single .hero-carousel-section {
     flex-basis: 100%;
 }
@@ -130,9 +136,30 @@
 .fixed-banner-content {
     width: 100%;
     height: 100%;
+    overflow: hidden;
+}
+
+.side-banner-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform .85s cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
 }
 
 .fixed-banner-content > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.side-banner-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+}
+
+.side-banner-slide > a {
     display: block;
     width: 100%;
     height: 100%;
@@ -149,27 +176,19 @@
 /* ---------------- Slide ---------------- */
 
 .hero-slide {
-    position: absolute;
-    inset: 0;
-
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(24px);
-
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    visibility: visible;
     z-index: 1;
-
-    transition:
-        opacity .95s cubic-bezier(.4, 0, .2, 1),
-        transform .95s cubic-bezier(.22, 1, .36, 1),
-        visibility 0s linear .95s;
 }
 
 .hero-slide.active {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0);
     z-index: 2;
-    transition-delay: 0s;
 }
 
 .hero-image {
@@ -642,10 +661,6 @@
     transform: scale(1.2);
 }
 
-.side-banner-slide {
-    animation: side-banner-enter .8s ease both;
-}
-
 .side-banner-dots {
     position: absolute;
     left: 50%;
@@ -654,6 +669,27 @@
     display: flex;
     gap: 5px;
     transform: translateX(-50%);
+}
+
+.side-banner-nav-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(.92);
+}
+
+.hero-fixed-banner-section:hover .side-banner-nav-btn,
+.hero-fixed-banner-section:focus-within .side-banner-nav-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+}
+
+.side-banner-prev {
+    left: 10px;
+}
+
+.side-banner-next {
+    right: 10px;
 }
 
 .side-banner-dots button {
@@ -671,25 +707,11 @@
     transform: scale(1.25);
 }
 
-@keyframes side-banner-enter {
-    from {
-        opacity: .35;
-        transform: translateX(24px) scale(1.02);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .promo-slide,
-    .hero-slide {
+    .promo-slides,
+    .hero-slides-track,
+    .side-banner-track {
         transition: none;
         transform: none;
-    }
-
-    .side-banner-slide {
-        animation: none;
     }
 }

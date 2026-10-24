@@ -87,8 +87,12 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    display: flex;
-    gap: clamp(18px, 1.8vw, 36px);
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, max-content);
+    grid-auto-columns: clamp(92px, 7vw, 118px);
+    column-gap: clamp(18px, 1.8vw, 36px);
+    row-gap: 12px;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: auto;
@@ -328,6 +332,10 @@
         padding-left: 40px;
     }
 
+    .category-container {
+        grid-auto-columns: 102px;
+    }
+
     .category-card,
     .subcategory-card {
         width: 102px;
@@ -386,6 +394,10 @@
         padding-right: 42px;
     }
 
+    .category-container {
+        grid-auto-columns: 88px;
+    }
+
     .category-card,
     .subcategory-card {
         width: 88px;
@@ -436,6 +448,10 @@
     .category-card,
     .subcategory-card {
         width: 75px;
+    }
+
+    .category-container {
+        grid-auto-columns: 75px;
     }
 
     .image-circle {

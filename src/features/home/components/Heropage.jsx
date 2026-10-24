@@ -145,6 +145,16 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
   };
 
+  const nextSideBanner = () => {
+    if (sideBanners.length < 2) return;
+    setCurrentSideBanner((previous) => (previous + 1) % sideBanners.length);
+  };
+
+  const prevSideBanner = () => {
+    if (sideBanners.length < 2) return;
+    setCurrentSideBanner((previous) => (previous === 0 ? sideBanners.length - 1 : previous - 1));
+  };
+
   return (
     <div className="hero-page-wrapper">
       
@@ -152,10 +162,13 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
       {promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
         <button className="promo-nav-btn left" onClick={prevPromo}>‹</button>
         
-        <div className="promo-slides">
+        <div
+          className="promo-slides"
+          style={{ transform: `translateX(-${currentPromo * 100}%)` }}
+        >
           {promoBanners.map((promo, index) => (
             <div 
-              key={promo.id} 
+              key={promo.id ?? index}
               className={`promo-slide ${currentPromo === index ? "active" : ""}`}
             >
               {promo.link ? (
@@ -189,13 +202,17 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
         
         {/* Main Carousel (Left) */}
         <div className="hero-carousel-section">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`hero-slide ${
-                currentSlide === index ? "active" : ""
-              }`}
-            >
+          <div
+            className="hero-slides-track"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {heroSlides.map((slide, index) => (
+              <div
+                key={slide.id ?? index}
+                className={`hero-slide ${
+                  currentSlide === index ? "active" : ""
+                }`}
+              >
 
               <img
                 src={getHeroImageUrl(slide.image || slide.banner_image || slide.image_url)}
@@ -229,8 +246,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
 
               </div>
 
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
           
           {/* Navigation Arrows */}
           <button className="carousel-nav-btn prev-btn" onClick={prevSlide}>
@@ -260,26 +278,56 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
         {/* Rotating Side Banners (Right) */}
         {activeSideBanner?.image && <div className="hero-fixed-banner-section" aria-label="Promotional side banners">
           <div className="fixed-banner-content">
-             {activeSideBanner?.link ? (
-               <a href={activeSideBanner.link} target="_blank" rel="noopener noreferrer">
-                 <img
-                   key={sideBannerKey}
-                   src={getHeroImageUrl(activeSideBanner.image)}
-                   alt="Promotional Banner"
-                   className="fixed-banner-image side-banner-slide"
-                   onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
-                 />
-               </a>
-             ) : (
-                 <img
-                   key={sideBannerKey}
-                   src={getHeroImageUrl(activeSideBanner.image)}
-                   alt="Promotional Banner"
-                   className="fixed-banner-image side-banner-slide"
-                   onLoad={(event) => rememberImageRatio(`side-${sideBannerKey}`, event)}
-                 />
-             )}
+            <div
+              className="side-banner-track"
+              style={{ transform: `translateX(-${normalizedSideBannerIndex * 100}%)` }}
+            >
+              {sideBanners.map((banner, index) => {
+                const bannerKey = banner.id ?? banner.image ?? index;
+                return (
+                  <div className="side-banner-slide" key={bannerKey}>
+                    {banner.link ? (
+                      <a href={banner.link} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={getHeroImageUrl(banner.image)}
+                          alt="Promotional Banner"
+                          className="fixed-banner-image"
+                          onLoad={(event) => rememberImageRatio(`side-${bannerKey}`, event)}
+                        />
+                      </a>
+                    ) : (
+                      <img
+                        src={getHeroImageUrl(banner.image)}
+                        alt="Promotional Banner"
+                        className="fixed-banner-image"
+                        onLoad={(event) => rememberImageRatio(`side-${bannerKey}`, event)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+          {sideBanners.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="carousel-nav-btn side-banner-nav-btn side-banner-prev"
+                onClick={prevSideBanner}
+                aria-label="Previous side banner"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="carousel-nav-btn side-banner-nav-btn side-banner-next"
+                onClick={nextSideBanner}
+                aria-label="Next side banner"
+              >
+                ›
+              </button>
+            </>
+          )}
           {sideBanners.length > 1 && (
             <div className="side-banner-dots" aria-label="Choose promotional side banner">
               {sideBanners.map((banner, index) => (

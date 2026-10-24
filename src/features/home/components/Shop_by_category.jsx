@@ -26,6 +26,8 @@ function Shop_by_category({ categories: providedCategories }) {
 
     const categorySliderRef = useRef(null);
     const subCategorySliderRef = useRef(null);
+    const categoryScrollCheckFrame = useRef(null);
+    const categoryAutoPauseUntil = useRef(0);
 
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [closing, setClosing] = useState(false);
@@ -88,6 +90,15 @@ function Shop_by_category({ categories: providedCategories }) {
 
     };
 
+    const scheduleCategoryScrollCheck = () => {
+        if (categoryScrollCheckFrame.current !== null) return;
+
+        categoryScrollCheckFrame.current = window.requestAnimationFrame(() => {
+            categoryScrollCheckFrame.current = null;
+            checkCategoryScroll();
+        });
+    };
+
     const checkSubCategoryScroll = () => {
 
         const container = subCategorySliderRef.current;
@@ -137,15 +148,22 @@ function Shop_by_category({ categories: providedCategories }) {
         checkCategoryScroll();
         const category =
             categorySliderRef.current;
-        category?.addEventListener(
-            "scroll",
-            checkCategoryScroll
-        );
+        category?.addEventListener("scroll", scheduleCategoryScrollCheck, { passive: true });
+        const pauseAutoScroll = () => {
+            categoryAutoPauseUntil.current = performance.now() + 900;
+        };
+        category?.addEventListener("pointerdown", pauseAutoScroll, { passive: true });
+        category?.addEventListener("touchstart", pauseAutoScroll, { passive: true });
+        category?.addEventListener("wheel", pauseAutoScroll, { passive: true });
         return () => {
-            category?.removeEventListener(
-                "scroll",
-                checkCategoryScroll
-            );
+            category?.removeEventListener("scroll", scheduleCategoryScrollCheck);
+            category?.removeEventListener("pointerdown", pauseAutoScroll);
+            category?.removeEventListener("touchstart", pauseAutoScroll);
+            category?.removeEventListener("wheel", pauseAutoScroll);
+            if (categoryScrollCheckFrame.current !== null) {
+                window.cancelAnimationFrame(categoryScrollCheckFrame.current);
+                categoryScrollCheckFrame.current = null;
+            }
         }
     }, [categories]);
 
@@ -153,8 +171,16 @@ function Shop_by_category({ categories: providedCategories }) {
         const container = categorySliderRef.current;
         if (!container || categoryItems.length < 2) return undefined;
 
+        const firstItem = container.children[0];
+        const repeatedFirstItem = container.children[categoryItems.length];
+        if (!firstItem || !repeatedFirstItem) return undefined;
+
+        const loopDistance = repeatedFirstItem.offsetLeft - firstItem.offsetLeft;
+        if (loopDistance <= 0) return undefined;
+
         let animationFrame;
         let previousTime;
+        let scrollPosition = container.scrollLeft;
         const pixelsPerSecond = 36;
 
         const moveCategories = (time) => {
@@ -162,16 +188,14 @@ function Shop_by_category({ categories: providedCategories }) {
             const elapsed = Math.min(time - previousTime, 50);
             previousTime = time;
 
-            container.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
-            const repeatedFirstItem = container.children[categoryItems.length];
-            if (repeatedFirstItem) {
-                const containerRect = container.getBoundingClientRect();
-                const loopPoint = repeatedFirstItem.getBoundingClientRect().left
-                    - containerRect.left
-                    + container.scrollLeft;
-                if (loopPoint > 0 && container.scrollLeft >= loopPoint) {
-                    container.scrollLeft -= loopPoint;
+            if (time < categoryAutoPauseUntil.current) {
+                scrollPosition = container.scrollLeft;
+            } else {
+                scrollPosition += (pixelsPerSecond * elapsed) / 1000;
+                if (scrollPosition >= loopDistance) {
+                    scrollPosition -= loopDistance;
                 }
+                container.scrollLeft = scrollPosition;
             }
 
             animationFrame = window.requestAnimationFrame(moveCategories);
@@ -204,6 +228,7 @@ function Shop_by_category({ categories: providedCategories }) {
         const container =
             categorySliderRef.current;
         if (!container) return;
+        categoryAutoPauseUntil.current = performance.now() + 1200;
         container.scrollBy({
             left:
                 direction === "right"
