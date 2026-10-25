@@ -435,6 +435,34 @@
     padding-top: 22px;
 }
 
+.address-user {
+    display: grid;
+    gap: 12px;
+}
+
+.address-field,
+.address-details p {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.address-field-label {
+    color: var(--account-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.address-field-value {
+    color: #526871;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
 .address-user h4 {
     margin: 0;
     color: var(--account-ink);
@@ -447,6 +475,15 @@
     margin-top: 6px;
     color: var(--account-muted);
     font-size: 13px;
+}
+
+.address-user .address-field-label,
+.address-user .address-field-value {
+    margin-top: 0;
+}
+
+.address-user .address-field-value {
+    color: var(--account-muted);
 }
 
 .address-details,
@@ -463,6 +500,14 @@
     font-size: 13px;
     line-height: 1.6;
     overflow-wrap: anywhere;
+}
+
+.address-details p .address-field-label {
+    color: var(--account-muted);
+}
+
+.address-details p .address-field-value {
+    color: #526871;
 }
 
 .change-address-btn,

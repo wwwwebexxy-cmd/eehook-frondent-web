@@ -535,23 +535,36 @@ const Profile = () => {
 
             <div className="address-user">
 
-                <h4>{getDefaultAddress().full_name}</h4>
+                <div className="address-field">
+                    <span className="address-field-label">Name</span>
+                    <h4>{getDefaultAddress().full_name || "—"}</h4>
+                </div>
 
-                <span>{getDefaultAddress().phone}</span>
+                <div className="address-field">
+                    <span className="address-field-label">Phone</span>
+                    <span className="address-field-value">{getDefaultAddress().phone || "—"}</span>
+                </div>
 
             </div>
 
             <div className="address-details">
 
-                <p>{getDefaultAddress().address_line}</p>
-
                 <p>
-                    {getDefaultAddress().city},{" "}
-                    
-                    {getDefaultAddress().postal_code}
+                    <span className="address-field-label">Address</span>
+                    <span className="address-field-value">{getDefaultAddress().address_line || "—"}</span>
                 </p>
 
-                <p>{getDefaultAddress().country}</p>
+                <p>
+                    <span className="address-field-label">City / Postal Code</span>
+                    <span className="address-field-value">
+                        {[getDefaultAddress().city, getDefaultAddress().postal_code].filter(Boolean).join(", ") || "—"}
+                    </span>
+                </p>
+
+                <p>
+                    <span className="address-field-label">Country</span>
+                    <span className="address-field-value">{getDefaultAddress().country || "—"}</span>
+                </p>
 
             </div>
 
