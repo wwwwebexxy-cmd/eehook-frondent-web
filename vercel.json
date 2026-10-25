@@ -37,7 +37,9 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+          "value": {
+            "re": ".*(WhatsApp|whatsapp|FacebookExternalHit|facebookexternalhit|Facebot|facebot|Twitterbot|twitterbot|TelegramBot|telegrambot|LinkedInBot|linkedinbot|Discordbot|discordbot|Pinterest|pinterest|Slackbot|slackbot|SkypeUriPreview|skypeuripreview|Googlebot|googlebot|bingbot).*"
+          }
         }
       ],
       "destination": "/api/product-share?slug=:slug&id=:id&color=:color&storage=:storage"
@@ -48,7 +50,9 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+          "value": {
+            "re": ".*(WhatsApp|whatsapp|FacebookExternalHit|facebookexternalhit|Facebot|facebot|Twitterbot|twitterbot|TelegramBot|telegrambot|LinkedInBot|linkedinbot|Discordbot|discordbot|Pinterest|pinterest|Slackbot|slackbot|SkypeUriPreview|skypeuripreview|Googlebot|googlebot|bingbot).*"
+          }
         }
       ],
       "destination": "/api/product-share?slug=:slug&id=:id&storage=:storage"
@@ -59,7 +63,9 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+          "value": {
+            "re": ".*(WhatsApp|whatsapp|FacebookExternalHit|facebookexternalhit|Facebot|facebot|Twitterbot|twitterbot|TelegramBot|telegrambot|LinkedInBot|linkedinbot|Discordbot|discordbot|Pinterest|pinterest|Slackbot|slackbot|SkypeUriPreview|skypeuripreview|Googlebot|googlebot|bingbot).*"
+          }
         }
       ],
       "destination": "/api/product-share?slug=:slug&id=:id&color=:color"
@@ -70,7 +76,9 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+          "value": {
+            "re": ".*(WhatsApp|whatsapp|FacebookExternalHit|facebookexternalhit|Facebot|facebot|Twitterbot|twitterbot|TelegramBot|telegrambot|LinkedInBot|linkedinbot|Discordbot|discordbot|Pinterest|pinterest|Slackbot|slackbot|SkypeUriPreview|skypeuripreview|Googlebot|googlebot|bingbot).*"
+          }
         }
       ],
       "destination": "/api/product-share?slug=:slug&id=:id"
