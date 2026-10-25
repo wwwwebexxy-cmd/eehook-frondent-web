@@ -341,15 +341,31 @@ const Profile = () => {
 
           <div className="profile-card">
 
-            <div className="card-title">
+            <div className="profile-card-heading">
 
-              <FaUserCircle />
+              <div className="card-title">
 
-              <h3>
+                <FaUserCircle />
 
-                Personal Information
+                <h3>
 
-              </h3>
+                  Personal Information
+
+                </h3>
+
+              </div>
+
+              {!isEditingProfile && (
+                <button
+                  type="button"
+                  className="edit-profile-btn"
+                  onClick={() => setIsEditingProfile(true)}
+                  disabled={loading}
+                >
+                  <FaEdit aria-hidden="true" />
+                  Edit
+                </button>
+              )}
 
             </div>
 
@@ -476,26 +492,15 @@ const Profile = () => {
 
               </div>
 
-              <button
-                type={isEditingProfile ? "submit" : "button"}
-                className={`save-profile-btn ${!isEditingProfile ? "edit-profile-btn" : ""}`}
-                onClick={!isEditingProfile ? () => setIsEditingProfile(true) : undefined}
-                disabled={loading}
-              >
-
-                {loading ?
-
-                  "Saving..."
-
-                  : isEditingProfile ?
-
-                  "Save Changes"
-
-                  :
-
-                  <><FaEdit aria-hidden="true" /> Edit</>}
-
-              </button>
+              {isEditingProfile && (
+                <button
+                  type="submit"
+                  className="save-profile-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
+              )}
 
             </form>
 

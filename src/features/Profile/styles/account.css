@@ -186,6 +186,18 @@
     margin-bottom: 26px;
 }
 
+.profile-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.profile-card-heading .card-title {
+    margin-bottom: 0;
+}
+
 .card-title svg,
 .title-icon {
     flex: 0 0 auto;
@@ -338,6 +350,27 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid rgba(255, 144, 0, 0.35);
+    border-radius: 10px;
+    background: #fff8ed;
+    color: var(--account-orange-dark);
+    font-size: 13px;
+    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.edit-profile-btn:hover {
+    border-color: var(--account-orange);
+    background: #fff0d9;
+    box-shadow: 0 8px 18px rgba(255, 144, 0, 0.14);
+    transform: translateY(-1px);
+}
+
+.edit-profile-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 /* Default address */
