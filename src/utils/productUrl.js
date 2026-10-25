@@ -19,3 +19,31 @@ export function getProductDetailsPath(productOrName, productId) {
 
     return `/single/${encodeURIComponent(slugifyProductName(name))}/${encodeURIComponent(String(id))}/p`;
 }
+
+function addSelectionParam(params, key, value) {
+    if (value === null || value === undefined || value === "") return;
+    params.set(key, String(value));
+}
+
+export function getProductSelectionPath(productOrName, selection = {}) {
+    const basePath = getProductDetailsPath(productOrName);
+    const params = new URLSearchParams();
+
+    addSelectionParam(params, "variant", selection.variantId ?? selection.variant);
+    addSelectionParam(params, "size", selection.sizeId ?? selection.size);
+
+    const colorSlug = selection.color ? slugifyProductName(selection.color) : "";
+    const storageSlug = selection.storage ? slugifyProductName(selection.storage) : "";
+    let selectionPath = basePath;
+
+    if (colorSlug && storageSlug) {
+        selectionPath = `${basePath}/${encodeURIComponent(colorSlug)}/${encodeURIComponent(storageSlug)}`;
+    } else if (colorSlug) {
+        selectionPath = `${basePath}/${encodeURIComponent(colorSlug)}`;
+    } else if (storageSlug) {
+        selectionPath = `${basePath}/storage/${encodeURIComponent(storageSlug)}`;
+    }
+
+    const query = params.toString();
+    return query ? `${selectionPath}?${query}` : selectionPath;
+}

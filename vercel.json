@@ -32,6 +32,50 @@
       "destination": "https://16-16-204-58.sslip.io/:path*"
     },
     {
+      "source": "/single/:slug/:id/p/:color/:storage",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+        }
+      ],
+      "destination": "/api/product-share?slug=:slug&id=:id&color=:color&storage=:storage"
+    },
+    {
+      "source": "/single/:slug/:id/p/storage/:storage",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+        }
+      ],
+      "destination": "/api/product-share?slug=:slug&id=:id&storage=:storage"
+    },
+    {
+      "source": "/single/:slug/:id/p/:color",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+        }
+      ],
+      "destination": "/api/product-share?slug=:slug&id=:id&color=:color"
+    },
+    {
+      "source": "/single/:slug/:id/p",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|discordbot|pinterest|slackbot|skypeuripreview|googlebot|bingbot)"
+        }
+      ],
+      "destination": "/api/product-share?slug=:slug&id=:id"
+    },
+    {
       "source": "/:path((?!backend(?:/|$)).*)",
       "destination": "/index.html"
     }

@@ -36,7 +36,7 @@ import {
 import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
-import { getProductDetailsPath, slugifyProductName } from "../../../utils/productUrl";
+import { getProductDetailsPath, getProductSelectionPath, slugifyProductName } from "../../../utils/productUrl";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -92,6 +92,77 @@ function getProductHeading(name, storageLabel, colorLabel) {
     }
 
     return heading;
+}
+
+function updateMetaContent(attr, key, value, touched, created) {
+    let element = Array.from(document.head.querySelectorAll("meta")).find(
+        (item) => item.getAttribute(attr) === key
+    );
+
+    if (!element) {
+        element = document.createElement("meta");
+        element.setAttribute(attr, key);
+        document.head.appendChild(element);
+        created.push(element);
+        touched.push({ element, previous: null });
+    } else {
+        touched.push({ element, previous: element.getAttribute("content") });
+    }
+
+    element.setAttribute("content", value);
+}
+
+function updateCanonicalUrl(value, touched, created) {
+    let element = document.head.querySelector('link[rel="canonical"]');
+
+    if (!element) {
+        element = document.createElement("link");
+        element.setAttribute("rel", "canonical");
+        document.head.appendChild(element);
+        created.push(element);
+        touched.push({ element, previous: null });
+    } else {
+        touched.push({ element, previous: element.getAttribute("href") });
+    }
+
+    element.setAttribute("href", value);
+}
+
+function updateProductMetadata({ title, description, url, image, imageAlt }) {
+    if (typeof document === "undefined") return () => {};
+
+    const previousTitle = document.title;
+    const touched = [];
+    const created = [];
+    const absoluteImage = new URL(image, window.location.origin).href;
+
+    document.title = title;
+    updateMetaContent("name", "description", description, touched, created);
+    updateMetaContent("property", "og:title", title, touched, created);
+    updateMetaContent("property", "og:description", description, touched, created);
+    updateMetaContent("property", "og:url", url, touched, created);
+    updateMetaContent("property", "og:type", "product", touched, created);
+    updateMetaContent("property", "og:image", absoluteImage, touched, created);
+    updateMetaContent("property", "og:image:alt", imageAlt, touched, created);
+    updateMetaContent("name", "twitter:title", title, touched, created);
+    updateMetaContent("name", "twitter:description", description, touched, created);
+    updateMetaContent("name", "twitter:image", absoluteImage, touched, created);
+    updateCanonicalUrl(url, touched, created);
+
+    return () => {
+        document.title = previousTitle;
+        touched.reverse().forEach(({ element, previous }) => {
+            if (created.includes(element)) {
+                element.remove();
+            } else if (previous === null) {
+                element.removeAttribute("content");
+            } else if (element.tagName.toLowerCase() === "link") {
+                element.setAttribute("href", previous);
+            } else {
+                element.setAttribute("content", previous);
+            }
+        });
+    };
 }
 
 function getSavingsPercentage(originalPrice, currentPrice) {
@@ -182,7 +253,13 @@ function Single_product() {
 
     const navigate = useNavigate();
 
-    const { id, slug } = useParams();
+    const {
+        id,
+        slug,
+        colorSlug,
+        storageSlug,
+        storageOnlySlug,
+    } = useParams();
 
     const [searchParams] = useSearchParams();
 
@@ -435,12 +512,17 @@ function Single_product() {
 
         if (!data?.variants?.length) return;
 
-        // User came from Cart
+        const routeStorageSlug = storageOnlySlug || storageSlug;
+        const routeVariant = data.variants.find(
+            (variant) => variant.id === variantId
+        ) || data.variants.find(
+            (variant) => colorSlug && slugifyProductName(variant.color?.name) === colorSlug
+        ) || data.variants[0];
 
-        if (variantId) {
-            const variant = data.variants.find(
-                v => v.id === variantId
-            );
+        // Restore the selected color/storage from either the readable URL
+        // segments or the legacy variant/size query parameters.
+        if (variantId || colorSlug || routeStorageSlug) {
+            const variant = routeVariant;
 
             if (variant) {
                 setSelectedColor(
@@ -450,6 +532,12 @@ function Single_product() {
                 const size =
                     variant.sizes?.find(
                         s => s.id === sizeId
+                    ) ||
+                    variant.sizes?.find(
+                        (item) => {
+                            const option = item.unit || item.size;
+                            return routeStorageSlug && slugifyProductName(option?.name) === routeStorageSlug;
+                        }
                     ) ||
                     variant.sizes?.[0];
 
@@ -462,6 +550,7 @@ function Single_product() {
                 setActiveImage(
                     image?.image
                 );
+                syncProductSelectionUrl(variant, size || null);
                 return;
             }
         }
@@ -475,9 +564,9 @@ function Single_product() {
             firstVariant.color
         );
 
-        setSelectedSize(
-            getStorageOption(firstVariant)
-        );
+        const firstSize = firstVariant.sizes?.find((item) => item.unit || item.size) || null;
+
+        setSelectedSize(firstSize ? (firstSize.unit || firstSize.size) : null);
 
         const image = firstVariant.images.find(img => img.is_primary) || firstVariant.images[0];
 
@@ -485,10 +574,15 @@ function Single_product() {
             image?.image || null
         );
 
+        syncProductSelectionUrl(firstVariant, firstSize);
+
     }, [
         data,
         variantId,
-        sizeId
+        sizeId,
+        colorSlug,
+        storageSlug,
+        storageOnlySlug,
     ]);
 
     const availableSizes =
@@ -512,6 +606,59 @@ function Single_product() {
         || getStorageOption(selectedVariant);
     const selectedStorageLabel = selectedStorage?.name || "";
     const productHeading = getProductHeading(data.name, selectedStorageLabel, selectedColor?.name);
+
+    const syncProductSelectionUrl = (variant, sizeOption) => {
+        if (!data?.id || !variant?.id) return;
+
+        const storage = sizeOption?.unit || sizeOption?.size;
+        navigate(
+            getProductSelectionPath(data, {
+                variantId: variant.id,
+                sizeId: sizeOption?.id,
+                color: variant.color?.name,
+                storage: storage?.name,
+            }),
+            { replace: true, preventScrollReset: true }
+        );
+    };
+
+    useEffect(() => {
+        if (!data?.id || !selectedVariant) return undefined;
+
+        const selectedImage = activeImage
+            || selectedVariant.images?.find((image) => image.is_primary)?.image
+            || selectedVariant.images?.[0]?.image;
+        const imageUrl = selectedImage ? getImageUrl(selectedImage) : "/eehook.jpeg";
+        const description = (descriptionText || `Shop ${productHeading} at EEHOOK.`)
+            .replace(/\s+/g, " ")
+            .slice(0, 200);
+        const url = new URL(
+            getProductSelectionPath(data, {
+                variantId: selectedVariant.id,
+                sizeId: selectedSizeVariant?.id,
+                color: selectedColor?.name,
+                storage: selectedStorageLabel,
+            }),
+            window.location.origin
+        ).href;
+
+        return updateProductMetadata({
+            title: `${productHeading} | EEHOOK`,
+            description,
+            url,
+            image: imageUrl,
+            imageAlt: productHeading,
+        });
+    }, [
+        activeImage,
+        data,
+        descriptionText,
+        productHeading,
+        selectedColor,
+        selectedSizeVariant,
+        selectedStorageLabel,
+        selectedVariant,
+    ]);
 
     const displayImages =
         selectedVariant?.images || [];
@@ -791,10 +938,12 @@ function Single_product() {
                                         title={color.name}
                                         onClick={() => {
                                             const variant = data.variants.find(item => item.color?.id === color.id);
+                                            const nextSizeOption = variant?.sizes?.find((item) => item.unit || item.size) || null;
                                             setSelectedColor(color);
-                                             setSelectedSize(getStorageOption(variant));
+                                            setSelectedSize(nextSizeOption ? (nextSizeOption.unit || nextSizeOption.size) : null);
                                             const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
                                             setActiveImage(image?.image || null);
+                                            syncProductSelectionUrl(variant, nextSizeOption);
                                         }}
                                     >
                                         {img ? <img src={getImageUrl(img)} alt={color.name} /> : <div className="fallback-color" style={{ background: color.code }} />}
@@ -814,7 +963,10 @@ function Single_product() {
                                         <button
                                             key={item.id}
                                             className={selectedSize?.id === unitObj.id ? "size-btn active-size" : "size-btn"}
-                                            onClick={() => setSelectedSize(unitObj)}
+                                            onClick={() => {
+                                                setSelectedSize(unitObj);
+                                                syncProductSelectionUrl(selectedVariant, item);
+                                            }}
                                         >
                                             {unitObj.name}
                                         </button>
