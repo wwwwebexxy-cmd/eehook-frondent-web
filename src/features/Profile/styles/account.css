@@ -261,6 +261,17 @@
     font-size: 14px;
 }
 
+.profile-field-value {
+    display: flex;
+    align-items: center;
+    min-height: 50px;
+    padding: 0 2px;
+    color: #5f7077;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
 .input-group input:focus,
 .input-group select:focus,
 .modal-field input:focus,

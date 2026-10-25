@@ -382,14 +382,17 @@ const Profile = () => {
 
                 </label>
 
-                <input
-                  type="text"
-                  name="first_name"
-                  value={profile.first_name}
-                  onChange={handleProfileChange}
-                  readOnly={!isEditingProfile}
-                  required
-                />
+                {isEditingProfile ? (
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={profile.first_name}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                ) : (
+                  <div className="profile-field-value">{profile.first_name || "—"}</div>
+                )}
 
               </div>
 
@@ -401,12 +404,16 @@ const Profile = () => {
 
                 </label>
 
-                <input
-                  type="email"
-                  name="email"
-                  value={profile.email}
-                  readOnly
-                />
+                {isEditingProfile ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={profile.email}
+                    readOnly
+                  />
+                ) : (
+                  <div className="profile-field-value">{profile.email || "—"}</div>
+                )}
 
               </div>
 
@@ -418,14 +425,17 @@ const Profile = () => {
 
                 </label>
 
-                <input
-                  type="text"
-                  name="phone"
-                  value={profile.phone}
-                  onChange={handleProfileChange}
-                  readOnly={!isEditingProfile}
-                  required
-                />
+                {isEditingProfile ? (
+                  <input
+                    type="text"
+                    name="phone"
+                    value={profile.phone}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                ) : (
+                  <div className="profile-field-value">{profile.phone || "—"}</div>
+                )}
 
               </div>
 
@@ -437,39 +447,21 @@ const Profile = () => {
 
                 </label>
 
-                <select
-                  name="gender"
-                  value={profile.gender}
-                  onChange={handleProfileChange}
-                  disabled={!isEditingProfile}
-                  required
-                >
-
-                  <option value="">
-
-                    Select Gender
-
-                  </option>
-
-                  <option value="Male">
-
-                    Male
-
-                  </option>
-
-                  <option value="Female">
-
-                    Female
-
-                  </option>
-
-                  <option value="Other">
-
-                    Other
-
-                  </option>
-
-                </select>
+                {isEditingProfile ? (
+                  <select
+                    name="gender"
+                    value={profile.gender}
+                    onChange={handleProfileChange}
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                ) : (
+                  <div className="profile-field-value">{profile.gender || "—"}</div>
+                )}
 
               </div>
 
@@ -481,14 +473,17 @@ const Profile = () => {
 
                 </label>
 
-                <input
-                  type="date"
-                  name="date_of_birth"
-                  value={profile.date_of_birth}
-                  onChange={handleProfileChange}
-                  readOnly={!isEditingProfile}
-                  required
-                />
+                {isEditingProfile ? (
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    value={profile.date_of_birth}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                ) : (
+                  <div className="profile-field-value">{profile.date_of_birth || "—"}</div>
+                )}
 
               </div>
 
