@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { AiOutlineDoubleRight, AiOutlineEye, AiOutlineCheckCircle, AiOutlineLock, AiOutlineLeft, AiOutlineRight, AiOutlineDown, AiOutlineUp } from "react-icons/ai";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FiShare2 } from "react-icons/fi";
 import GetSingle_product_Query from "../queries/GetSingle_product_Query";
 import Cart_query from "../../cart/queries/Cart_query";
 import { addToCart_Post } from "../api/AddToCart_Api";
@@ -851,6 +852,48 @@ function Single_product() {
             (selectedVariant?.price_type === 'single' || item.variant_size === selectedSizeVariant?.id)
     );
 
+    const shareProduct = async () => {
+        if (!data?.id || !selectedVariant || typeof window === "undefined") return;
+
+        const sharePath = getProductSelectionPath(data, {
+            variantId: selectedVariant.id,
+            sizeId: selectedSizeVariant?.id,
+            color: selectedColor?.name,
+            storage: selectedStorageLabel,
+        });
+        const shareUrl = new URL(sharePath, window.location.origin).href;
+        const shareTitle = `${productHeading} | EEHOOK`;
+        const shareText = `Check out ${productHeading} on EEHOOK.`;
+
+        try {
+            if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+                await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+                return;
+            }
+
+            if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(shareUrl);
+                showToast.success("Product link copied");
+                return;
+            }
+
+            const textArea = document.createElement("textarea");
+            textArea.value = shareUrl;
+            textArea.setAttribute("readonly", "");
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            textArea.remove();
+            showToast.success("Product link copied");
+        } catch (shareError) {
+            if (shareError?.name !== "AbortError") {
+                showToast.error("Could not share this product");
+            }
+        }
+    };
+
     return (
         <div className="single-product-main">
             <div className="single-product-toshop">
@@ -868,6 +911,15 @@ function Single_product() {
                         <div className="main-image" style={{ cursor: 'pointer' }}>
                             <button className="wishlist-icon" onClick={(e) => { e.stopPropagation(); addToWishlist(); }}>
                                 {isWishlisted ? <FaHeart color="#fd0707ff" /> : <FaRegHeart color="#4B636D" />}
+                            </button>
+                            <button
+                                type="button"
+                                className="share-product-button"
+                                onClick={(e) => { e.stopPropagation(); shareProduct(); }}
+                                aria-label="Share product"
+                                title="Share product"
+                            >
+                                <FiShare2 aria-hidden="true" />
                             </button>
                             <img
                                 onClick={() => {

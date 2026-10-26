@@ -210,6 +210,37 @@
     transform: scale(1.1);
 }
 
+.share-product-button {
+    position: absolute;
+    top: 66px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 5px;
+    border: 0;
+    border-radius: 50%;
+    color: #4B636D;
+    background: rgba(255, 255, 255, .88);
+    box-shadow: 0 2px 8px rgba(38, 64, 72, .16);
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.share-product-button svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.2;
+}
+
+.share-product-button:hover {
+    color: #f28a00;
+    background: #fff;
+    transform: scale(1.1);
+}
+
 
 
 .main-image img {
@@ -891,6 +922,8 @@
 @media (max-width: 360px) {
     .single-product { padding: 10px; }
     .wishlist-icon { top: 8px; right: 8px; width: 36px; height: 36px; font-size: 21px; }
+    .share-product-button { top: 50px; right: 8px; width: 36px; height: 36px; }
+    .share-product-button svg { width: 18px; height: 18px; }
 }
 
 .image-popup-modal {
