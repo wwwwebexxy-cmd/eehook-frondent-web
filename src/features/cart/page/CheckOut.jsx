@@ -549,9 +549,10 @@ const Checkout = () => {
                         <div className="eehook-summary-total">
                                                         <div className="eehook-summary-row">
 
-                                <span>
+                                <span className="eehook-subtotal-label">
 
-                                    Subtotal
+                                    <span>Subtotal</span>
+                                    <small>Price includes 5% VAT</small>
 
                                 </span>
 
