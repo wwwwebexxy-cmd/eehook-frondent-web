@@ -12,4 +12,6 @@
 .product-type-field{border:1px solid var(--admin-line);border-radius:8px;padding:13px;margin:0 0 16px}.product-type-field legend{padding:0 5px;color:var(--admin-ink);font-size:12px;font-weight:800}.product-type-field label{display:inline-flex;align-items:center;gap:6px;margin-right:20px;color:var(--admin-muted);font-size:12px;font-weight:600}.product-type-field input{accent-color:var(--admin-brand)}.product-type-field small{display:block;color:var(--admin-muted);font-size:11px;margin-top:10px}
 @media(max-width:760px){.unit-editor-row{grid-template-columns:1fr 1fr}.unit-editor-row .table-icon{justify-self:end}.variant-editor>.admin-form-field{max-width:none}}
 .table-copy-button { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #cfded9; border-radius: 6px; background: #f3f8f6; color: #365b61; padding: 5px 8px; cursor: pointer; font-size: 12px; }
+.table-image-cell { width: 56px; height: 38px; display: inline-grid; place-items: center; }
 .table-image-thumb { width: 56px; height: 38px; display: block; object-fit: cover; border-radius: 6px; border: 1px solid var(--admin-line); background: #f4f7f5; }
+.table-image-fallback { width: 56px; height: 38px; display: inline-grid; place-items: center; border: 1px solid var(--admin-line); border-radius: 6px; background: #f4f7f5; color: var(--admin-muted); }

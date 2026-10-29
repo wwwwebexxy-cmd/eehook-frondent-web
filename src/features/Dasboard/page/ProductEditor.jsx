@@ -290,7 +290,8 @@ function SelectField({ label, value, options: optionRows, onChange, error, requi
 function FileField({ label, value, onChange }) { const preview = value instanceof File ? URL.createObjectURL(value) : value; return <label className="product-field"><span>{label}</span><input type="file" accept="image/*" onChange={(event) => onChange(event.target.files?.[0] || null)} />{preview && <img className="editor-image-preview" src={preview} alt="Preview" />}</label>; }
 
 function VariantCard({ variant, index, colors, unitTypes, units, fieldErrors, onChange, onDelete, onConfirmTypeChange, onAddUnit, onRemoveUnit, onAddImage, onRemoveImage, onMoveImage }) {
-    return <article className="variant-card"><div className="variant-card-heading"><div><strong>Variant {index + 1}</strong> {variant.price_type === "multiple" ? <StatusPill value="Multiple Price" /> : <StatusPill value="Single Price" />}</div><button type="button" className="table-icon danger" onClick={() => onDelete(index)}><FiTrash2 /></button></div><div className="product-form-grid two"><SelectField label="Color" value={variant.color} options={colors} onChange={(value) => onChange(index, "color", value)} error={fieldErrors[`variant_${index}_color`]} /><TextField label="SKU (optional)" value={variant.sku} onChange={(value) => onChange(index, "sku", value)} error={fieldErrors[`variant_${index}_sku`]} hint="SKU (Stock Keeping Unit) is a unique code for this variant. Example: TSHIRT-BLUE-M" /><fieldset className="price-type-field"><legend>Price Type</legend><label><input type="radio" checked={variant.price_type === "single"} onChange={() => onConfirmTypeChange("single")} /> Single Price</label><label><input type="radio" checked={variant.price_type === "multiple"} onChange={() => onConfirmTypeChange("multiple")} /> Multiple Price</label></fieldset></div>{variant.price_type === "single" ? <div className="product-form-grid two"><NumberField label="Price" min="0.01" value={variant.price} onChange={(value) => onChange(index, "price", value)} error={fieldErrors[`variant_${index}_price`]} /><NumberField label="Stock" min="0" step="1" value={variant.stock} onChange={(value) => onChange(index, "stock", value)} error={fieldErrors[`variant_${index}_stock`]} /></div> : <UnitTable units={variant.units} unitTypes={unitTypes} unitOptions={units} errors={fieldErrors} variantIndex={index} onAdd={onAddUnit} onRemove={onRemoveUnit} onChange={(unitIndex, key, value) => onChange(index, "units", variant.units.map((unit, current) => current === unitIndex ? { ...unit, [key]: value } : unit))} />}<div className="variant-images"><div className="variant-subheading"><strong>Product images</strong><label className="admin-button secondary"><FiImage /> Add Image<input hidden type="file" accept="image/*" onChange={(event) => { if (event.target.files?.[0]) onAddImage(event.target.files[0]); event.target.value = ""; }} /></label></div><div className="variant-image-grid">{variant.images.map((image, imageIndex) => <div className="variant-image-item" draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", String(imageIndex))} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); const from = Number(event.dataTransfer.getData("text/plain")); if (Number.isInteger(from)) onMoveImage(from, imageIndex); }} key={idOf(image) || `${imageIndex}-${image.image}`}><img src={image.file ? URL.createObjectURL(image.file) : getImageUrl(image.image)} alt="Product" /><span className="image-position">{imageIndex + 1}</span><label className="primary-image-check"><input type="radio" name={`primary-image-${index}`} checked={Boolean(image.is_primary)} onChange={() => onChange(index, "images", variant.images.map((item, current) => ({ ...item, is_primary: current === imageIndex })))} /> Primary</label><button type="button" onClick={() => onRemoveImage(imageIndex)} aria-label="Delete image"><FiX /></button></div>)}</div></div></article>;
+    const updateUnit = (unitIndex, changes) => onChange(index, "units", variant.units.map((unit, current) => current === unitIndex ? { ...unit, ...changes } : unit));
+    return <article className="variant-card"><div className="variant-card-heading"><div><strong>Variant {index + 1}</strong> {variant.price_type === "multiple" ? <StatusPill value="Multiple Price" /> : <StatusPill value="Single Price" />}</div><button type="button" className="table-icon danger" onClick={() => onDelete(index)}><FiTrash2 /></button></div><div className="product-form-grid two"><SelectField label="Color" value={variant.color} options={colors} onChange={(value) => onChange(index, "color", value)} error={fieldErrors[`variant_${index}_color`]} /><TextField label="SKU (optional)" value={variant.sku} onChange={(value) => onChange(index, "sku", value)} error={fieldErrors[`variant_${index}_sku`]} hint="SKU (Stock Keeping Unit) is a unique code for this variant. Example: TSHIRT-BLUE-M" /><fieldset className="price-type-field"><legend>Price Type</legend><label><input type="radio" checked={variant.price_type === "single"} onChange={() => onConfirmTypeChange("single")} /> Single Price</label><label><input type="radio" checked={variant.price_type === "multiple"} onChange={() => onConfirmTypeChange("multiple")} /> Multiple Price</label></fieldset></div>{variant.price_type === "single" ? <div className="product-form-grid two"><NumberField label="Price" min="0.01" value={variant.price} onChange={(value) => onChange(index, "price", value)} error={fieldErrors[`variant_${index}_price`]} /><NumberField label="Stock" min="0" step="1" value={variant.stock} onChange={(value) => onChange(index, "stock", value)} error={fieldErrors[`variant_${index}_stock`]} /></div> : <UnitTable units={variant.units} unitTypes={unitTypes} unitOptions={units} errors={fieldErrors} variantIndex={index} onAdd={onAddUnit} onRemove={onRemoveUnit} onChange={updateUnit} />}<div className="variant-images"><div className="variant-subheading"><strong>Product images</strong><label className="admin-button secondary"><FiImage /> Add Image<input hidden type="file" accept="image/*" onChange={(event) => { if (event.target.files?.[0]) onAddImage(event.target.files[0]); event.target.value = ""; }} /></label></div><div className="variant-image-grid">{variant.images.map((image, imageIndex) => <div className="variant-image-item" draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", String(imageIndex))} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); const from = Number(event.dataTransfer.getData("text/plain")); if (Number.isInteger(from)) onMoveImage(from, imageIndex); }} key={idOf(image) || `${imageIndex}-${image.image}`}><img src={image.file ? URL.createObjectURL(image.file) : getImageUrl(image.image)} alt="Product" /><span className="image-position">{imageIndex + 1}</span><label className="primary-image-check"><input type="radio" name={`primary-image-${index}`} checked={Boolean(image.is_primary)} onChange={() => onChange(index, "images", variant.images.map((item, current) => ({ ...item, is_primary: current === imageIndex })))} /> Primary</label><button type="button" onClick={() => onRemoveImage(imageIndex)} aria-label="Delete image"><FiX /></button></div>)}</div></div></article>;
 }
 
 function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd, onRemove, onChange }) {
@@ -322,14 +323,13 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                     const valid = unitOptions.some(
                                         (option) => String(option.value) === String(unit.unit) && String(option.unitType) === String(nextType),
                                     );
-                                    onChange(index, "unit_type", nextType);
-                                    if (!valid) onChange(index, "unit", "");
+                                    onChange(index, { unit_type: nextType, ...(valid ? {} : { unit: "" }) });
                                 }}
                             >
                                 <option value="">Unit Type *</option>
                                 {unitTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                             </select>
-                            <select value={unit.unit || ""} onChange={(event) => onChange(index, "unit", event.target.value)}>
+                            <select value={unit.unit || ""} onChange={(event) => onChange(index, { unit: event.target.value })}>
                                 <option value="">Unit *</option>
                                 {filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                             </select>
@@ -339,7 +339,7 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                     type="text"
                                     value={unit.sku || ""}
                                     autoComplete="off"
-                                    onChange={(event) => onChange(index, "sku", event.target.value)}
+                                    onChange={(event) => onChange(index, { sku: event.target.value })}
                                 />
                                 {errors[`${prefix}_sku`] && <small>{errors[`${prefix}_sku`]}</small>}
                             </label>
@@ -350,7 +350,7 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                     min="0.01"
                                     step="0.01"
                                     value={unit.price ?? ""}
-                                    onChange={(event) => onChange(index, "price", event.target.value)}
+                                    onChange={(event) => onChange(index, { price: event.target.value })}
                                 />
                             </label>
                             <label className="variant-unit-field">
@@ -360,7 +360,7 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                     min="0"
                                     step="1"
                                     value={unit.stock ?? ""}
-                                    onChange={(event) => onChange(index, "stock", event.target.value)}
+                                    onChange={(event) => onChange(index, { stock: event.target.value })}
                                 />
                             </label>
                             <button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit">
@@ -372,7 +372,7 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                         </div>
                         <label className="variant-unit-grade">
                             <span>Grade <small>(optional)</small></span>
-                            <input type="text" value={unit.grade || ""} placeholder="Grade (optional)" onChange={(event) => onChange(index, "grade", event.target.value)} />
+                            <input type="text" value={unit.grade || ""} placeholder="Grade (optional)" onChange={(event) => onChange(index, { grade: event.target.value })} />
                         </label>
                         {errors[`${prefix}_unit_type`] && <small className="product-error">{errors[`${prefix}_unit_type`]}</small>}
                         {errors[`${prefix}_unit`] && <small className="product-error">{errors[`${prefix}_unit`]}</small>}

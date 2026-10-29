@@ -292,18 +292,49 @@ function AdminHeaderActions({ children }) {
     return <div className="admin-header-actions">{children}</div>;
 }
 
+function imagePath(value) {
+    if (typeof value === "string") return value;
+    if (!value || typeof value !== "object") return null;
+    return value.url || value.image || value.path || value.file || null;
+}
+
+function relationId(value) {
+    if (value && typeof value === "object") return value.id ?? value.pk ?? null;
+    return value;
+}
+
 function relatedProductImageMap(variants, images) {
     const variantById = new Map(variants.map((variant) => [String(recordId(variant)), variant]));
     const productImages = new Map();
     images.forEach((image) => {
-        const variantId = image?.variant?.id ?? image?.variant;
+        const variantId = relationId(image?.variant ?? image?.variant_id);
         const variant = variantById.get(String(variantId));
-        const productId = variant?.product?.id ?? variant?.product;
-        const imageUrl = typeof image?.image === "string" ? getImageUrl(image.image) : typeof image?.url === "string" ? getImageUrl(image.url) : null;
+        const productId = relationId(
+            image?.product
+                ?? image?.product_id
+                ?? variant?.product
+                ?? variant?.product_id,
+        );
+        const imageUrl = imagePath(image?.image) || imagePath(image?.url) || imagePath(image?.file);
         if (!productId || !imageUrl) return;
-        if (!productImages.has(String(productId)) || image.is_primary) productImages.set(String(productId), imageUrl);
+        if (!productImages.has(String(productId)) || image.is_primary) {
+            // Keep the API value raw. It is resolved exactly once when the
+            // table renders it; resolving here would produce /backend/backend
+            // when the mapped value is passed through getImageUrl again.
+            productImages.set(String(productId), imageUrl);
+        }
     });
     return productImages;
+}
+
+function productImagePath(product, productImageMap) {
+    const directImage = imagePath(product?.product_image) || imagePath(product?.image) || imagePath(product?.thumbnail);
+    if (directImage) return directImage;
+
+    const nestedImages = (Array.isArray(product?.variants) ? product.variants : [])
+        .flatMap((variant) => (Array.isArray(variant?.images) ? variant.images : []));
+    const nestedImage = nestedImages.find((image) => image?.is_primary) || nestedImages[0];
+    return imagePath(nestedImage) || productImageMap.get(String(recordId(product))) || null;
 }
 
 export default function OrderDashboard() {
@@ -461,10 +492,23 @@ function ResourcePage({ resource, schema }) {
     const [tableReferences, setTableReferences] = useState({});
     const params = useMemo(() => ({ page, page_size: pageSize, ...(search && { search }), ...(ordering && { ordering }), ...(resource === "orders" && status && { status }), ...(resource === "orders" && paymentStatus && { payment_status: paymentStatus }), ...(resource === "orders" && dateFrom && { date_from: dateFrom }), ...(resource === "orders" && dateTo && { date_to: dateTo }), ...(resource === "coupons" && couponProduct && { product: couponProduct }), ...(resource === "coupons" && couponCategory && { category: couponCategory }), ...(resource === "coupons" && couponDiscountType && { discount_type: couponDiscountType }), ...(resource === "coupons" && couponActive && { is_active: couponActive }) }), [page, pageSize, search, ordering, resource, status, paymentStatus, dateFrom, dateTo, couponProduct, couponCategory, couponDiscountType, couponActive]);
     const state = useAdminResource(resource, params);
-    const relationshipParams = useMemo(() => ({ page_size: 500 }), []);
-    const productVariantsState = useAdminResource("product-variants", relationshipParams, resource === "products");
-    const productImagesState = useAdminResource("product-images", relationshipParams, resource === "products");
-    const productImageMap = useMemo(() => relatedProductImageMap(productVariantsState.rows, productImagesState.rows), [productVariantsState.rows, productImagesState.rows]);
+    const [productRelatedRows, setProductRelatedRows] = useState({ variants: [], images: [] });
+    useEffect(() => {
+        let active = true;
+        if (resource !== "products") {
+            return () => { active = false; };
+        }
+        Promise.all([
+            fetchAllResourceRows("product-variants"),
+            fetchAllResourceRows("product-images"),
+        ]).then(([variants, images]) => {
+            if (active) setProductRelatedRows({ variants, images });
+        }).catch(() => {
+            if (active) setProductRelatedRows({ variants: [], images: [] });
+        });
+        return () => { active = false; };
+    }, [resource]);
+    const productImageMap = useMemo(() => relatedProductImageMap(productRelatedRows.variants, productRelatedRows.images), [productRelatedRows]);
 
     useEffect(() => {
         if (resource !== "units") return undefined;
@@ -497,9 +541,20 @@ function ResourcePage({ resource, schema }) {
         label: resource === "coupon-usages" && key === "user" ? "Used By" : columnLabel(resource, key),
         render: (row) => {
             if (resource === "products" && key === "product_image") {
-                const image = productImageMap.get(String(recordId(row))) || row.product_image || row.image;
-                const imagePath = typeof image === "object" ? image?.url || image?.image : image;
-                return imagePath ? <img className="table-image-thumb product-table-image" src={getImageUrl(imagePath)} alt={`${row.name || "Product"} image`} /> : "—";
+                const image = productImagePath(row, productImageMap);
+                if (!image) return <span className="table-image-fallback"><FiImage aria-hidden="true" /></span>;
+                return <span className="table-image-cell">
+                    <img
+                        className="table-image-thumb product-table-image"
+                        src={getImageUrl(image)}
+                        alt={`${row.name || "Product"} image`}
+                        onError={(event) => {
+                            event.currentTarget.hidden = true;
+                            event.currentTarget.nextElementSibling.hidden = false;
+                        }}
+                    />
+                    <span className="table-image-fallback" hidden><FiImage aria-hidden="true" /></span>
+                </span>;
             }
             if (resource === "coupon-usages" && ["user", "coupon", "product"].includes(key)) return recordLabel(usageReferences[{ user: "users", coupon: "coupons", product: "products" }[key]].find((item) => String(recordId(item)) === String(row?.[key]?.id ?? row?.[key])) || row?.[key]);
             return resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences);

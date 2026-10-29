@@ -55,6 +55,25 @@ describe("product editor related-products configuration", () => {
         expect(mocks.listResource).toHaveBeenCalledWith("brands", { page_size: 500 });
     });
 
+    it("keeps the selected unit type when the current unit is cleared", async () => {
+        mocks.listResource.mockImplementation((resource) => Promise.resolve({
+            data: {
+                results: resource === "unit-types" ? [{ id: 7, name: "Weight" }] : [],
+            },
+        }));
+        const user = userEvent.setup();
+        render(<ProductEditor />);
+
+        await user.click(await screen.findByRole("button", { name: /Add Variant/i }));
+        await user.click(screen.getByRole("radio", { name: "Multiple Price" }));
+        await user.click(screen.getByRole("button", { name: /Add Unit/i }));
+
+        const unitTypeSelect = screen.getAllByRole("combobox").find((select) => select.options[0]?.textContent === "Unit Type *");
+        expect(unitTypeSelect).toBeDefined();
+        await user.selectOptions(unitTypeSelect, "7");
+        expect(unitTypeSelect).toHaveValue("7");
+    });
+
     it("shows automatic mode guidance and clears the manual UI when mode changes", async () => {
         const user = userEvent.setup();
         render(<ProductEditor />);
