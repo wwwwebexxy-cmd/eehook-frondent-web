@@ -187,6 +187,7 @@ export default function ProductEditor({ readOnly = false }) {
         event.preventDefault(); if (readOnly) return;
         const validation = validate(); if (Object.keys(validation).length) { setFieldErrors(validation); setError(Object.values(validation).join(" ")); return; }
         if (!window.confirm(editing ? "Save changes to this product?" : "Create this product?")) return;
+        const generateSku = variants.length > 0 && window.confirm("Automatically generate SKU for blank SKU fields?\nChoose OK for Yes or Cancel for No.");
         setSaving(true); setError(""); setFieldErrors({}); let activeVariantIndex = -1; let activeUnitIndex = -1;
         try {
             const productPayload = makeProductPayload(product);
@@ -194,13 +195,13 @@ export default function ProductEditor({ readOnly = false }) {
             const productId = id || idOf(productResponse.data); if (!productId) throw new Error("The product response did not contain an id.");
             for (let index = 0; index < variants.length; index += 1) {
                 activeVariantIndex = index; const variant = variants[index];
-                const variantPayload = { product: productId, color: variant.color || null, price_type: variant.price_type, stock: variant.price_type === "single" ? Number(variant.stock) : 0 };
+                const variantPayload = { product: productId, color: variant.color || null, price_type: variant.price_type, stock: variant.price_type === "single" ? Number(variant.stock) : 0, generate_sku: generateSku };
                 if (String(variant.sku || "").trim()) variantPayload.sku = String(variant.sku).trim();
                 if (variant.price_type === "single") variantPayload.price = Number(variant.price);
                 const variantResponse = idOf(variant) ? await updateResource("product-variants", idOf(variant), variantPayload) : await createResource("product-variants", variantPayload);
                 const variantId = idOf(variant) || idOf(variantResponse.data); if (!variantId) throw new Error("The variant response did not contain an id.");
                 if (variant.price_type === "single") for (const unitId of [...variant.deletedUnits, ...variant.units.map(idOf).filter(Boolean)]) await deleteResource("product-variant-units", unitId);
-                else { for (const unitId of variant.deletedUnits) await deleteResource("product-variant-units", unitId); for (let unitIndex = 0; unitIndex < variant.units.length; unitIndex += 1) { activeUnitIndex = unitIndex; const unit = variant.units[unitIndex]; const unitPayload = { variant: variantId, unit_type: unit.unit_type, unit: unit.unit, grade: String(unit.grade || "").trim(), price: Number(unit.price), stock: Number(unit.stock) }; if (String(unit.sku || "").trim()) unitPayload.sku = String(unit.sku).trim(); if (idOf(unit)) await updateResource("product-variant-units", idOf(unit), unitPayload); else await createResource("product-variant-units", unitPayload); } activeUnitIndex = -1; }
+                else { for (const unitId of variant.deletedUnits) await deleteResource("product-variant-units", unitId); for (let unitIndex = 0; unitIndex < variant.units.length; unitIndex += 1) { activeUnitIndex = unitIndex; const unit = variant.units[unitIndex]; const unitPayload = { variant: variantId, unit_type: unit.unit_type, unit: unit.unit, grade: String(unit.grade || "").trim(), price: Number(unit.price), stock: Number(unit.stock), generate_sku: generateSku }; if (String(unit.sku || "").trim()) unitPayload.sku = String(unit.sku).trim(); if (idOf(unit)) await updateResource("product-variant-units", idOf(unit), unitPayload); else await createResource("product-variant-units", unitPayload); } activeUnitIndex = -1; }
                 await saveVariantImages(variantId, variant);
                 const refreshedImages = sortImages(rows((await listResource("product-images", { variant: variantId, page_size: 500 })).data));
                 setVariants((current) => current.map((item, currentIndex) => currentIndex === index ? { ...item, id: idOf(item) || variantId, images: refreshedImages, deletedImages: [] } : item));
