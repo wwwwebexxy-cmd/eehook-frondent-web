@@ -3,8 +3,6 @@
   .product-section-content { padding: 15px; }
   .variant-section-heading,
   .variant-subheading { align-items: flex-start; flex-direction: column; }
-  .editor-unit-row { grid-template-columns: 1fr 1fr; }
-  .editor-unit-row .table-icon { justify-self: end; }
   .product-editor-footer { position: sticky; bottom: 0; background: var(--admin-bg); padding: 12px 0; z-index: 2; }
 }
 
