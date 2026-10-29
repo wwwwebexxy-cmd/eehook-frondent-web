@@ -54,16 +54,42 @@ export default function ProductEditor({ readOnly = false }) {
     useEffect(() => {
         let active = true;
         const loadDropdowns = async () => {
-            const names = ["categories", "subcategories", "colors", "unit-types", "units", "products"];
-            const [results, brands] = await Promise.all([
-                Promise.all(names.map((resource) => listResource(resource, { page_size: 500 }).then((response) => response.data).catch(() => ({ results: [] })))),
-                // Brands created in the dashboard are available through the
-                // authenticated admin endpoint, not the public brands endpoint.
-                listResource("brands", { page_size: 500 }).then((response) => response.data).catch(() => ({ results: [] }))
+            const loadOption = async (resource, key, pageSize = 500) => {
+                try {
+                    const response = await listResource(resource, { page_size: pageSize });
+                    if (!active) return;
+                    const optionRows = toOptions(response.data);
+                    const sellerNames = key === "products"
+                        ? [...new Set(rows(response.data).map((product) => String(product.seller_name || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b))
+                        : null;
+                    setDropdowns((current) => ({
+                        ...current,
+                        [key]: optionRows,
+                        ...(sellerNames ? { sellerNames } : {}),
+                    }));
+                } catch {
+                    if (active) setDropdowns((current) => ({ ...current, [key]: [] }));
+                }
+            };
+
+            // Load the small, immediately-needed unit lists first. The larger
+            // product list must not block Unit Type/Unit selection.
+            await Promise.all([
+                loadOption("unit-types", "unitTypes", 100),
+                loadOption("units", "units", 500),
             ]);
-            if (!active) return;
-            const sellerNames = [...new Set(rows(results[6]).map((product) => String(product.seller_name || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-            setDropdowns({ categories: toOptions(results[0]), subcategories: toOptions(results[1]), brands: toOptions(brands), colors: toOptions(results[2]), unitTypes: toOptions(results[3]), units: toOptions(results[4]), products: toOptions(results[5]), sellerNames });
+
+            await Promise.all([
+                loadOption("categories", "categories"),
+                loadOption("subcategories", "subcategories"),
+                loadOption("colors", "colors"),
+                // Brands created in the dashboard use the authenticated admin endpoint.
+                loadOption("brands", "brands"),
+            ]);
+
+            // Products are only needed for related-product suggestions, so
+            // fetch the heavier list after the primary form options are ready.
+            await loadOption("products", "products");
         };
         loadDropdowns().catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load product options.")); });
         if (!editing) return () => { active = false; };
