@@ -174,7 +174,7 @@ export default function ProductEditor({ readOnly = false }) {
                 const variantResponse = idOf(variant) ? await updateResource("product-variants", idOf(variant), variantPayload) : await createResource("product-variants", variantPayload);
                 const variantId = idOf(variant) || idOf(variantResponse.data); if (!variantId) throw new Error("The variant response did not contain an id.");
                 if (variant.price_type === "single") for (const unitId of [...variant.deletedUnits, ...variant.units.map(idOf).filter(Boolean)]) await deleteResource("product-variant-units", unitId);
-                else { for (const unitId of variant.deletedUnits) await deleteResource("product-variant-units", unitId); for (let unitIndex = 0; unitIndex < variant.units.length; unitIndex += 1) { activeUnitIndex = unitIndex; const unit = variant.units[unitIndex]; const unitPayload = { variant: variantId, unit_type: unit.unit_type, unit: unit.unit, price: Number(unit.price), stock: Number(unit.stock) }; if (String(unit.sku || "").trim()) unitPayload.sku = String(unit.sku).trim(); if (idOf(unit)) await updateResource("product-variant-units", idOf(unit), unitPayload); else await createResource("product-variant-units", unitPayload); } activeUnitIndex = -1; }
+                else { for (const unitId of variant.deletedUnits) await deleteResource("product-variant-units", unitId); for (let unitIndex = 0; unitIndex < variant.units.length; unitIndex += 1) { activeUnitIndex = unitIndex; const unit = variant.units[unitIndex]; const unitPayload = { variant: variantId, unit_type: unit.unit_type, unit: unit.unit, grade: String(unit.grade || "").trim(), price: Number(unit.price), stock: Number(unit.stock) }; if (String(unit.sku || "").trim()) unitPayload.sku = String(unit.sku).trim(); if (idOf(unit)) await updateResource("product-variant-units", idOf(unit), unitPayload); else await createResource("product-variant-units", unitPayload); } activeUnitIndex = -1; }
                 await saveVariantImages(variantId, variant);
                 const refreshedImages = sortImages(rows((await listResource("product-images", { variant: variantId, page_size: 500 })).data));
                 setVariants((current) => current.map((item, currentIndex) => currentIndex === index ? { ...item, id: idOf(item) || variantId, images: refreshedImages, deletedImages: [] } : item));
@@ -182,7 +182,7 @@ export default function ProductEditor({ readOnly = false }) {
             toast.success(editing ? "Product updated successfully" : "Product created successfully"); navigate(`/eehook-dashboard/products/${productId}`, { replace: true });
         } catch (requestError) {
             const backendErrors = flattenApiErrors(requestError?.response?.data); const mappedErrors = { ...backendErrors };
-            Object.entries(backendErrors).forEach(([key, message]) => { if (activeVariantIndex >= 0 && ["sku", "color", "price", "stock", "price_type"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_${key}`] = message; if (activeVariantIndex >= 0 && activeUnitIndex >= 0 && ["sku", "unit", "unit_type", "price", "stock"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_unit_${activeUnitIndex}_${key}`] = message; });
+            Object.entries(backendErrors).forEach(([key, message]) => { if (activeVariantIndex >= 0 && ["sku", "color", "price", "stock", "price_type"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_${key}`] = message; if (activeVariantIndex >= 0 && activeUnitIndex >= 0 && ["sku", "unit", "unit_type", "grade", "price", "stock"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_unit_${activeUnitIndex}_${key}`] = message; });
             setFieldErrors(mappedErrors); setError(getErrorMessage(requestError, "Could not save product.")); toast.error(getErrorMessage(requestError, "Could not save product."));
         } finally { setSaving(false); }
     };
@@ -207,7 +207,7 @@ async function loadProduct(id) {
 }
 
 function normalizeProduct(data = {}) { const productData = { ...data }; delete productData.emi_available; delete productData.emi_starting_price; delete productData.offer; const manualRelated = rows(data.manual_related_products).sort((a, b) => Number(a.position ?? 0) - Number(b.position ?? 0)); const relatedIds = (Array.isArray(data.related_product_ids) && data.related_product_ids.length ? data.related_product_ids : manualRelated.map(relationId)).map(relationId); const relatedMode = ["none", "manual", "automatic"].includes(data.related_product_mode) ? data.related_product_mode : relatedIds.length ? "manual" : "none"; return { ...emptyProduct, ...productData, category: valueOf(data.category), subcategory: valueOf(data.subcategory), brand: valueOf(data.brand), key_features: Array.isArray(data.key_features) ? data.key_features.join("\n") : data.key_features || "", promotional_banner_image: data.promotional_banner_image || null, related_product_mode: relatedMode, related_product_ids: relatedIds, manual_related_products: manualRelated.map((item, position) => ({ ...item, id: relationId(item), position })) }; }
-function normalizeUnit(unit) { return { ...unit, sku: unit.sku || "", unit_type: valueOf(unit.unit_type), unit: valueOf(unit.unit) }; }
+function normalizeUnit(unit) { return { ...unit, sku: unit.sku || "", grade: unit.grade || "", unit_type: valueOf(unit.unit_type), unit: valueOf(unit.unit) }; }
 function makeProductPayload(product) { const values = { ...product, key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : String(product.key_features || ""), category: product.category || null, subcategory: product.subcategory || null, brand: product.brand || null, shipping_fee: product.shipping_fee === "" ? 0 : Number(product.shipping_fee), current_viewers_count: product.current_viewers_count === "" ? 0 : Number(product.current_viewers_count), related_product_mode: product.related_product_mode || "none", related_product_ids: product.related_product_mode === "manual" ? (product.related_product_ids || []).map(relationId) : [] }; delete values.product_type; delete values.has_variants; delete values.variants; delete values.units; delete values.images; delete values.regions; delete values.emi_available; delete values.emi_starting_price; delete values.offer; delete values.manual_related_products; const file = values.promotional_banner_image instanceof File ? values.promotional_banner_image : null; if (!file) { delete values.promotional_banner_image; return values; } const form = new FormData(); Object.entries(values).forEach(([key, value]) => { if (value === null || value === undefined) return; if (Array.isArray(value)) value.forEach((item) => form.append(key, String(item))); else form.append(key, value); }); form.set("promotional_banner_image", file); return form; }
 async function saveVariantImages(variantId, variant) {
     for (const imageId of variant.deletedImages) await deleteResource("product-images", imageId);
@@ -288,54 +288,60 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                 const prefix = `variant_${variantIndex}_unit_${index}`;
                 return (
                     <div className="editor-unit-row" key={idOf(unit) || index}>
-                        <select
-                            value={unit.unit_type || ""}
-                            onChange={(event) => {
-                                const nextType = event.target.value;
-                                const valid = unitOptions.some(
-                                    (option) => String(option.value) === String(unit.unit) && String(option.unitType) === String(nextType),
-                                );
-                                onChange(index, "unit_type", nextType);
-                                if (!valid) onChange(index, "unit", "");
-                            }}
-                        >
-                            <option value="">Unit Type *</option>
-                            {unitTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                        </select>
-                        <select value={unit.unit || ""} onChange={(event) => onChange(index, "unit", event.target.value)}>
-                            <option value="">Unit *</option>
-                            {filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                        </select>
-                        <TextField
-                            label="SKU"
-                            value={unit.sku}
-                            onChange={(value) => onChange(index, "sku", value)}
-                            error={errors[`${prefix}_sku`]}
-                            hint="SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M"
-                        />
-                        <label className="variant-unit-field">
-                            <span>Price</span>
-                            <input
-                                type="number"
-                                min="0.01"
-                                step="0.01"
-                                value={unit.price ?? ""}
-                                onChange={(event) => onChange(index, "price", event.target.value)}
+                        <div className="editor-unit-main-row">
+                            <select
+                                value={unit.unit_type || ""}
+                                onChange={(event) => {
+                                    const nextType = event.target.value;
+                                    const valid = unitOptions.some(
+                                        (option) => String(option.value) === String(unit.unit) && String(option.unitType) === String(nextType),
+                                    );
+                                    onChange(index, "unit_type", nextType);
+                                    if (!valid) onChange(index, "unit", "");
+                                }}
+                            >
+                                <option value="">Unit Type *</option>
+                                {unitTypes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                            </select>
+                            <select value={unit.unit || ""} onChange={(event) => onChange(index, "unit", event.target.value)}>
+                                <option value="">Unit *</option>
+                                {filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                            </select>
+                            <TextField
+                                label="SKU"
+                                value={unit.sku}
+                                onChange={(value) => onChange(index, "sku", value)}
+                                error={errors[`${prefix}_sku`]}
+                                hint="SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M"
                             />
+                            <label className="variant-unit-field">
+                                <span>Price</span>
+                                <input
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={unit.price ?? ""}
+                                    onChange={(event) => onChange(index, "price", event.target.value)}
+                                />
+                            </label>
+                            <label className="variant-unit-field">
+                                <span>Stock</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={unit.stock ?? ""}
+                                    onChange={(event) => onChange(index, "stock", event.target.value)}
+                                />
+                            </label>
+                            <button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit">
+                                <FiTrash2 />
+                            </button>
+                        </div>
+                        <label className="variant-unit-grade">
+                            <span>Grade <small>(optional)</small></span>
+                            <input type="text" value={unit.grade || ""} placeholder="Grade (optional)" onChange={(event) => onChange(index, "grade", event.target.value)} />
                         </label>
-                        <label className="variant-unit-field">
-                            <span>Stock</span>
-                            <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={unit.stock ?? ""}
-                                onChange={(event) => onChange(index, "stock", event.target.value)}
-                            />
-                        </label>
-                        <button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit">
-                            <FiTrash2 />
-                        </button>
                         {errors[`${prefix}_unit_type`] && <small className="product-error">{errors[`${prefix}_unit_type`]}</small>}
                         {errors[`${prefix}_unit`] && <small className="product-error">{errors[`${prefix}_unit`]}</small>}
                         {errors[`${prefix}_price`] && <small className="product-error">{errors[`${prefix}_price`]}</small>}
@@ -348,7 +354,7 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
 }
 
 function changeVariantType(variants, setVariants, index, nextType) { const variant = variants[index]; if (variant.price_type === nextType) return; if (nextType === "single" && variant.units.length && !window.confirm("Switching to Single Price will clear the unit rows. Continue?")) return; setVariants((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, price_type: nextType, units: nextType === "single" ? [] : item.units, deletedUnits: nextType === "single" ? [...item.deletedUnits, ...item.units.map(idOf).filter(Boolean)] : item.deletedUnits, price: nextType === "multiple" ? "" : item.price, stock: nextType === "multiple" ? 0 : item.stock } : item)); }
-function addUnit(setVariants, index) { setVariants((current) => current.map((variant, variantIndex) => variantIndex === index ? { ...variant, units: [...variant.units, { unit_type: "", unit: "", sku: "", price: "", stock: "" }] } : variant)); }
+function addUnit(setVariants, index) { setVariants((current) => current.map((variant, variantIndex) => variantIndex === index ? { ...variant, units: [...variant.units, { unit_type: "", unit: "", sku: "", grade: "", price: "", stock: "" }] } : variant)); }
 function removeUnit(setVariants, index, unitIndex) { if (!window.confirm("Delete this unit?")) return; setVariants((current) => current.map((variant, variantIndex) => { if (variantIndex !== index) return variant; const unit = variant.units[unitIndex]; return { ...variant, units: variant.units.filter((_, currentIndex) => currentIndex !== unitIndex), deletedUnits: idOf(unit) ? [...variant.deletedUnits, idOf(unit)] : variant.deletedUnits }; })); }
 function addImage(setVariants, index, file) { setVariants((current) => current.map((variant, variantIndex) => variantIndex === index ? { ...variant, images: [...variant.images, { file, image: "", is_primary: variant.images.length === 0, position: variant.images.length }] } : variant)); }
 function removeImage(setVariants, index, imageIndex) { if (!window.confirm("Delete this product image?")) return; setVariants((current) => current.map((variant, variantIndex) => { if (variantIndex !== index) return variant; const image = variant.images[imageIndex]; const images = variant.images.filter((_, currentIndex) => currentIndex !== imageIndex); if (image.is_primary && images[0]) images[0] = { ...images[0], is_primary: true }; return { ...variant, images, deletedImages: idOf(image) ? [...variant.deletedImages, idOf(image)] : variant.deletedImages }; })); }

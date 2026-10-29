@@ -1058,6 +1058,11 @@ function Single_product() {
                                             </>
                                         )}
                                     </div>
+                                    {String(itemPriceInfo.grade || "").trim() && (
+                                        <div className="product-grade-value">
+                                            <span>Grade:</span> {String(itemPriceInfo.grade).trim()}
+                                        </div>
+                                    )}
                                     {appliedCoupon && (
                                         <div style={{ color: 'green', fontSize: '14px', marginTop: '5px', fontWeight: 'bold' }}>
                                             {String(appliedCoupon.promotion_type || "").toUpperCase() === "WELCOME_BONUS"

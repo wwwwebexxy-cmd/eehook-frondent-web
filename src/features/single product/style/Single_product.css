@@ -546,6 +546,18 @@
     line-height: 1.1;
 }
 
+.product-grade-value {
+    margin-top: 8px;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.product-grade-value span {
+    color: #111;
+    font-weight: 700;
+}
+
 .stock-status {
     margin-bottom: 20px;
     font-weight: 500;
