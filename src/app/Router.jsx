@@ -100,6 +100,8 @@ function Router() {
                 <Route path="eehook-dashboard/products/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/products/:id" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/products/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/offers/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/offers/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/hero-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/hero-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/promo-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
