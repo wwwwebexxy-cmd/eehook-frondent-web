@@ -45,7 +45,7 @@ const resources = {
     "product-images": { label: "Product Images", group: "Catalog", fields: ["variant", "image", "is_primary", "position"], columns: ["variant", "image", "is_primary", "position"] },
     wishlists: { label: "Wishlists", group: "Customers", fields: ["user", "variant", "variant_unit"], columns: ["user", "variant", "variant_unit"] },
     carts: { label: "Carts", group: "Customers", fields: ["user", "variant", "variant_unit", "quantity", "coupon"], columns: ["user", "variant", "variant_unit", "quantity"] },
-    addresses: { label: "Addresses", group: "Customers", fields: ["user", "full_name", "phone", "address_line", "city", "postal_code", "country", "is_default"], columns: ["user", "full_name", "phone", "city", "postal_code", "is_default"] },
+    addresses: { label: "Addresses", group: "Customers", fields: ["user", "full_name", "phone", "address_line", "city", "emirate", "postal_code", "country", "is_default"], columns: ["user", "full_name", "phone", "city", "emirate", "postal_code", "is_default"] },
     "user-profiles": { label: "User Profiles", group: "Customers", fields: ["user", "phone", "date_of_birth", "gender"], columns: ["user", "phone", "date_of_birth", "gender"] },
     orders: { label: "Orders", group: "Orders", fields: ["user", "address", "customer_name", "subtotal", "discount_amount", "shipping_charge", "total_amount", "payment_status", "status", "created_at"], columns: ["customer_name", "total_amount", "payment_status", "status", "created_at"] },
     "order-items": { label: "Order Items", group: "Orders", fields: ["order", "product", "color", "unit", "quantity", "original_price", "variant_unit", "discount_amount", "price", "total_price"], columns: ["order", "product", "quantity", "price", "total_price"] },

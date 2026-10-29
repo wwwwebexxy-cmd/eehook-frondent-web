@@ -14,6 +14,20 @@ import client, { logoutSession } from "../../../lib/ApiClient";
 import "../styles/account.css";
 import showToast from "../../../utils/toast";
 
+const UAE_EMIRATES = [
+  "Abu Dhabi",
+  "Ajman",
+  "Dubai",
+  "Fujairah",
+  "Ras Al Khaimah",
+  "Sharjah",
+  "Umm Al Quwain",
+];
+
+const isUaeCountry = (country) => ["uae", "united arab emirates"].includes(
+  String(country || "").trim().toLowerCase(),
+);
+
 const Profile = () => {
 
   const navigate = useNavigate();
@@ -38,6 +52,7 @@ const Profile = () => {
     city: "",
     postal_code: "",
     country: "United Arab Emirates",
+    emirate: "",
     is_default: false
   });
 
@@ -85,10 +100,12 @@ const Profile = () => {
   const handleAddressChange = (e) => {
 
     const { name, value, type, checked } = e.target;
+    const nextValue = type === "checkbox" ? checked : value;
 
     setAddressData({
       ...addressData,
-      [name]: type === "checkbox" ? checked : value
+      [name]: nextValue,
+      ...(name === "country" && !isUaeCountry(value) ? { emirate: "" } : {}),
     });
 
   };
@@ -102,6 +119,7 @@ const Profile = () => {
       city: "",
       postal_code: "",
       country: "United Arab Emirates",
+      emirate: "",
       is_default: false
     });
 
@@ -205,6 +223,7 @@ const Profile = () => {
       city: address.city || "",
       postal_code: address.postal_code || "",
       country: address.country || "United Arab Emirates",
+      emirate: address.emirate || "",
       is_default: address.is_default
     });
 
@@ -557,7 +576,7 @@ const Profile = () => {
                 <p>
                     <span className="address-field-label">City / Postal Code</span>
                     <span className="address-field-value">
-                        {[getDefaultAddress().city, getDefaultAddress().postal_code].filter(Boolean).join(", ") || "—"}
+                        {[getDefaultAddress().city, getDefaultAddress().emirate, getDefaultAddress().postal_code].filter(Boolean).join(", ") || "—"}
                     </span>
                 </p>
 
@@ -639,19 +658,6 @@ const Profile = () => {
               </div>
             </button>
 
-            <button
-              type="button"
-              className="quick-card logout-card"
-              onClick={logout}
-            >
-              <div className="quick-icon">
-                <FaSignOutAlt />
-              </div>
-              <div>
-                <h3>Logout</h3>
-                <p>Sign out from your account</p>
-              </div>
-            </button>
           </div>
 
           </aside>
@@ -769,7 +775,7 @@ const Profile = () => {
 
                   <p>
 
-                    {address.city},{" "}
+                    {address.city}{address.emirate ? `, ${address.emirate}` : ""},{" "}
                     
 
                   </p>
@@ -824,6 +830,22 @@ const Profile = () => {
 
           )}
 
+        </div>
+
+        <div className="profile-logout-area">
+          <button
+            type="button"
+            className="quick-card logout-card"
+            onClick={logout}
+          >
+            <div className="quick-icon">
+              <FaSignOutAlt />
+            </div>
+            <div>
+              <h3>Logout</h3>
+              <p>Sign out from your account</p>
+            </div>
+          </button>
         </div>
 
         {showModal && (
@@ -931,6 +953,23 @@ const Profile = () => {
                       required
                     />
                   </div>
+
+                  {isUaeCountry(addressData.country) && (
+                    <div className="modal-field modal-field--wide">
+                      <label htmlFor="address-emirate">Emirate <small>(optional)</small></label>
+                      <select
+                        id="address-emirate"
+                        name="emirate"
+                        value={addressData.emirate}
+                        onChange={handleAddressChange}
+                      >
+                        <option value="">Select Emirate</option>
+                        {UAE_EMIRATES.map((emirate) => (
+                          <option key={emirate} value={emirate}>{emirate}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div className="modal-field modal-field--wide">
                     <label htmlFor="address-line">Street Address</label>

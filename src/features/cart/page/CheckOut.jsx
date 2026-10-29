@@ -118,7 +118,7 @@ const Checkout = () => {
             address.full_name,
             address.phone,
             address.address_line,
-            `${address.city}, ${address.postal_code}`,
+            `${address.city}${address.emirate ? `, ${address.emirate}` : ""}, ${address.postal_code}`,
             address.country,
         ].join("\n");
     };
@@ -365,7 +365,7 @@ const Checkout = () => {
 
                                             <p>
 
-                                                {address.city},{" "}
+                                                {address.city}{address.emirate ? `, ${address.emirate}` : ""},{" "}
                                                 {address.postal_code}
 
                                             </p>
