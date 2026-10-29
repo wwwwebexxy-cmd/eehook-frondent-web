@@ -316,7 +316,6 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                     onChange={(event) => onChange(index, "sku", event.target.value)}
                                 />
                                 {errors[`${prefix}_sku`] && <small>{errors[`${prefix}_sku`]}</small>}
-                                <small className="field-hint">SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M</small>
                             </label>
                             <label className="variant-unit-field">
                                 <span>Price</span>
@@ -341,6 +340,9 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                             <button type="button" className="table-icon danger" onClick={() => onRemove(index)} aria-label="Delete unit">
                                 <FiTrash2 />
                             </button>
+                        </div>
+                        <div className="editor-unit-sku-hint-row">
+                            <small className="field-hint">SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M</small>
                         </div>
                         <label className="variant-unit-grade">
                             <span>Grade <small>(optional)</small></span>
