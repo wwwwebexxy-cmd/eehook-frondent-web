@@ -71,3 +71,146 @@
 .offer-active-toggle span {
     min-width: 50px;
 }
+
+/* Keep the offer editor contained on ultrawide screens and usable on phones. */
+.offer-editor-page {
+    width: min(100%, 1320px);
+    margin-inline: auto;
+    min-width: 0;
+}
+
+.offer-editor-page .admin-page-header,
+.offer-editor-page .admin-page-header > div,
+.offer-editor-page .admin-form,
+.offer-editor-page .admin-form-grid,
+.offer-editor-page .admin-form-field,
+.offer-target-section,
+.offer-variant-choice,
+.offer-variant-option {
+    min-width: 0;
+}
+
+.offer-editor-page .admin-page-header p:last-child {
+    max-width: 760px;
+    line-height: 1.55;
+}
+
+.offer-editor-form {
+    gap: clamp(16px, 2vw, 24px);
+    padding: clamp(16px, 2.2vw, 32px);
+}
+
+.offer-editor-form .admin-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+}
+
+.offer-editor-form .admin-form-field-wide {
+    grid-column: 1 / -1;
+}
+
+.offer-editor-form input,
+.offer-editor-form select,
+.offer-editor-form textarea {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.offer-editor-form input[type="file"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.offer-target-section {
+    padding: clamp(14px, 1.7vw, 24px);
+}
+
+.offer-target-heading p {
+    line-height: 1.5;
+}
+
+.offer-variant-choice {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.offer-variant-choice legend {
+    grid-column: 1 / -1;
+    width: auto;
+}
+
+.offer-variant-option small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.offer-editor-form > .admin-modal-actions {
+    padding-top: 4px;
+}
+
+@media (max-width: 760px) {
+    .offer-editor-form {
+        padding: 16px;
+    }
+
+    .offer-editor-form .admin-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .offer-editor-form .admin-form-field-wide {
+        grid-column: auto;
+    }
+
+    .offer-variant-choice {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .offer-variant-choice legend {
+        grid-column: auto;
+    }
+
+    .offer-variant-option {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .offer-variant-option small {
+        grid-column: 2;
+        margin-top: -4px;
+    }
+
+    .offer-editor-form > .admin-modal-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .offer-editor-form > .admin-modal-actions .admin-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .offer-editor-form {
+        gap: 16px;
+        padding: 12px;
+    }
+
+    .offer-target-section {
+        gap: 13px;
+        padding: 13px;
+        border-radius: 12px;
+    }
+
+    .offer-target-heading h3 {
+        font-size: 17px;
+    }
+
+    .offer-target-heading p {
+        font-size: 12px;
+    }
+
+    .offer-variant-choice {
+        gap: 10px;
+    }
+}
