@@ -307,13 +307,17 @@ function UnitTable({ units, unitTypes, unitOptions, errors, variantIndex, onAdd,
                                 <option value="">Unit *</option>
                                 {filteredUnits.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                             </select>
-                            <TextField
-                                label="SKU"
-                                value={unit.sku}
-                                onChange={(value) => onChange(index, "sku", value)}
-                                error={errors[`${prefix}_sku`]}
-                                hint="SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M"
-                            />
+                            <label className={`variant-unit-field variant-unit-sku-field ${errors[`${prefix}_sku`] ? "has-error" : ""}`}>
+                                <span>SKU</span>
+                                <input
+                                    type="text"
+                                    value={unit.sku || ""}
+                                    autoComplete="off"
+                                    onChange={(event) => onChange(index, "sku", event.target.value)}
+                                />
+                                {errors[`${prefix}_sku`] && <small>{errors[`${prefix}_sku`]}</small>}
+                                <small className="field-hint">SKU (Stock Keeping Unit) is a unique code for this unit. Example: TSHIRT-BLUE-M</small>
+                            </label>
                             <label className="variant-unit-field">
                                 <span>Price</span>
                                 <input

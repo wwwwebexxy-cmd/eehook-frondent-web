@@ -19,6 +19,7 @@
         38px;
     gap: 8px;
     align-items: start;
+    grid-auto-rows: minmax(min-content, auto);
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
@@ -72,6 +73,26 @@
     color: var(--admin-ink);
     font-size: 11px;
     font-weight: 700;
+}
+
+.variant-unit-sku-field {
+    align-self: start;
+    min-height: 0;
+}
+
+.variant-unit-sku-field .field-hint {
+    display: block;
+    margin: 0;
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.variant-unit-sku-field.has-error .field-hint {
+    margin-top: 0;
 }
 
 .variant-unit-field input {
