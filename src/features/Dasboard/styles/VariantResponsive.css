@@ -35,7 +35,7 @@
 }
 
 .unit-editor-row {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) 38px;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) 38px;
     min-width: 0;
 }
 
