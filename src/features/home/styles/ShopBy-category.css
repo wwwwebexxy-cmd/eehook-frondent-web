@@ -96,6 +96,8 @@
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: auto;
+    overflow-anchor: none;
+    overscroll-behavior-x: contain;
     justify-content: space-evenly;
     scrollbar-width: none;
     padding: 8px 58px 12px;
@@ -142,6 +144,11 @@
     cursor: pointer;
     text-align: center;
     transition: .35s ease;
+}
+
+.category-card-spacer {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .category-card:hover,

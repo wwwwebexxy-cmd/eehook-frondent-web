@@ -28,6 +28,7 @@ function Shop_by_category({ categories: providedCategories }) {
     const subCategorySliderRef = useRef(null);
     const categoryScrollCheckFrame = useRef(null);
     const categoryAutoPauseUntil = useRef(0);
+    const categoryLoopDistanceRef = useRef(0);
 
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [closing, setClosing] = useState(false);
@@ -141,6 +142,19 @@ function Shop_by_category({ categories: providedCategories }) {
         ? [{ id: `offer-${activeOffer.id}`, name: "OFFERS", image: specialOffer, type: "offer" }, ...categories]
         : categories;
 
+    // The category rail is a two-row grid. Keep each repeated track an even
+    // number of cards so the second copy always starts on a fresh column;
+    // otherwise odd item counts make the loop distance jump backwards.
+    const categoryLoopLength = categoryItems.length > 1
+        ? categoryItems.length + (categoryItems.length % 2)
+        : categoryItems.length;
+    const categoryLoopBase = categoryItems.length > 1 && categoryItems.length % 2
+        ? [...categoryItems, { id: `category-spacer-${categoryItems.length}`, type: "spacer" }]
+        : categoryItems;
+    const categoryLoopItems = categoryItems.length > 1
+        ? [...categoryLoopBase, ...categoryLoopBase]
+        : categoryItems;
+
 
 
     useEffect(() => {
@@ -169,32 +183,47 @@ function Shop_by_category({ categories: providedCategories }) {
 
     useEffect(() => {
         const container = categorySliderRef.current;
-        if (!container || categoryItems.length < 2) return undefined;
+        if (!container || categoryLoopLength < 2) return undefined;
 
         const firstItem = container.children[0];
-        const repeatedFirstItem = container.children[categoryItems.length];
+        const repeatedFirstItem = container.children[categoryLoopLength];
         if (!firstItem || !repeatedFirstItem) return undefined;
-
-        const loopDistance = repeatedFirstItem.offsetLeft - firstItem.offsetLeft;
-        if (loopDistance <= 0) return undefined;
 
         let animationFrame;
         let previousTime;
         let scrollPosition = container.scrollLeft;
         const pixelsPerSecond = 36;
 
+        const measureLoopDistance = () => {
+            const distance = repeatedFirstItem.offsetLeft - firstItem.offsetLeft;
+            if (distance > 0) categoryLoopDistanceRef.current = distance;
+        };
+
+        measureLoopDistance();
+        if (categoryLoopDistanceRef.current <= 0) return undefined;
+
+        const resizeObserver = typeof ResizeObserver === "undefined"
+            ? null
+            : new ResizeObserver(() => {
+                measureLoopDistance();
+                scrollPosition = container.scrollLeft;
+            });
+        resizeObserver?.observe(container);
+
         const moveCategories = (time) => {
             if (previousTime === undefined) previousTime = time;
             const elapsed = Math.min(time - previousTime, 50);
             previousTime = time;
 
+            const loopDistance = categoryLoopDistanceRef.current;
+
             if (time < categoryAutoPauseUntil.current) {
                 scrollPosition = container.scrollLeft;
             } else {
-                scrollPosition += (pixelsPerSecond * elapsed) / 1000;
-                if (scrollPosition >= loopDistance) {
-                    scrollPosition -= loopDistance;
-                }
+                const nextPosition = scrollPosition + (pixelsPerSecond * elapsed) / 1000;
+                scrollPosition = nextPosition >= loopDistance
+                    ? nextPosition % loopDistance
+                    : nextPosition;
                 container.scrollLeft = scrollPosition;
             }
 
@@ -202,8 +231,12 @@ function Shop_by_category({ categories: providedCategories }) {
         };
 
         animationFrame = window.requestAnimationFrame(moveCategories);
-        return () => window.cancelAnimationFrame(animationFrame);
-    }, [categoryItems.length]);
+        return () => {
+            window.cancelAnimationFrame(animationFrame);
+            resizeObserver?.disconnect();
+            categoryLoopDistanceRef.current = 0;
+        };
+    }, [categoryLoopLength]);
 
 
     useEffect(() => {
@@ -318,25 +351,21 @@ function Shop_by_category({ categories: providedCategories }) {
                     ref={categorySliderRef}
                 >
 
-                    {(categoryItems.length > 1 ? [...categoryItems, ...categoryItems] : categoryItems).map((item, index) => (
-
+                    {categoryLoopItems.map((item, index) => item.type === "spacer" ? (
+                        <div className="category-card category-card-spacer" key={`${item.id}-${index}`} aria-hidden="true" />
+                    ) : (
                         <div
                             key={`${item.id}-${index}`}
-                            className={
-                                `
-                            category-card
-                            ${selectedCategory?.id === item.id ? "active-category" : ""}`} onClick={() => selectCategory(item)} >
+                            className={`category-card ${selectedCategory?.id === item.id ? "active-category" : ""}`}
+                            onClick={() => selectCategory(item)}
+                        >
                             <div className="image-circle">
-
                                 <img
                                     src={item.type === "offer" ? item.image : getImageUrl(item.image)}
                                     alt={item.name}
                                 />
                             </div>
-
-                            <p>
-                                {item.name}
-                            </p>
+                            <p>{item.name}</p>
                         </div>
                     ))
                     }

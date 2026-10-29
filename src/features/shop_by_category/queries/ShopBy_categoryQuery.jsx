@@ -7,6 +7,7 @@ function ShopBy_categoryQuery(options = {}) {
     queryKey : ['shopBycategory'],
     queryFn : ShopBy_categoryGet,
     enabled: options.enabled ?? true,
+    staleTime: 1000 * 60 * 5,
   })
 
 }
