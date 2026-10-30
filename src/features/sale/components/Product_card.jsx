@@ -66,19 +66,42 @@ function getAvailability(product, variant, unit) {
 function getPricing(product, variant, unit) {
     const selectedPrice = unit?.price ?? variant?.price;
     const selectedDiscountedPrice = unit?.discounted_price ?? variant?.discounted_price;
-    const originalPrice = selectedPrice ?? product?.original_price ?? product?.starting_price;
-    const currentPrice = selectedDiscountedPrice
+    const hasVariantSelection = Boolean(variant);
+    const hasOffer = hasVariantSelection
+        ? variant?.has_offer === true || unit?.has_offer === true
+        : product?.has_offer === true
+            || (hasValue(product?.discount_percentage) && Number(product.discount_percentage) > 0);
+    const originalPrice = selectedPrice
+        ?? (hasVariantSelection ? null : product?.original_price ?? product?.starting_price);
+    const discountedPrice = selectedDiscountedPrice
+        ?? (hasVariantSelection ? null : product?.discounted_price);
+    const currentPrice = discountedPrice
         ?? selectedPrice
         ?? product?.current_price
-        ?? product?.discounted_price
         ?? product?.starting_price;
-    const discountedPrice = selectedDiscountedPrice ?? product?.discounted_price;
-    const hasOffer = variant?.has_offer === true
-        || unit?.has_offer === true
-        || product?.has_offer === true
-        || (hasValue(product?.discount_percentage) && Number(product.discount_percentage) > 0);
+    const discountType = String(
+        unit?.offer_discount_type
+        ?? variant?.offer_discount_type
+        ?? product?.offer_discount_type
+        ?? product?.offer?.discount_type
+        ?? ""
+    ).toUpperCase();
+    const offerDiscountValue = Number(
+        unit?.offer_discount_value
+        ?? variant?.offer_discount_value
+        ?? (hasVariantSelection ? "" : product?.offer_discount_value)
+    );
+    const configuredDiscountValue = Number.isFinite(offerDiscountValue) && offerDiscountValue > 0 ? offerDiscountValue : null;
+    const reportedDiscountAmount = unit?.discount_amount
+        ?? variant?.discount_amount
+        ?? (hasVariantSelection ? null : product?.discount_amount);
+    const discountAmount = hasOffer && hasValue(reportedDiscountAmount)
+        ? Number(reportedDiscountAmount)
+        : hasOffer && Number.isFinite(Number(originalPrice)) && Number.isFinite(Number(currentPrice))
+            ? Math.max(Number(originalPrice) - Number(currentPrice), 0)
+            : 0;
 
-    return { originalPrice, currentPrice, discountedPrice, hasOffer };
+    return { originalPrice, currentPrice, discountedPrice, hasOffer, discountType, discountAmount, configuredDiscountValue };
 }
 
 function getCardItems(products, expandVariants) {
@@ -152,7 +175,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
     return <div className="catalog-container homepage-product-catalog"><section className={`products ${cardItems.length <= 3 ? "shop-few-products" : "shop-many-products"}`}>
         {cardItems.map(({ product, variant, unit, key }) => {
             const isWishlisted = !!wishdata.find((item) => String(item.variant) === String(variant?.id) && String(item.variant_size ?? "") === String(unit?.id ?? ""));
-            const { originalPrice, currentPrice, discountedPrice, hasOffer } = getPricing(product, variant, unit);
+            const { originalPrice, currentPrice, discountedPrice, hasOffer, discountType, discountAmount, configuredDiscountValue } = getPricing(product, variant, unit);
             const image = getProductImage(product, variant);
             const variantLabel = getVariantLabel(variant);
             const displayPrice = hasOffer && hasValue(discountedPrice) ? discountedPrice : currentPrice;
@@ -160,6 +183,9 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
             const savingsPercentage = showOriginalPrice
                 ? Math.round(((Number(originalPrice) - Number(displayPrice)) / Number(originalPrice)) * 100)
                 : 0;
+            const savingsLabel = discountType === "FIXED"
+                ? <><span>Save </span><DirhamAmount value={configuredDiscountValue ?? discountAmount} /></>
+                : `Save ${configuredDiscountValue ?? savingsPercentage}%`;
             const availability = getAvailability(product, variant, unit);
 
             const openProduct = () => {
@@ -176,10 +202,10 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
 
             return <article className="product_card" key={key} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}${variantLabel ? ` in ${variantLabel}` : ""}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
                 <div className="product_img">
-                    {(product.marketing_highlights?.length || (hasOffer && hasValue(product.discount_percentage))) ? (
+                    {(product.marketing_highlights?.length || (hasOffer && showOriginalPrice)) ? (
                         <div className="product-image-topbar">
                             <ProductHighlightRail highlights={product.marketing_highlights} placement="badge" />
-                            {hasOffer && hasValue(product.discount_percentage) && <div className="offer-badge">{product.discount_percentage}% OFF</div>}
+                            {hasOffer && showOriginalPrice && <div className="offer-badge">{discountType === "FIXED" ? <><DirhamAmount value={configuredDiscountValue ?? discountAmount} /> OFF</> : `${configuredDiscountValue ?? savingsPercentage}% OFF`}</div>}
                         </div>
                     ) : null}
                     <div className="product-image-stage">
@@ -203,7 +229,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                     {variantLabel && <span className="product-variant-label">Color: {variantLabel}</span>}
                     <div className="product-footer">
                         <div className="price-box">
-                            {savingsPercentage > 0 && <span className="price-savings">Save {savingsPercentage}%</span>}
+                            {showOriginalPrice && discountAmount > 0 && <span className="price-savings">{savingsLabel}</span>}
                             {showOriginalPrice ? (
                                 <span className="old-price"><DirhamAmount value={originalPrice} fallback="Price unavailable" /></span>
                             ) : null}

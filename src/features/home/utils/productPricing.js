@@ -16,6 +16,11 @@ const toPercentage = (value) => {
     return Number.isFinite(numericValue) && numericValue > 0 && numericValue <= 100 ? numericValue : null;
 };
 
+const toDiscountValue = (value) => {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : null;
+};
+
 const roundedPercentage = (value) => Math.round(value * 100) / 100;
 const roundedAmount = (value) => Math.round(value * 100) / 100;
 
@@ -61,13 +66,18 @@ export function getHomepageProductPricing(product = {}, variant = null, now = ne
         && currentPrice < originalPrice
         && (calculatedDiscount !== null || hasReportedOffer);
     const offerDiscountType = String(product?.offer_discount_type ?? product?.offer?.discount_type ?? "PERCENTAGE").toUpperCase();
+    const reportedOfferValue = toDiscountValue(
+        product?.offer_discount_value
+        ?? (offerDiscountType === "FIXED" ? product?.offer?.fixed_amount : product?.offer?.discount_percentage)
+    );
     const discountAmount = hasOffer ? roundedAmount(originalPrice - currentPrice) : null;
 
     return {
         currentPrice,
         originalPrice: hasOffer ? originalPrice : null,
-        discountPercentage: hasOffer ? (calculatedDiscount ?? reportedDiscount) : null,
+        discountPercentage: hasOffer ? (offerDiscountType === "PERCENTAGE" ? (reportedOfferValue ?? calculatedDiscount ?? reportedDiscount) : null) : null,
         discountAmount,
+        offerDiscountValue: hasOffer ? reportedOfferValue : null,
         isFixedOffer: hasOffer && offerDiscountType === "FIXED",
         hasOffer,
     };

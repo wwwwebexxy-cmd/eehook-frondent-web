@@ -77,11 +77,13 @@ describe("getHomepageProductPricing", () => {
             discounted_price: 875,
             discount_percentage: 12.5,
             offer_discount_type: "FIXED",
+            offer_discount_value: 125,
             has_offer: true,
         });
 
         expect(pricing).toMatchObject({
             discountAmount: 125,
+            offerDiscountValue: 125,
             isFixedOffer: true,
             hasOffer: true,
         });

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiSave } from "react-icons/fi";
+import { FiSave, FiSearch } from "react-icons/fi";
 import { getErrorMessage, getResource, listResource, createResource, updateResource } from "../services/adminApi";
 import { LoadingState } from "../components/AdminPrimitives";
 import "../styles/OfferEditor.css";
@@ -26,6 +26,20 @@ const idOf = (value) => value?.id ?? value?.pk ?? value?.uuid ?? value;
 const relationId = (value) => String(idOf(value) ?? "");
 const relationIds = (value) => rows(value).map(relationId).filter(Boolean);
 const dateValue = (value) => String(value || "").match(/^(\d{4}-\d{2}-\d{2})/)?.[1] || "";
+
+async function listAllResourceRows(resource) {
+    const collected = [];
+    let page = 1;
+    while (page <= 1000) {
+        const response = await listResource(resource, { page, page_size: 100 });
+        const payload = response.data;
+        const pageRows = rows(payload);
+        collected.push(...pageRows);
+        if (Array.isArray(payload) || !payload?.next || !pageRows.length) break;
+        page += 1;
+    }
+    return collected;
+}
 
 function productLabel(product) {
     return product?.name || `Product #${idOf(product)}`;
@@ -60,21 +74,29 @@ export default function OfferEditor() {
     const [form, setForm] = useState(emptyOffer);
     const [products, setProducts] = useState([]);
     const [variants, setVariants] = useState([]);
+    const [productSearch, setProductSearch] = useState("");
+    const [productPickerOpen, setProductPickerOpen] = useState(false);
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const productPickerRef = useRef(null);
 
     useEffect(() => {
         let active = true;
         Promise.all([
-            listResource("products", { page_size: 500 }),
-            listResource("product-variants", { page_size: 500 }),
+            listAllResourceRows("products"),
+            listAllResourceRows("product-variants"),
             editing ? getResource("offers", id) : Promise.resolve({ data: null }),
         ]).then(([productResponse, variantResponse, offerResponse]) => {
             if (!active) return;
-            setProducts(rows(productResponse.data));
-            setVariants(rows(variantResponse.data));
-            if (offerResponse.data) setForm(readOffer(offerResponse.data));
+            setProducts(productResponse);
+            setVariants(variantResponse);
+            if (offerResponse.data) {
+                const nextForm = readOffer(offerResponse.data);
+                setForm(nextForm);
+                const selectedProduct = productResponse.find((product) => String(idOf(product)) === String(nextForm.product));
+                setProductSearch(selectedProduct ? productLabel(selectedProduct) : "");
+            }
         }).catch((requestError) => {
             if (active) setError(getErrorMessage(requestError, "Could not load offer options."));
         }).finally(() => {
@@ -83,12 +105,33 @@ export default function OfferEditor() {
         return () => { active = false; };
     }, [editing, id]);
 
+    useEffect(() => {
+        const closePicker = (event) => {
+            if (!productPickerRef.current?.contains(event.target)) setProductPickerOpen(false);
+        };
+        document.addEventListener("mousedown", closePicker);
+        return () => document.removeEventListener("mousedown", closePicker);
+    }, []);
+
     const productVariants = useMemo(
         () => variants.filter((variant) => String(idOf(variant.product)) === String(form.product)),
         [variants, form.product],
     );
 
+    const filteredProducts = useMemo(() => {
+        const query = productSearch.trim().toLowerCase();
+        return products
+            .filter((product) => !query || `${productLabel(product)} ${idOf(product)}`.toLowerCase().includes(query))
+            .slice(0, 12);
+    }, [products, productSearch]);
+
     const update = (name, value) => setForm((current) => ({ ...current, [name]: value }));
+    const selectProduct = (product) => {
+        const productId = String(idOf(product));
+        setForm((current) => ({ ...current, product: productId, variants: [], variant_mode: "all" }));
+        setProductSearch(productLabel(product));
+        setProductPickerOpen(false);
+    };
     const toggleVariant = (variantId) => setForm((current) => {
         const idValue = String(variantId);
         const selected = current.variants.map(String);
@@ -106,6 +149,7 @@ export default function OfferEditor() {
         if (form.end_date < form.start_date) return "Expiry date must be on or after the start date.";
         if (form.discount_type === "PERCENTAGE" && (Number(form.discount_percentage) <= 0 || Number(form.discount_percentage) > 100)) return "Enter a percentage between 0 and 100.";
         if (form.discount_type === "FIXED" && Number(form.fixed_amount) <= 0) return "Enter a fixed amount greater than 0.";
+        if (form.variant_mode === "selected" && productVariants.length > 1 && !form.variants.length) return "Select at least one variant or choose All variants.";
         if (!editing && !(form.image instanceof File)) return "Offer image is required.";
         return "";
     };
@@ -130,7 +174,7 @@ export default function OfferEditor() {
             end_date: form.end_date,
             is_active: Boolean(form.is_active),
             products: [Number(form.product)],
-            variants: form.variant_mode === "selected" ? form.variants.map(Number) : [],
+            variants: form.variant_mode === "selected" && productVariants.length > 1 ? form.variants.map(Number) : [],
         };
         try {
             let payload = data;
@@ -166,9 +210,29 @@ export default function OfferEditor() {
                 <label className="admin-form-field"><span>Expiry date *</span><input type="date" value={form.end_date} onChange={(event) => update("end_date", event.target.value)} /></label>
             </div>
             <section className="offer-target-section"><div className="offer-target-heading"><div><h3>Offer target</h3><p>Choose one product. If all variants is selected, every variant of this product receives the offer.</p></div></div>
-                <label className="admin-form-field"><span>Product *</span><select value={form.product} onChange={(event) => update("product", event.target.value)}><option value="">Select product</option>{products.map((product) => <option key={idOf(product)} value={idOf(product)}>{productLabel(product)}</option>)}</select></label>
-                {form.product && <fieldset className="offer-variant-choice"><legend>Variants</legend><label><input type="radio" name="variant_mode" checked={form.variant_mode === "all"} onChange={() => update("variant_mode", "all")} /> All variants</label><label><input type="radio" name="variant_mode" checked={form.variant_mode === "selected"} onChange={() => update("variant_mode", "selected")} /> Select specific variants</label></fieldset>}
-                {form.product && form.variant_mode === "selected" && <div className="offer-variant-list">{productVariants.length ? productVariants.map((variant) => <label className="offer-variant-option" key={idOf(variant)}><input type="checkbox" checked={form.variants.map(String).includes(String(idOf(variant)))} onChange={() => toggleVariant(idOf(variant))} /><span>{variantLabel(variant)}</span><small>{variant.price_type === "multiple" ? "Multiple price" : "Single price"}</small></label>) : <p className="admin-muted">No variants found for this product.</p>}</div>}
+                <div className="admin-form-field offer-product-picker" ref={productPickerRef}>
+                    <span>Product *</span>
+                    <div className="offer-product-search-wrap">
+                        <FiSearch aria-hidden="true" />
+                        <input
+                            type="search"
+                            value={productSearch}
+                            onFocus={() => setProductPickerOpen(true)}
+                            onChange={(event) => { setProductSearch(event.target.value); setProductPickerOpen(true); }}
+                            placeholder="Search products or choose from the dropdown"
+                            aria-label="Search products"
+                            aria-expanded={productPickerOpen}
+                            aria-autocomplete="list"
+                        />
+                    </div>
+                    {productPickerOpen && <div className="offer-product-suggestions" role="listbox" aria-label="Product suggestions">
+                        {filteredProducts.length ? filteredProducts.map((product) => <button type="button" className="offer-product-suggestion" role="option" key={idOf(product)} onClick={() => selectProduct(product)}><span>{productLabel(product)}</span><small>Product #{idOf(product)}</small></button>) : <p className="offer-product-empty">No matching products found.</p>}
+                    </div>}
+                    <small className="offer-field-help">Search by product name, then select a suggestion.</small>
+                </div>
+                {form.product && productVariants.length > 1 && <fieldset className="offer-variant-choice"><legend>Variants</legend><label><input type="radio" name="variant_mode" checked={form.variant_mode === "all"} onChange={() => update("variant_mode", "all")} /> All variants</label><label><input type="radio" name="variant_mode" checked={form.variant_mode === "selected"} onChange={() => update("variant_mode", "selected")} /> Select specific variants</label></fieldset>}
+                {form.product && productVariants.length === 1 && <p className="offer-single-variant-note">This product has one sellable variant ({productVariants[0].price_type === "multiple" ? "multiple-price units" : "single price"}). The product selection will apply the offer to it.</p>}
+                {form.product && form.variant_mode === "selected" && productVariants.length > 1 && <div className="offer-variant-list">{productVariants.map((variant, index) => <label className="offer-variant-option" key={idOf(variant)}><input type="checkbox" checked={form.variants.map(String).includes(String(idOf(variant)))} onChange={() => toggleVariant(idOf(variant))} /><span>Variant {index + 1}{variantLabel(variant) ? ` · ${variantLabel(variant)}` : ""}</span><small>{variant.price_type === "multiple" ? "Multiple price" : "Single price"}</small></label>)}</div>}
             </section>
             <label className="admin-form-field offer-active-toggle"><span>Active</span><input type="checkbox" checked={Boolean(form.is_active)} onChange={(event) => update("is_active", event.target.checked)} /></label>
             {error && <p className="admin-form-error">{error}</p>}
