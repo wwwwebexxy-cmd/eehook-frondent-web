@@ -143,13 +143,15 @@
 .offer-product-search-wrap > svg {
     position: absolute;
     left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--admin-muted, #6b7280);
     pointer-events: none;
 }
 
 .offer-product-search-wrap input {
     width: 100%;
-    padding-left: 46px;
+    padding-left: 50px;
 }
 
 .offer-product-suggestions {
