@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { FiSave, FiSearch } from "react-icons/fi";
 import { getErrorMessage, getResource, listResource, createResource, updateResource } from "../services/adminApi";
 import { LoadingState } from "../components/AdminPrimitives";
+import { variantOptionMeta } from "../utils/offerVariantLabels";
 import "../styles/OfferEditor.css";
 
 const emptyOffer = {
@@ -45,8 +46,10 @@ function productLabel(product) {
     return product?.name || `Product #${idOf(product)}`;
 }
 
-function variantLabel(variant) {
-    const color = typeof variant?.color === "object" ? variant.color?.name : variant?.color;
+function variantLabel(variant, colors = []) {
+    const color = typeof variant?.color === "object"
+        ? variant.color?.name
+        : colors.find((item) => String(idOf(item)) === String(variant?.color))?.name || variant?.color;
     return color || variant?.sku || `Variant #${idOf(variant)}`;
 }
 
@@ -74,6 +77,9 @@ export default function OfferEditor() {
     const [form, setForm] = useState(emptyOffer);
     const [products, setProducts] = useState([]);
     const [variants, setVariants] = useState([]);
+    const [variantUnits, setVariantUnits] = useState([]);
+    const [units, setUnits] = useState([]);
+    const [colors, setColors] = useState([]);
     const [productSearch, setProductSearch] = useState("");
     const [productPickerOpen, setProductPickerOpen] = useState(false);
     const [loading, setLoading] = useState(editing);
@@ -86,11 +92,17 @@ export default function OfferEditor() {
         Promise.all([
             listAllResourceRows("products"),
             listAllResourceRows("product-variants"),
+            listAllResourceRows("product-variant-units").catch(() => []),
+            listAllResourceRows("units").catch(() => []),
+            listAllResourceRows("colors").catch(() => []),
             editing ? getResource("offers", id) : Promise.resolve({ data: null }),
-        ]).then(([productResponse, variantResponse, offerResponse]) => {
+        ]).then(([productResponse, variantResponse, variantUnitResponse, unitResponse, colorResponse, offerResponse]) => {
             if (!active) return;
             setProducts(productResponse);
             setVariants(variantResponse);
+            setVariantUnits(variantUnitResponse);
+            setUnits(unitResponse);
+            setColors(colorResponse);
             if (offerResponse.data) {
                 const nextForm = readOffer(offerResponse.data);
                 setForm(nextForm);
@@ -232,7 +244,7 @@ export default function OfferEditor() {
                 </div>
                 {form.product && productVariants.length > 1 && <fieldset className="offer-variant-choice"><legend>Variants</legend><label><input type="radio" name="variant_mode" checked={form.variant_mode === "all"} onChange={() => update("variant_mode", "all")} /> All variants</label><label><input type="radio" name="variant_mode" checked={form.variant_mode === "selected"} onChange={() => update("variant_mode", "selected")} /> Select specific variants</label></fieldset>}
                 {form.product && productVariants.length === 1 && <p className="offer-single-variant-note">This product has one sellable variant ({productVariants[0].price_type === "multiple" ? "multiple-price units" : "single price"}). The product selection will apply the offer to it.</p>}
-                {form.product && form.variant_mode === "selected" && productVariants.length > 1 && <div className="offer-variant-list">{productVariants.map((variant, index) => <label className="offer-variant-option" key={idOf(variant)}><input type="checkbox" checked={form.variants.map(String).includes(String(idOf(variant)))} onChange={() => toggleVariant(idOf(variant))} /><span>Variant {index + 1}{variantLabel(variant) ? ` · ${variantLabel(variant)}` : ""}</span><small>{variant.price_type === "multiple" ? "Multiple price" : "Single price"}</small></label>)}</div>}
+                {form.product && form.variant_mode === "selected" && productVariants.length > 1 && <div className="offer-variant-list">{productVariants.map((variant, index) => <label className="offer-variant-option" key={idOf(variant)}><input type="checkbox" checked={form.variants.map(String).includes(String(idOf(variant)))} onChange={() => toggleVariant(idOf(variant))} /><span>Variant {index + 1}{variantLabel(variant, colors) ? ` · ${variantLabel(variant, colors)}` : ""}</span><small>{variantOptionMeta(variant, variantUnits, units)}</small></label>)}</div>}
             </section>
             <label className="admin-form-field offer-active-toggle"><span>Active</span><input type="checkbox" checked={Boolean(form.is_active)} onChange={(event) => update("is_active", event.target.checked)} /></label>
             {error && <p className="admin-form-error">{error}</p>}
