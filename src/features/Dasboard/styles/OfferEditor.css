@@ -142,14 +142,14 @@
 
 .offer-product-search-wrap > svg {
     position: absolute;
-    left: 13px;
+    left: 9px;
     color: var(--admin-muted, #6b7280);
     pointer-events: none;
 }
 
 .offer-product-search-wrap input {
     width: 100%;
-    padding-left: 40px;
+    padding-left: 46px;
 }
 
 .offer-product-suggestions {
