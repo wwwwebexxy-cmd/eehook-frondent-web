@@ -37,6 +37,26 @@
     justify-content: center;
 }
 
+.promo-loading-skeleton {
+    border-radius: 0;
+}
+
+.media-loading-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+}
+
+.media-is-loading {
+    opacity: 0;
+}
+
+.media-is-ready {
+    opacity: 1;
+    transition: opacity .25s ease;
+}
+
 .promo-slide.active {
     opacity: 1;
     visibility: visible;
@@ -44,6 +64,8 @@
 
 .promo-slide img {
     display: block;
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -124,6 +146,15 @@
     flex-basis: 100%;
 }
 
+.hero-split-layout.single .hero-fixed-banner-section {
+    flex-basis: 100%;
+}
+
+.hero-loading-skeleton,
+.side-banner-loading-skeleton {
+    min-height: 190px;
+}
+
 /* ---------------- Fixed Side Banner (Right ~28%) ---------------- */
 .hero-fixed-banner-section {
     flex: 1; 
@@ -154,6 +185,7 @@
 }
 
 .side-banner-slide {
+    position: relative;
     flex: 0 0 100%;
     width: 100%;
     height: 100%;
@@ -166,6 +198,8 @@
 }
 
 .fixed-banner-image {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -192,6 +226,8 @@
 }
 
 .hero-image {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
 
@@ -222,6 +258,8 @@
         rgba(0, 0, 0, .28) 35%,
         rgba(0, 0, 0, .04) 72%
     );
+
+    z-index: 2;
 
     transition: opacity 1.2s ease;
 }

@@ -12,8 +12,6 @@ import Offer_poster from "../../hooks/offers/page/Offer_poster";
 import ContactUs from "../../components/Contact";
 import vedio1 from "../../assets/eehook-video-one.mp4";
 import vedio2 from "../../assets/eehook-video-two.mp4";
-import videoOnePoster from "../../assets/eehook_hero_tech.png";
-import videoTwoPoster from "../../assets/eehook_lifestyle_vibe.png";
 
 const asArray = (value) => {
     if (Array.isArray(value)) return value;
@@ -53,9 +51,10 @@ function HomeLoading() {
     );
 }
 
-function DeferredHeritageVideo({ source, poster, label }) {
+function DeferredHeritageVideo({ source, label }) {
     const videoRef = useRef(null);
     const [shouldLoad, setShouldLoad] = useState(false);
+    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -81,9 +80,23 @@ function DeferredHeritageVideo({ source, poster, label }) {
         });
     }, [shouldLoad]);
 
-    return <video ref={videoRef} className="heritage-video" muted loop playsInline preload="none" poster={poster} aria-label={label}>
-        {shouldLoad && <source src={source} type="video/mp4" />}
-    </video>;
+    return (
+        <div className="heritage-video-frame">
+            {!isReady && <div className="heritage-video-skeleton skeleton" role="status" aria-label={`Loading ${label}`} />}
+            <video
+                ref={videoRef}
+                className={`heritage-video ${isReady ? "media-is-ready" : "media-is-loading"}`}
+                muted
+                loop
+                playsInline
+                preload="none"
+                onLoadedData={() => setIsReady(true)}
+                aria-label={label}
+            >
+                {shouldLoad && <source src={source} type="video/mp4" />}
+            </video>
+        </div>
+    );
 }
 
 function Home() {
@@ -146,8 +159,8 @@ function Home() {
                 </div>
 
                 <div className="section-heritage-gallery">
-                    <DeferredHeritageVideo source={vedio1} poster={videoOnePoster} label="Technology collection preview" />
-                    <DeferredHeritageVideo source={vedio2} poster={videoTwoPoster} label="Lifestyle collection preview" />
+                    <DeferredHeritageVideo source={vedio1} label="Technology collection preview" />
+                    <DeferredHeritageVideo source={vedio2} label="Lifestyle collection preview" />
                 </div>
             </section>
 

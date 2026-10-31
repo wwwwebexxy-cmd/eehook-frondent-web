@@ -6,28 +6,7 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import Hero_Query from "../queries/Hero_Query";
 import PromoBanners_Query from "../queries/PromoBanners_Query";
 import HeroSideBanner_Query from "../queries/HeroSideBanner_Query";
-import defaultHeroImage from "../../../assets/eehook_hero_tech.png";
-import defaultHeroSideImage from "../../../assets/eehook_lifestyle_vibe.png";
-
-const DEFAULT_HERO_SLIDES = [
-  {
-    id: "default-tech-hero",
-    subtitle: "Technology, thoughtfully curated",
-    title: "Elevate your everyday",
-    description: "Discover premium electronics and modern lifestyle essentials selected for the way you live.",
-    button_text: "Shop now",
-    image: defaultHeroImage,
-  },
-];
-
-const DEFAULT_SIDE_BANNER = {
-  image: defaultHeroSideImage,
-  link: "/shop",
-};
-
-const getHeroImageUrl = (image) => image === defaultHeroImage || image === defaultHeroSideImage
-  ? image
-  : getImageUrl(image);
+import { resolveBannerList } from "./heroContent";
 
 const getHeroCopy = (...values) => {
   return values
@@ -35,39 +14,34 @@ const getHeroCopy = (...values) => {
     .find((text) => text && text !== ".") || "";
 };
 
-const normalizeBannerList = (value) => {
-  if (Array.isArray(value)) return value.filter((banner) => banner?.image);
-  if (Array.isArray(value?.results)) return value.results.filter((banner) => banner?.image);
-  return value?.image ? [value] : [];
-};
-
 const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBanner: providedSideBanner }) => {
-
-  // An empty homepage response is not an intentional override. Keep the
-  // dedicated hero endpoint available, then fall back to the bundled hero
-  // image when the API has no active banners configured.
   const hasHeroBanners = Array.isArray(heroBanners) && heroBanners.length > 0;
-  const { data: rawHeroSlides } = Hero_Query({ enabled: !hasHeroBanners });
-  const queriedHeroSlides = Array.isArray(rawHeroSlides) ? rawHeroSlides : [];
-  const heroSlides = (hasHeroBanners ? heroBanners : queriedHeroSlides).length > 0
-    ? (hasHeroBanners ? heroBanners : queriedHeroSlides)
-    : DEFAULT_HERO_SLIDES;
+  const heroQuery = Hero_Query({ enabled: !hasHeroBanners });
+  const heroSlides = resolveBannerList({
+    provided: hasHeroBanners ? heroBanners : undefined,
+    fetched: heroQuery.data,
+  });
+  const heroLoading = !hasHeroBanners && heroQuery.isLoading;
 
   const hasPromoBanners = Array.isArray(providedPromoBanners);
-  const { data: rawPromoBanners } = PromoBanners_Query({ enabled: !hasPromoBanners });
-  const promoBanners = hasPromoBanners ? providedPromoBanners : (Array.isArray(rawPromoBanners) ? rawPromoBanners : []);
+  const promoQuery = PromoBanners_Query({ enabled: !hasPromoBanners });
+  const promoBanners = resolveBannerList({
+    provided: hasPromoBanners ? providedPromoBanners : undefined,
+    fetched: promoQuery.data,
+  });
+  const promoLoading = !hasPromoBanners && promoQuery.isLoading;
 
   const hasSideBanners = providedSideBanner !== undefined;
-  const { data: queriedSideBanner } = HeroSideBanner_Query({ enabled: !hasSideBanners });
-  const configuredSideBanners = hasSideBanners
-    ? normalizeBannerList(providedSideBanner)
-    : normalizeBannerList(queriedSideBanner);
-  const sideBanners = configuredSideBanners.length > 0
-    ? configuredSideBanners
-    : (hasSideBanners ? [] : [DEFAULT_SIDE_BANNER]);
+  const sideQuery = HeroSideBanner_Query({ enabled: !hasSideBanners });
+  const sideBanners = resolveBannerList({
+    provided: hasSideBanners ? providedSideBanner : undefined,
+    fetched: sideQuery.data,
+  });
+  const sideLoading = !hasSideBanners && sideQuery.isLoading;
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentSideBanner, setCurrentSideBanner] = useState(0);
+  const [loadedImages, setLoadedImages] = useState({});
 
   // Auto Slide
   useEffect(() => {
@@ -102,6 +76,11 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     ));
   };
 
+  const markImageLoaded = (key, event) => {
+    rememberImageRatio(key, event);
+    setLoadedImages((current) => current[key] ? current : { ...current, [key]: true });
+  };
+
   const activeHero = heroSlides[currentSlide] || heroSlides[0];
   const activePromo = promoBanners[currentPromo] || promoBanners[0];
   const normalizedSideBannerIndex = sideBanners.length
@@ -114,6 +93,10 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
   const sideBannerKey = activeSideBanner?.id ?? activeSideBanner?.image ?? "default";
   const sideRatio = imageRatios[`side-${sideBannerKey}`] || (16 / 7);
   const promoRatio = imageRatios[`promo-${activePromo?.id ?? currentPromo}`] || (16 / 3);
+
+  const hasHeroSlot = heroLoading || heroSlides.length > 0;
+  const hasSideSlot = sideLoading || sideBanners.length > 0;
+  const hasPromoSlot = promoLoading || promoBanners.length > 0;
 
   useEffect(() => {
     if (promoBanners.length === 0) return;
@@ -133,6 +116,8 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
 
     return () => clearInterval(sideBannerTimer);
   }, [sideBanners.length]);
+
+  if (!hasHeroSlot && !hasSideSlot && !hasPromoSlot) return null;
 
   const nextPromo = () => setCurrentPromo((prev) => (prev === promoBanners.length - 1 ? 0 : prev + 1));
   const prevPromo = () => setCurrentPromo((prev) => (prev === 0 ? promoBanners.length - 1 : prev - 1));
@@ -159,7 +144,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     <div className="hero-page-wrapper">
       
       {/* Top Promo Carousel (Visa Banner Equivalent) */}
-      {promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
+      {promoLoading ? (
+        <div className="top-promo-carousel promo-loading-skeleton skeleton" role="status" aria-label="Loading promotional banner" />
+      ) : promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
         <button className="promo-nav-btn left" onClick={prevPromo}>‹</button>
         
         <div
@@ -167,24 +154,27 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           style={{ transform: `translateX(-${currentPromo * 100}%)` }}
         >
           {promoBanners.map((promo, index) => (
-            <div 
+            <div
               key={promo.id ?? index}
               className={`promo-slide ${currentPromo === index ? "active" : ""}`}
             >
+              {!loadedImages[`promo-${promo.id ?? index}`] && <div className="media-loading-skeleton skeleton" aria-hidden="true" />}
               {promo.link ? (
                 <a href={promo.link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '100%', height: '100%' }}>
-                  <img 
+                  <img
                     src={getImageUrl(promo.image)} 
                     alt="Promo Banner" 
-                    onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
+                    className={loadedImages[`promo-${promo.id ?? index}`] ? "media-is-ready" : "media-is-loading"}
+                    onLoad={(event) => markImageLoaded(`promo-${promo.id ?? index}`, event)}
                     style={{ width: "100%", height: "100%" }}
                   />
                 </a>
               ) : (
-                <img 
+                <img
                   src={getImageUrl(promo.image)} 
                   alt="Promo Banner" 
-                  onLoad={(event) => rememberImageRatio(`promo-${promo.id ?? index}`, event)}
+                  className={loadedImages[`promo-${promo.id ?? index}`] ? "media-is-ready" : "media-is-loading"}
+                  onLoad={(event) => markImageLoaded(`promo-${promo.id ?? index}`, event)}
                   style={{ width: "100%", height: "100%" }}
                 />
               )}
@@ -196,12 +186,14 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
       </div>}
 
       <section
-        className={`hero-split-layout ${activeSideBanner?.image ? "" : "single"}`}
+        className={`hero-split-layout ${hasHeroSlot && hasSideSlot ? "" : "single"}`}
         style={{ "--hero-ratio": heroRatio, "--side-ratio": sideRatio }}
       >
         
         {/* Main Carousel (Left) */}
-        <div className="hero-carousel-section">
+        {heroLoading ? (
+          <div className="hero-carousel-section hero-loading-skeleton skeleton" role="status" aria-label="Loading hero banner" />
+        ) : heroSlides.length > 0 && <div className="hero-carousel-section">
           <div
             className="hero-slides-track"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -214,11 +206,13 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 }`}
               >
 
+              {!loadedImages[`hero-${slide.id ?? index}`] && <div className="media-loading-skeleton skeleton" aria-hidden="true" />}
+
               <img
-                src={getHeroImageUrl(slide.image || slide.banner_image || slide.image_url)}
+                src={getImageUrl(slide.image || slide.banner_image || slide.image_url)}
                 alt={slide.title || slide.heading || "Featured collection"}
-                className="hero-image"
-                onLoad={(event) => rememberImageRatio(`hero-${slide.id ?? index}`, event)}
+                className={`hero-image ${loadedImages[`hero-${slide.id ?? index}`] ? "media-is-ready" : "media-is-loading"}`}
+                onLoad={(event) => markImageLoaded(`hero-${slide.id ?? index}`, event)}
               />
 
               <div className="hero-overlay"></div>
@@ -273,10 +267,12 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
             ))}
 
           </div>
-        </div>
+        </div>}
 
         {/* Rotating Side Banners (Right) */}
-        {activeSideBanner?.image && <div className="hero-fixed-banner-section" aria-label="Promotional side banners">
+        {sideLoading ? (
+          <div className="hero-fixed-banner-section side-banner-loading-skeleton skeleton" role="status" aria-label="Loading side promotional banner" />
+        ) : sideBanners.length > 0 && <div className="hero-fixed-banner-section" aria-label="Promotional side banners">
           <div className="fixed-banner-content">
             <div
               className="side-banner-track"
@@ -286,21 +282,22 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 const bannerKey = banner.id ?? banner.image ?? index;
                 return (
                   <div className="side-banner-slide" key={bannerKey}>
+                    {!loadedImages[`side-${bannerKey}`] && <div className="media-loading-skeleton skeleton" aria-hidden="true" />}
                     {banner.link ? (
                       <a href={banner.link} target="_blank" rel="noopener noreferrer">
                         <img
-                          src={getHeroImageUrl(banner.image)}
+                          src={getImageUrl(banner.image)}
                           alt="Promotional Banner"
-                          className="fixed-banner-image"
-                          onLoad={(event) => rememberImageRatio(`side-${bannerKey}`, event)}
+                          className={`fixed-banner-image ${loadedImages[`side-${bannerKey}`] ? "media-is-ready" : "media-is-loading"}`}
+                          onLoad={(event) => markImageLoaded(`side-${bannerKey}`, event)}
                         />
                       </a>
                     ) : (
                       <img
-                        src={getHeroImageUrl(banner.image)}
+                        src={getImageUrl(banner.image)}
                         alt="Promotional Banner"
-                        className="fixed-banner-image"
-                        onLoad={(event) => rememberImageRatio(`side-${bannerKey}`, event)}
+                        className={`fixed-banner-image ${loadedImages[`side-${bannerKey}`] ? "media-is-ready" : "media-is-loading"}`}
+                        onLoad={(event) => markImageLoaded(`side-${bannerKey}`, event)}
                       />
                     )}
                   </div>
