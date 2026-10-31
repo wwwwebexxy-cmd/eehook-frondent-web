@@ -252,9 +252,9 @@
 
     top: 10px;
 
-    width: 30px;
+    width: 28px;
 
-    height: 30px;
+    height: 28px;
 
     border-radius: 50%;
 
@@ -277,7 +277,9 @@
 
 .heart-icon {
 
-    width: 16px;
+    width: 12px;
+
+    height: 12px;
 
     color: #4B636D;
 
@@ -748,8 +750,13 @@
     .wishlist-btn {
         top: 8px;
         right: 8px;
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
+    }
+
+    .wishlist-btn .heart-icon {
+        width: 10px;
+        height: 10px;
     }
 
     .quick-add-btn {
