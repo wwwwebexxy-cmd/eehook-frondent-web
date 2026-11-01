@@ -19,6 +19,7 @@ describe("Welcome Bonus form contract", () => {
 
     it("includes the selected subcategory for a category-wise bonus", () => {
         const payload = welcomeBonusPayload({ ...validValues, applicability_type: "CATEGORY", product: "", category: "7", subcategory: "11" });
-        expect(payload).toMatchObject({ applicability_type: "CATEGORY", product: null, category: 7, subcategory: 11 });
+        expect(payload).toMatchObject({ applicability_type: "CATEGORY", category: 7, subcategory: 11 });
+        expect(payload).not.toHaveProperty("product");
     });
 });

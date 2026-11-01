@@ -19,10 +19,9 @@ export function validateWelcomeBonus(values) {
 export function welcomeBonusPayload(values) {
     const productWise = values.applicability_type === "PRODUCT";
     const percentage = values.discount_type === "PERCENTAGE";
-    return {
+    const payload = {
         name: values.name.trim(),
         applicability_type: values.applicability_type,
-        product: productWise ? Number(values.product) || values.product : null,
         category: productWise ? null : Number(values.category) || values.category,
         subcategory: productWise ? null : Number(values.subcategory) || values.subcategory || null,
         discount_type: values.discount_type,
@@ -32,4 +31,6 @@ export function welcomeBonusPayload(values) {
         end_date: toIsoDateTime(values.end_date),
         is_active: Boolean(values.is_active),
     };
+    if (productWise) payload.product = Number(values.product) || values.product;
+    return payload;
 }
