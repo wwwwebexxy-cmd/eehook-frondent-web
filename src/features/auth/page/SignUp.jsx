@@ -120,7 +120,7 @@ function Signup() {
                 setFormError(error.response?.data?.error || "Use a Google account with a verified email.");
             } else if (status === 403) {
                 clearAuthSession();
-                setFormError("This account is disabled or is not allowed for this login area.");
+                setFormError(error.response?.data?.detail || "This account is disabled or is not allowed for this login area.");
             } else if (status === 503) {
                 setFormError("Google sign-in is not configured. Please use email and password.");
             } else {

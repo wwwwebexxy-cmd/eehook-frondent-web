@@ -113,7 +113,7 @@ function Login() {
                 setErrorMessage(error.response?.data?.error || "Use a Google account with a verified email.");
             } else if (error.response?.status === 403) {
                 clearAuthSession();
-                setErrorMessage("This account is disabled or is not allowed for this login area.");
+                setErrorMessage(error.response?.data?.detail || "This account is disabled or is not allowed for this login area.");
             } else if (error.response?.status === 503) {
                 setErrorMessage("Google sign-in is not configured. Please use email and password.");
             } else {
