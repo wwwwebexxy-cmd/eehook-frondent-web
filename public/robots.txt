@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /admin-login
+Disallow: /eehook-dashboard/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password/
+Disallow: /profile
+Disallow: /myorders
+Disallow: /wishlist
+Disallow: /cart
+Disallow: /checkout
+Disallow: /checkoutpage
+Disallow: /backend/
+
+Sitemap: https://www.eehook.com/sitemap.xml

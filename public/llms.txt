@@ -1,0 +1,27 @@
+# EEHOOK
+
+> EEHOOK | Seriously Different. Explore cutting-edge tech gadgets and modern lifestyle products with fast, reliable delivery across Dubai and India.
+
+EEHOOK is an online store for tech gadgets and modern lifestyle products, serving customers in Dubai, the United Arab Emirates, and India.
+
+## Primary pages
+
+- [Home](https://www.eehook.com/): EEHOOK storefront and featured products.
+- [Shop](https://www.eehook.com/shop): Browse the product catalogue.
+- [Offers](https://www.eehook.com/offers): View current offers and promotions.
+- [About](https://www.eehook.com/about): Learn about EEHOOK.
+- [Contact](https://www.eehook.com/contact): Contact EEHOOK for support and enquiries.
+
+## Service coverage
+
+- Dubai, United Arab Emirates
+- India
+
+## Contact
+
+- WhatsApp: https://wa.me/971527281919
+- Email: mailto:info@eehook.com
+
+## Discovery
+
+- Sitemap: https://www.eehook.com/sitemap.xml
