@@ -325,6 +325,8 @@ const MyOrders = () => {
                                 <div className="order-product-image">
 
                                     <img
+                                        loading="lazy"
+                                        decoding="async"
                                         src={
                                             item.product_image
                                                 ? getImageUrl(item.product_image)

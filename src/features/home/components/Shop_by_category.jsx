@@ -363,6 +363,8 @@ function Shop_by_category({ categories: providedCategories }) {
                                 <img
                                     src={item.type === "offer" ? item.image : getImageUrl(item.image)}
                                     alt={item.name}
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             </div>
                             <p>{item.name}</p>
@@ -426,7 +428,7 @@ function Shop_by_category({ categories: providedCategories }) {
                                     >
 
                                         <div className="image-circle">
-                                            <img src={getImageUrl(item.image)} alt={item.name} />
+                                            <img src={getImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" />
                                         </div>
 
                                         <p>

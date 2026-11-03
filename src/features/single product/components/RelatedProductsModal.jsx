@@ -206,7 +206,7 @@ export default function RelatedProductsModal({ products, sourceProductId, onClos
                                     <input type="checkbox" checked={Boolean(choice.selected)} onChange={(event) => updateChoice(productId, { selected: event.target.checked })} disabled={submitting} />
                                     <span>Add to cart</span>
                                 </label>
-                                <img className="related-product-image" src={productImage(product) ? getImageUrl(productImage(product)) : defaultImage} alt="" onError={(event) => { event.currentTarget.src = defaultImage; }} />
+                                <img className="related-product-image" src={productImage(product) ? getImageUrl(productImage(product)) : defaultImage} alt="" loading="lazy" decoding="async" onError={(event) => { event.currentTarget.src = defaultImage; }} />
                                 <div className="related-product-info">
                                     <h3>{product.name || "Related product"}</h3>
                                     {product.description && <p className="related-product-description">{product.description}</p>}

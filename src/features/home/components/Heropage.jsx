@@ -164,6 +164,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                   <img
                     src={getImageUrl(promo.image)} 
                     alt="Promo Banner" 
+                    loading={index === currentPromo ? "eager" : "lazy"}
+                    fetchPriority={index === currentPromo ? "high" : "auto"}
+                    decoding="async"
                     className={loadedImages[`promo-${promo.id ?? index}`] ? "media-is-ready" : "media-is-loading"}
                     onLoad={(event) => markImageLoaded(`promo-${promo.id ?? index}`, event)}
                     style={{ width: "100%", height: "100%" }}
@@ -173,6 +176,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 <img
                   src={getImageUrl(promo.image)} 
                   alt="Promo Banner" 
+                  loading={index === currentPromo ? "eager" : "lazy"}
+                  fetchPriority={index === currentPromo ? "high" : "auto"}
+                  decoding="async"
                   className={loadedImages[`promo-${promo.id ?? index}`] ? "media-is-ready" : "media-is-loading"}
                   onLoad={(event) => markImageLoaded(`promo-${promo.id ?? index}`, event)}
                   style={{ width: "100%", height: "100%" }}
@@ -211,6 +217,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
               <img
                 src={getImageUrl(slide.image || slide.banner_image || slide.image_url)}
                 alt={slide.title || slide.heading || "Featured collection"}
+                loading={index === currentSlide ? "eager" : "lazy"}
+                fetchPriority={index === currentSlide ? "high" : "auto"}
+                decoding="async"
                 className={`hero-image ${loadedImages[`hero-${slide.id ?? index}`] ? "media-is-ready" : "media-is-loading"}`}
                 onLoad={(event) => markImageLoaded(`hero-${slide.id ?? index}`, event)}
               />
@@ -288,6 +297,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                         <img
                           src={getImageUrl(banner.image)}
                           alt="Promotional Banner"
+                          loading={index === normalizedSideBannerIndex ? "eager" : "lazy"}
+                          fetchPriority={index === normalizedSideBannerIndex ? "high" : "auto"}
+                          decoding="async"
                           className={`fixed-banner-image ${loadedImages[`side-${bannerKey}`] ? "media-is-ready" : "media-is-loading"}`}
                           onLoad={(event) => markImageLoaded(`side-${bannerKey}`, event)}
                         />
@@ -296,6 +308,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                       <img
                         src={getImageUrl(banner.image)}
                         alt="Promotional Banner"
+                        loading={index === normalizedSideBannerIndex ? "eager" : "lazy"}
+                        fetchPriority={index === normalizedSideBannerIndex ? "high" : "auto"}
+                        decoding="async"
                         className={`fixed-banner-image ${loadedImages[`side-${bannerKey}`] ? "media-is-ready" : "media-is-loading"}`}
                         onLoad={(event) => markImageLoaded(`side-${bannerKey}`, event)}
                       />

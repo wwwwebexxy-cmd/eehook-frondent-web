@@ -81,6 +81,8 @@ export default function Wishlist() {
                         <img
                             src={getImageUrl(item.product_image)}
                             alt={item.product_name}
+                            loading="lazy"
+                            decoding="async"
                         />
 
                         {

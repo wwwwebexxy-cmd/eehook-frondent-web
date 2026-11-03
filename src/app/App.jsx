@@ -15,12 +15,16 @@ function App() {
     const [authReady, setAuthReady] = useState(false);
     const normalizedPath = location.pathname.toLowerCase();
     const isAdminPage = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");
+    const isProtectedPage = ["/profile", "/checkout", "/checkoutpage", "/wishlist", "/myorders"]
+        .some((path) => normalizedPath === path || normalizedPath.startsWith(`${path}/`));
+    const requiresAuthReady = isAdminPage || isProtectedPage;
 
     useEffect(() => {
         let active = true;
-        // Session restoration must never make the public storefront depend on
-        // an available API connection. A cold EC2/proxy or a CORS outage
-        // should show the public app after a short bounded wait.
+        // Restore the session in the background for public pages. Protected
+        // pages still wait for the answer so an expired session cannot render
+        // a private screen briefly before the redirect runs.
+        setAuthReady(!requiresAuthReady);
         client.get("auth/session/", {
             params: { scope: isAdminPage ? "admin" : "customer" },
             skipAuthRefresh: true,
@@ -37,9 +41,9 @@ function App() {
                 if (active) setAuthReady(true);
             });
         return () => { active = false; };
-    }, [isAdminPage]);
+    }, [isAdminPage, requiresAuthReady]);
 
-    if (!authReady) return <div aria-live="polite" aria-label="Loading application" className="app-loading"><div className="app-loading-card" aria-hidden="true"><span className="skeleton app-loading-logo" /><span className="skeleton app-loading-line wide" /><span className="skeleton app-loading-line" /></div></div>;
+    if (requiresAuthReady && !authReady) return <div aria-live="polite" aria-label="Loading application" className="app-loading"><div className="app-loading-card" aria-hidden="true"><span className="skeleton app-loading-logo" /><span className="skeleton app-loading-line wide" /><span className="skeleton app-loading-line" /></div></div>;
 
     return (
         <>

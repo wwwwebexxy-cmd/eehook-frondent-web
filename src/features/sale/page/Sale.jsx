@@ -182,6 +182,8 @@ function Sale() {
                                 <img
                                     src={getImageUrl(selectedSubcategory?.image || selectedCategory.image)}
                                     alt={selectedSubcategory?.name || selectedCategory.name}
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             )}
                         </div>

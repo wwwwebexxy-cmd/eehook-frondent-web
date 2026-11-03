@@ -937,6 +937,9 @@ function Single_product() {
                                             : defaultImage
                                 }
                                 alt={data.name}
+                                loading="eager"
+                                fetchPriority="high"
+                                decoding="async"
                             />
                         </div>
                         <p className="zoom-text">Click image to view in full screen</p>
@@ -965,6 +968,8 @@ function Single_product() {
                                             ? "active-thumb"
                                             : ""
                                     }
+                                    loading="lazy"
+                                    decoding="async"
                                     onClick={() => setActiveImage(img.image)}
                                 />
                             ))}
@@ -1000,7 +1005,7 @@ function Single_product() {
                                             syncProductSelectionUrl(variant, nextSizeOption);
                                         }}
                                     >
-                                        {img ? <img src={getImageUrl(img)} alt={color.name} /> : <div className="fallback-color" style={{ background: color.code }} />}
+                                        {img ? <img src={getImageUrl(img)} alt={color.name} loading="lazy" decoding="async" /> : <div className="fallback-color" style={{ background: color.code }} />}
                                     </button>
                                 );
                             })}
@@ -1110,12 +1115,16 @@ function Single_product() {
                                     <img 
                                         src={getImageUrl(data.promotional_banner_image)} 
                                         alt="Promotion" 
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 </a>
                             ) : (
                                 <img 
                                     src={getImageUrl(data.promotional_banner_image)} 
                                     alt="Promotion" 
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             )}
                         </div>
@@ -1185,10 +1194,10 @@ function Single_product() {
                 <div className="promotional-banner">
                     {data.promotional_banner_link ? (
                         <a className="promotional-banner-link" href={data.promotional_banner_link} target="_blank" rel="noopener noreferrer">
-                            <img src={data.promotional_banner_url} alt="Promotion" />
+                            <img src={data.promotional_banner_url} alt="Promotion" loading="lazy" decoding="async" />
                         </a>
                     ) : (
-                        <img src={data.promotional_banner_url} alt="Promotion" />
+                        <img src={data.promotional_banner_url} alt="Promotion" loading="lazy" decoding="async" />
                     )}
                 </div>
             )}
@@ -1209,7 +1218,7 @@ function Single_product() {
                             return (
                                 <NavLink className="product-related-product-card" to={getProductDetailsPath(product, relatedProductId)} key={relatedProductId}>
                                     <div className="product-related-product-image">
-                                        <img src={image ? getImageUrl(image) : defaultImage} alt={product?.name || "Related product"} onError={(event) => { event.currentTarget.src = defaultImage; }} />
+                                        <img src={image ? getImageUrl(image) : defaultImage} alt={product?.name || "Related product"} loading="lazy" decoding="async" onError={(event) => { event.currentTarget.src = defaultImage; }} />
                                     </div>
                                     <div className="product-related-product-info">
                                         <h3>{product?.name || "Related product"}</h3>
@@ -1232,7 +1241,7 @@ function Single_product() {
                         <button type="button" className="image-popup-arrow image-popup-arrow-left" onClick={() => setModalImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1))} aria-label="Previous image">&#10094;</button>
                     )}
 
-                    <img src={getImageUrl(displayImages[modalImageIndex]?.image)} alt="Product preview" />
+                    <img src={getImageUrl(displayImages[modalImageIndex]?.image)} alt="Product preview" decoding="async" />
 
                     {displayImages.length > 1 && (
                         <button type="button" className="image-popup-arrow image-popup-arrow-right" onClick={() => setModalImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0))} aria-label="Next image">&#10095;</button>

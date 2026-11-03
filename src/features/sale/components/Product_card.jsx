@@ -209,7 +209,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                         </div>
                     ) : null}
                     <div className="product-image-stage">
-                        <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} />
+                        <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} loading="lazy" decoding="async" />
                         <button
                             type="button"
                             className="quick-add-bar"

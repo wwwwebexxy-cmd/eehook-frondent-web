@@ -157,7 +157,7 @@ function New_Arrival_Home({
                                             </div>
                                         ) : null}
                                         <div className="product-image-stage">
-                                            <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
+                                            <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" loading="lazy" decoding="async" />
                                             <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(productDetailsPath); }}>VIEW PRODUCT</button>
                                         </div>
                                         <button type="button" className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`} onClick={(event) => addToWishlist(item, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}>{isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}</button>

@@ -36,6 +36,8 @@ if (error) {
                 <img
                   src={getImageUrl(offer.image)}
                   alt={offer.title}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             )}

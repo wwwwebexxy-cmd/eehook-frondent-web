@@ -492,6 +492,8 @@ const Checkout = () => {
                                         <div className="eehook-summary-image">
 
                                             <img
+                                                loading="lazy"
+                                                decoding="async"
                                                 src={getImageUrl(item.product_image)}
                                                 alt={item.product_name}
                                             />

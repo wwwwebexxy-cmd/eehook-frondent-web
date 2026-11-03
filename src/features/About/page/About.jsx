@@ -47,7 +47,7 @@ const About = () => {
                 </div>
                 <div className="hero-image-content">
                     <div className="image-frame">
-                        <img src={AboutFirstimage} alt="Modern Tech Workspace" />
+                        <img src={AboutFirstimage} alt="Modern Tech Workspace" loading="eager" fetchPriority="high" decoding="async" />
                     </div>
                 </div>
             </section>
@@ -81,7 +81,7 @@ const About = () => {
                     </div>
                 </div>
                 <div className="story-right">
-                    <img src={AboutSecondimage} alt="Lifestyle Vibe" className="story-vibe-img" />
+                    <img src={AboutSecondimage} alt="Lifestyle Vibe" className="story-vibe-img" loading="lazy" decoding="async" />
                 </div>
             </section>
 

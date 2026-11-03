@@ -282,7 +282,8 @@ function Cart_page() {
                                     >
 
                                         <img
-
+                                            loading="lazy"
+                                            decoding="async"
                                             src={getImageUrl(cart.image)}
 
                                             alt={cart.name}
