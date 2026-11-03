@@ -1,28 +1,43 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
-import Home from '../features/home/Home'
-import Sale from '../features/sale/page/Sale'
-import Single_product from '../features/single product/page/Single_product'
-import Cart_page from '../features/cart/page/Cart_Page'
-import Wishlist from '../features/wishlist/page/Wishlist'
-import Offer_poster from '../hooks/offers/page/Offer_poster'
-import OrderDashboard from '../features/Dasboard/page/OrderDashboard'
-import About from '../features/About/page/About'
-import Profile from '../features/Profile/page/Profile'
-
-import MyOrder from '../features/myOrders/page/My_orders'
-import PaymentSuccess from '../features/cart/page/PaymentSuccess'
-import ContactUs from '../components/Contact'
-
-import Login from '../features/auth/page/Login'
-import AdminLogin from '../features/auth/page/AdminLogin'
-import Signup from '../features/auth/page/SignUp'
 import AdminRoute from '../features/Dasboard/page/AdminRoute'
-import ForgotPassword from '../features/auth/page/ForgotPassord'
-import ResetPassword from '../features/auth/page/ResetPassword'
-import Checkout from '../features/cart/page/CheckOut'
-import Invoice from '../features/Dasboard/page/InvoicePrint'
 import ProtectedRoute from '../features/auth/page/ProtectedRoute'
-import Unauthorized from '../features/auth/page/Unauthorized'
+
+// Keep the public shell small. Pages are fetched only when a route is visited,
+// so the homepage does not pay the cost of the dashboard, checkout, and admin
+// editor modules during its first render.
+const Home = lazy(() => import('../features/home/Home'))
+const Sale = lazy(() => import('../features/sale/page/Sale'))
+const Single_product = lazy(() => import('../features/single product/page/Single_product'))
+const Cart_page = lazy(() => import('../features/cart/page/Cart_Page'))
+const Wishlist = lazy(() => import('../features/wishlist/page/Wishlist'))
+const Offer_poster = lazy(() => import('../hooks/offers/page/Offer_poster'))
+const OrderDashboard = lazy(() => import('../features/Dasboard/page/OrderDashboard'))
+const About = lazy(() => import('../features/About/page/About'))
+const Profile = lazy(() => import('../features/Profile/page/Profile'))
+const MyOrder = lazy(() => import('../features/myOrders/page/My_orders'))
+const PaymentSuccess = lazy(() => import('../features/cart/page/PaymentSuccess'))
+const ContactUs = lazy(() => import('../components/Contact'))
+const Login = lazy(() => import('../features/auth/page/Login'))
+const AdminLogin = lazy(() => import('../features/auth/page/AdminLogin'))
+const Signup = lazy(() => import('../features/auth/page/SignUp'))
+const ForgotPassword = lazy(() => import('../features/auth/page/ForgotPassord'))
+const ResetPassword = lazy(() => import('../features/auth/page/ResetPassword'))
+const Checkout = lazy(() => import('../features/cart/page/CheckOut'))
+const Invoice = lazy(() => import('../features/Dasboard/page/InvoicePrint'))
+const Unauthorized = lazy(() => import('../features/auth/page/Unauthorized'))
+
+function RouteLoading() {
+    return (
+        <div className="app-loading" role="status" aria-live="polite" aria-label="Loading page">
+            <div className="app-loading-card" aria-hidden="true">
+                <span className="skeleton app-loading-logo" />
+                <span className="skeleton app-loading-line wide" />
+                <span className="skeleton app-loading-line" />
+            </div>
+        </div>
+    );
+}
 function LegacyOrderDetailsRedirect() {
     const { id } = useParams();
     return <Navigate to={`/eehook-dashboard/orders/${id}`} replace />;
@@ -36,7 +51,8 @@ function LegacyDashboardPathRedirect() {
 
 function Router() {
     return (
-        <div>
+        <Suspense fallback={<RouteLoading />}>
+            <div>
 
             <Routes>
                 <Route path='/' element={<Home />} />
@@ -158,7 +174,8 @@ function Router() {
 
             </Routes>
 
-        </div>
+            </div>
+        </Suspense>
     )
 }
 
