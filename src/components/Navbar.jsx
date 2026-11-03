@@ -172,7 +172,7 @@ const cartLength = cart.total_items ?? 0;
 
                     <div className="nav_main2">
                         <NavLink to='/' className="logo-link topbar-logo-link">
-                            <img src={navbarlogo} alt="Logo" className="navbar-logo topbar-logo" fetchPriority="high" decoding="async" />
+                            <img src={navbarlogo} alt="EEHOOK" className="navbar-logo topbar-logo" width="170" height="80" fetchPriority="high" decoding="async" />
                         </NavLink>
 
                         <div className="link_flex">
@@ -337,7 +337,7 @@ const cartLength = cart.total_items ?? 0;
             <div id="mobile-navigation" className={`mobile_menu ${menuOpen ? "show" : ""}`}>
                 <div className="mobile_header">
                     <NavLink to='/' className="logo-link" style={{ marginTop: '5px' }}>
-                        <img src={navbarlogo} alt="Logo" className="navbar-logo" fetchPriority="high" decoding="async" />
+                        <img src={navbarlogo} alt="EEHOOK" className="navbar-logo" width="170" height="80" fetchPriority="high" decoding="async" />
                     </NavLink>
                     <button type="button" className="mobile-close-button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><IoClose size={25} /></button>
                 </div>

@@ -35,7 +35,7 @@ function HomepageBrandSection({ brands }) {
                     >
                         <div className="brand-showcase-visual">
                             <span className="brand-showcase-orb" aria-hidden="true" />
-                            <img src={getImageUrl(brand.logo) || defaultImage} alt="" loading="lazy" decoding="async" />
+                            <img src={getImageUrl(brand.logo) || defaultImage} alt={`${brandName} logo`} width="160" height="160" loading="lazy" decoding="async" />
                             <span className="brand-showcase-product-count">{productCount ? `${productCount} ${productCount === 1 ? "product" : "products"}` : "Explore collection"}</span>
                         </div>
                         <div className="brand-showcase-card-content">

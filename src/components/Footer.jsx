@@ -17,7 +17,7 @@ function Footer() {
                 <div className="footer-container">
 
                     <div className="footer-column brand">
-                        <img src={footerlogo} alt="Logo" className="footer-logo" loading="lazy" decoding="async" />
+                        <img src={footerlogo} alt="EEHOOK" className="footer-logo" width="1672" height="941" loading="lazy" decoding="async" />
                     </div>
 
                     <div className="footer-column social-column">

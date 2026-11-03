@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import './../App.css';
 import client from "../lib/ApiClient";
-import { clearAuthSession, saveAuthSession } from "../features/auth/authUtils";
+import { clearAuthSession, hasAuthSession, saveAuthSession } from "../features/auth/authUtils";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Router from './Router';
@@ -12,19 +12,25 @@ import ScrollToTop from '../components/ScrollToTop';
 function App() {
 
     const location = useLocation();
-    const [authReady, setAuthReady] = useState(false);
     const normalizedPath = location.pathname.toLowerCase();
     const isAdminPage = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");
     const isProtectedPage = ["/profile", "/checkout", "/checkoutpage", "/wishlist", "/myorders"]
         .some((path) => normalizedPath === path || normalizedPath.startsWith(`${path}/`));
     const requiresAuthReady = isAdminPage || isProtectedPage;
+    const [authReady, setAuthReady] = useState(() => !requiresAuthReady);
 
     useEffect(() => {
         let active = true;
+        // Anonymous public pages do not need a session probe. The expected
+        // 401 response was being counted as a browser error by Lighthouse.
+        if (!requiresAuthReady && !hasAuthSession()) {
+            return () => { active = false; };
+        }
         // Restore the session in the background for public pages. Protected
         // pages still wait for the answer so an expired session cannot render
-        // a private screen briefly before the redirect runs.
-        setAuthReady(!requiresAuthReady);
+        // a private screen briefly before the redirect runs. Public pages do
+        // not use authReady as a render gate, so no synchronous state update
+        // is needed here.
         client.get("auth/session/", {
             params: { scope: isAdminPage ? "admin" : "customer" },
             skipAuthRefresh: true,

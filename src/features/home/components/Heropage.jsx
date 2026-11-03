@@ -147,7 +147,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
       {promoLoading ? (
         <div className="top-promo-carousel promo-loading-skeleton skeleton" role="status" aria-label="Loading promotional banner" />
       ) : promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
-        <button className="promo-nav-btn left" onClick={prevPromo}>‹</button>
+        <button type="button" className="promo-nav-btn left" onClick={prevPromo} aria-label="Previous promotional banner">‹</button>
         
         <div
           className="promo-slides"
@@ -164,6 +164,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                   <img
                     src={getImageUrl(promo.image)} 
                     alt="Promo Banner" 
+                    width="1600"
+                    height="300"
+                    sizes="100vw"
                     loading={index === currentPromo ? "eager" : "lazy"}
                     fetchPriority={index === currentPromo ? "high" : "auto"}
                     decoding="async"
@@ -176,6 +179,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                 <img
                   src={getImageUrl(promo.image)} 
                   alt="Promo Banner" 
+                  width="1600"
+                  height="300"
+                  sizes="100vw"
                   loading={index === currentPromo ? "eager" : "lazy"}
                   fetchPriority={index === currentPromo ? "high" : "auto"}
                   decoding="async"
@@ -188,7 +194,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           ))}
         </div>
 
-        <button className="promo-nav-btn right" onClick={nextPromo}>›</button>
+        <button type="button" className="promo-nav-btn right" onClick={nextPromo} aria-label="Next promotional banner">›</button>
       </div>}
 
       <section
@@ -217,6 +223,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
               <img
                 src={getImageUrl(slide.image || slide.banner_image || slide.image_url)}
                 alt={slide.title || slide.heading || "Featured collection"}
+                width="1600"
+                height="700"
+                sizes="(max-width: 768px) 100vw, 66vw"
                 loading={index === currentSlide ? "eager" : "lazy"}
                 fetchPriority={index === currentSlide ? "high" : "auto"}
                 decoding="async"
@@ -254,10 +263,10 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
           </div>
           
           {/* Navigation Arrows */}
-          <button className="carousel-nav-btn prev-btn" onClick={prevSlide}>
+          <button className="carousel-nav-btn prev-btn" onClick={prevSlide} aria-label="Previous hero slide">
             ‹
           </button>
-          <button className="carousel-nav-btn next-btn" onClick={nextSlide}>
+          <button className="carousel-nav-btn next-btn" onClick={nextSlide} aria-label="Next hero slide">
             ›
           </button>
 
@@ -297,6 +306,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                         <img
                           src={getImageUrl(banner.image)}
                           alt="Promotional Banner"
+                          width="800"
+                          height="700"
+                          sizes="(max-width: 768px) 100vw, 34vw"
                           loading={index === normalizedSideBannerIndex ? "eager" : "lazy"}
                           fetchPriority={index === normalizedSideBannerIndex ? "high" : "auto"}
                           decoding="async"
@@ -308,6 +320,9 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
                       <img
                         src={getImageUrl(banner.image)}
                         alt="Promotional Banner"
+                        width="800"
+                        height="700"
+                        sizes="(max-width: 768px) 100vw, 34vw"
                         loading={index === normalizedSideBannerIndex ? "eager" : "lazy"}
                         fetchPriority={index === normalizedSideBannerIndex ? "high" : "auto"}
                         decoding="async"

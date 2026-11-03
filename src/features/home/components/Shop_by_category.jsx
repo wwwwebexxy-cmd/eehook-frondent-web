@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import ShopBy_categoryQuery from "../../shop_by_category/queries/ShopBy_categoryQuery";
 import "../styles/ShopBy-category.css";
 
@@ -54,7 +54,7 @@ function Shop_by_category({ categories: providedCategories }) {
         right: true
     });
 
-    const checkCategoryScroll = () => {
+    const checkCategoryScroll = useCallback(() => {
 
         const container = categorySliderRef.current;
 
@@ -89,16 +89,16 @@ function Shop_by_category({ categories: providedCategories }) {
 
         });
 
-    };
+    }, []);
 
-    const scheduleCategoryScrollCheck = () => {
+    const scheduleCategoryScrollCheck = useCallback(() => {
         if (categoryScrollCheckFrame.current !== null) return;
 
         categoryScrollCheckFrame.current = window.requestAnimationFrame(() => {
             categoryScrollCheckFrame.current = null;
             checkCategoryScroll();
         });
-    };
+    }, [checkCategoryScroll]);
 
     const checkSubCategoryScroll = () => {
 
@@ -179,7 +179,7 @@ function Shop_by_category({ categories: providedCategories }) {
                 categoryScrollCheckFrame.current = null;
             }
         }
-    }, [categories]);
+    }, [categories, checkCategoryScroll, scheduleCategoryScrollCheck]);
 
     useEffect(() => {
         const container = categorySliderRef.current;
@@ -363,6 +363,8 @@ function Shop_by_category({ categories: providedCategories }) {
                                 <img
                                     src={item.type === "offer" ? item.image : getImageUrl(item.image)}
                                     alt={item.name}
+                                    width="160"
+                                    height="160"
                                     loading="lazy"
                                     decoding="async"
                                 />
@@ -428,7 +430,7 @@ function Shop_by_category({ categories: providedCategories }) {
                                     >
 
                                         <div className="image-circle">
-                                            <img src={getImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" />
+                                            <img src={getImageUrl(item.image)} alt={item.name} width="160" height="160" loading="lazy" decoding="async" />
                                         </div>
 
                                         <p>

@@ -209,7 +209,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                         </div>
                     ) : null}
                     <div className="product-image-stage">
-                        <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} loading="lazy" decoding="async" />
+                        <img src={image ? getImageUrl(image) : defaultImage} alt={product.name || "Product"} width="400" height="400" sizes="(max-width: 576px) 45vw, (max-width: 900px) 30vw, 22vw" loading="lazy" decoding="async" />
                         <button
                             type="button"
                             className="quick-add-bar"
