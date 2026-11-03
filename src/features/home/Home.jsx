@@ -6,6 +6,7 @@ import New_Arrival_Home from "./components/New_Arrival_Home";
 import HomepageProductSection from "./components/HomepageProductSection";
 import HomepageBrandSection from "./components/HomepageBrandSection";
 import HomepageTrustBenefits from "./components/HomepageTrustBenefits";
+import DeferredHomepageSection from "./components/DeferredHomepageSection";
 import Homepage_Query from "./queries/Homepage_Query";
 import Product_Query from "../sale/queries/Product_Query";
 import Offer_poster from "../../hooks/offers/page/Offer_poster";
@@ -120,6 +121,8 @@ function Home() {
 
     const categories = asArray(homepageData.categories);
     const heroBanners = asArray(homepageData.hero_banners);
+    const promoBanners = asArray(homepageData.promo_banners);
+    const heroSideBanner = asArray(homepageData.hero_side_banners);
     const newArrivals = homepageData.new_arrivals;
     const trendingNow = homepageData.trending_now;
     const topDeals = homepageData.top_deals;
@@ -129,7 +132,11 @@ function Home() {
     const shopByBrand = homepageBrands.length ? homepageBrands : brandsFromProducts(brandProducts);
     return (
         <main className="homepage-discovery">
-            <Heropage heroBanners={heroBanners} />
+            <Heropage
+                heroBanners={heroBanners}
+                promoBanners={promoBanners}
+                heroSideBanner={heroSideBanner}
+            />
 
             {categories.length > 0 && (
                 <div className="category-section-wrapper" style={{ background: "#fbfbf6", padding: "14px 15px 28px" }}>
@@ -137,34 +144,56 @@ function Home() {
                 </div>
             )}
 
-            <New_Arrival_Home products={asArray(newArrivals)} totalCount={newArrivals?.count} showNewBadge tone="new" />
-            <Offer_poster />
-            <HomepageProductSection title="Trending now" eyebrow="Popular right now" section={trendingNow} tone="trending" />
-            <HomepageProductSection title="Top deals" eyebrow="Best value" section={topDeals} tone="deals" />
-            <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} tone="bestsellers" />
-            <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} tone="personal" />
+            <DeferredHomepageSection minHeight={480}>
+                <New_Arrival_Home products={asArray(newArrivals)} totalCount={newArrivals?.count} showNewBadge tone="new" />
+            </DeferredHomepageSection>
+            <DeferredHomepageSection minHeight={260}>
+                <Offer_poster />
+            </DeferredHomepageSection>
+            <DeferredHomepageSection minHeight={480}>
+                <HomepageProductSection title="Trending now" eyebrow="Popular right now" section={trendingNow} tone="trending" />
+            </DeferredHomepageSection>
+            <DeferredHomepageSection minHeight={480}>
+                <HomepageProductSection title="Top deals" eyebrow="Best value" section={topDeals} tone="deals" />
+            </DeferredHomepageSection>
+            <DeferredHomepageSection minHeight={480}>
+                <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} tone="bestsellers" />
+            </DeferredHomepageSection>
+            <DeferredHomepageSection minHeight={480}>
+                <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} tone="personal" />
+            </DeferredHomepageSection>
 
-            <HomepageBrandSection brands={shopByBrand} />
+            <DeferredHomepageSection minHeight={360}>
+                <HomepageBrandSection brands={shopByBrand} />
+            </DeferredHomepageSection>
 
-            <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} tone="recent" />
+            <DeferredHomepageSection minHeight={480}>
+                <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} tone="recent" />
+            </DeferredHomepageSection>
 
-            <HomepageTrustBenefits benefits={asArray(homepageData.trust_benefits)} />
+            <DeferredHomepageSection minHeight={260}>
+                <HomepageTrustBenefits benefits={asArray(homepageData.trust_benefits)} />
+            </DeferredHomepageSection>
 
-            <section className="section-heritage">
-                <div className="section-heritage-text">
-                    <span className="heritage-tag">OUR PROMISE</span>
-                    <h2>Innovation Meets Premium Lifestyle</h2>
-                    <p>At eehook, every product is selected with a focus on quality, performance, and modern design. From powerful electronics to top-tier cosmetics, our collections are thoughtfully curated for customers who value excellence.</p>
-                    <p>Blending the latest tech trends with lifestyle essentials, we create a shopping experience that elevates your everyday life.</p>
-                </div>
+            <DeferredHomepageSection minHeight={620}>
+                <section className="section-heritage">
+                    <div className="section-heritage-text">
+                        <span className="heritage-tag">OUR PROMISE</span>
+                        <h2>Innovation Meets Premium Lifestyle</h2>
+                        <p>At eehook, every product is selected with a focus on quality, performance, and modern design. From powerful electronics to top-tier cosmetics, our collections are thoughtfully curated for customers who value excellence.</p>
+                        <p>Blending the latest tech trends with lifestyle essentials, we create a shopping experience that elevates your everyday life.</p>
+                    </div>
 
-                <div className="section-heritage-gallery">
-                    <DeferredHeritageVideo source={vedio1} label="Technology collection preview" />
-                    <DeferredHeritageVideo source={vedio2} label="Lifestyle collection preview" />
-                </div>
-            </section>
+                    <div className="section-heritage-gallery">
+                        <DeferredHeritageVideo source={vedio1} label="Technology collection preview" />
+                        <DeferredHeritageVideo source={vedio2} label="Lifestyle collection preview" />
+                    </div>
+                </section>
+            </DeferredHomepageSection>
 
-            <ContactUs />
+            <DeferredHomepageSection minHeight={300}>
+                <ContactUs />
+            </DeferredHomepageSection>
         </main>
     );
 }

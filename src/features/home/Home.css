@@ -270,6 +270,15 @@
     background: var(--background, #F8F9F3);
 }
 
+.homepage-deferred-section {
+    width: 100%;
+}
+
+.homepage-deferred-skeleton {
+    width: 100%;
+    min-height: 320px;
+}
+
 .homepage-category-section,
 .homepage-section,
 .homepage-benefits {
