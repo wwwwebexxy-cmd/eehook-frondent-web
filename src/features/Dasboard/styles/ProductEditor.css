@@ -12,6 +12,13 @@
 .variant-image-item:active { cursor: grabbing; }
 .image-position { position: absolute; top: 8px; left: 8px; min-width: 20px; padding: 2px 5px; border-radius: 10px; background: rgba(38, 64, 72, .82); color: #fff; text-align: center; font: 700 10px Inter, sans-serif; }
 .variant-image-item > button { position: absolute; top: 5px; right: 5px; display: grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: #a33; }
+.variant-images .variant-subheading > div:first-child { display: flex; flex-direction: column; gap: 4px; }
+.variant-images .variant-subheading .field-hint { color: var(--admin-muted); font-size: 11px; font-weight: 400; }
+.variant-image-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.image-transparency-toggle { display: inline-flex; align-items: center; gap: 5px; color: var(--admin-muted); font: 600 11px Inter, sans-serif; cursor: pointer; }
+.image-transparency-toggle input { width: 15px; height: 15px; accent-color: var(--admin-brand); }
+.variant-images .admin-button.is-processing { cursor: wait; opacity: .7; }
+.variant-images .variant-image-item { background-color: #f7faf8; background-image: linear-gradient(45deg, #e8efeb 25%, transparent 25%), linear-gradient(-45deg, #e8efeb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e8efeb 75%), linear-gradient(-45deg, transparent 75%, #e8efeb 75%); background-position: 0 0, 0 6px, 6px -6px, -6px 0; background-size: 12px 12px; }
 .editor-unit-row { align-items: start; }
 .editor-unit-row .product-field { min-width: 0; }
 .editor-unit-row .product-field input { width: 100%; }
@@ -39,6 +46,7 @@
 .product-editor-page .admin-back-link { display: inline-flex; align-items: center; gap: 7px; padding: 10px 14px; margin: 0 0 18px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; color: #62767d; font: 700 12px Inter, sans-serif; box-shadow: 0 2px 7px rgba(38, 64, 72, .05); transition: .2s ease; }
 .product-editor-page .admin-back-link:hover { border-color: #eaa34d; background: #fff7ec; color: var(--admin-brand-dark); transform: translateX(-2px); }
 @media (max-width: 760px) { .product-view-toolbar { flex-direction: column; } .product-view-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .variant-image-actions { width: 100%; justify-content: flex-start; } }
 
 .product-view-page { max-width: 1280px; }
 .product-view-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
