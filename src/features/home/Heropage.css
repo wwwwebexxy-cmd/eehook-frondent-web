@@ -14,27 +14,31 @@
     display: flex;
     align-items: center;
     background: #f0f0f0;
+    touch-action: pan-y;
 }
 
 .promo-slides {
+    position: relative;
     width: 100%;
     height: 100%;
-    display: flex;
-    transition: transform .85s cubic-bezier(.22, 1, .36, 1);
-    will-change: transform;
+    display: block;
 }
 
 .promo-slide {
     position: relative;
-    flex: 0 0 100%;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     transform: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: opacity .7s ease, visibility 0s linear .7s;
+    will-change: opacity;
 }
 
 .promo-loading-skeleton {
@@ -60,6 +64,9 @@
 .promo-slide.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
+    transition-delay: 0s;
 }
 
 .promo-slide img {
@@ -132,14 +139,13 @@
     overflow: hidden;
     border-radius: 0; /* flush edges */
     height: 100%;
+    touch-action: pan-y;
 }
 
 .hero-slides-track {
-    display: flex;
+    position: relative;
     width: 100%;
     height: 100%;
-    transition: transform .95s cubic-bezier(.22, 1, .36, 1);
-    will-change: transform;
 }
 
 .hero-split-layout.single .hero-carousel-section {
@@ -168,14 +174,13 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    touch-action: pan-y;
 }
 
 .side-banner-track {
-    display: flex;
+    position: relative;
     width: 100%;
     height: 100%;
-    transition: transform .85s cubic-bezier(.22, 1, .36, 1);
-    will-change: transform;
 }
 
 .fixed-banner-content > a {
@@ -185,10 +190,23 @@
 }
 
 .side-banner-slide {
-    position: relative;
-    flex: 0 0 100%;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .7s ease, visibility 0s linear .7s;
+    will-change: opacity;
+}
+
+.side-banner-slide.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
+    transition-delay: 0s;
 }
 
 .side-banner-slide > a {
@@ -210,19 +228,24 @@
 /* ---------------- Slide ---------------- */
 
 .hero-slide {
-    position: relative;
-    flex: 0 0 100%;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 1;
-    visibility: visible;
-    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity .7s ease, visibility 0s linear .7s;
+    will-change: opacity;
 }
 
 .hero-slide.active {
     opacity: 1;
     visibility: visible;
     z-index: 2;
+    pointer-events: auto;
+    transition-delay: 0s;
 }
 
 .hero-image {
@@ -750,6 +773,8 @@
     .hero-slides-track,
     .side-banner-track {
         transition: none;
-        transform: none;
     }
+    .promo-slide,
+    .hero-slide,
+    .side-banner-slide { transition: none; }
 }

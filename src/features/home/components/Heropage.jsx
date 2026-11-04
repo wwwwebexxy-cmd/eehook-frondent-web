@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../Heropage.css";
 import { getImageUrl } from "../../../utils/imageUrl";
@@ -7,6 +7,7 @@ import Hero_Query from "../queries/Hero_Query";
 import PromoBanners_Query from "../queries/PromoBanners_Query";
 import HeroSideBanner_Query from "../queries/HeroSideBanner_Query";
 import { resolveBannerList } from "./heroContent";
+import { getSwipeDirection } from "./heroSwipe";
 
 const getHeroCopy = (...values) => {
   return values
@@ -42,6 +43,7 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentSideBanner, setCurrentSideBanner] = useState(0);
   const [loadedImages, setLoadedImages] = useState({});
+  const swipeStart = useRef({});
 
   // Auto Slide
   useEffect(() => {
@@ -140,19 +142,49 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
     setCurrentSideBanner((previous) => (previous === 0 ? sideBanners.length - 1 : previous - 1));
   };
 
+  const handleTouchStart = (key, event) => {
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    swipeStart.current[key] = { startX: touch.clientX, startY: touch.clientY, cancelClick: false };
+  };
+
+  const handleTouchEnd = (key, event, next, previous) => {
+    const start = swipeStart.current[key];
+    const touch = event.changedTouches[0];
+    if (!start || !touch) return;
+
+    const direction = getSwipeDirection({
+      startX: start.startX,
+      startY: start.startY,
+      endX: touch.clientX,
+      endY: touch.clientY,
+    });
+    if (direction === "next") next();
+    if (direction === "previous") previous();
+    swipeStart.current[key] = { ...start, cancelClick: Boolean(direction) };
+  };
+
+  const handleTouchCancel = (key) => {
+    delete swipeStart.current[key];
+  };
+
+  const preventSwipeClick = (key, event) => {
+    if (!swipeStart.current[key]?.cancelClick) return;
+    event.preventDefault();
+    event.stopPropagation();
+    delete swipeStart.current[key];
+  };
+
   return (
     <div className="hero-page-wrapper">
       
       {/* Top Promo Carousel (Visa Banner Equivalent) */}
       {promoLoading ? (
         <div className="top-promo-carousel promo-loading-skeleton skeleton" role="status" aria-label="Loading promotional banner" />
-      ) : promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }}>
+      ) : promoBanners.length > 0 && <div className="top-promo-carousel" style={{ aspectRatio: promoRatio }} onTouchStart={(event) => handleTouchStart("promo", event)} onTouchEnd={(event) => handleTouchEnd("promo", event, nextPromo, prevPromo)} onTouchCancel={() => handleTouchCancel("promo")} onClickCapture={(event) => preventSwipeClick("promo", event)}>
         <button type="button" className="promo-nav-btn left" onClick={prevPromo} aria-label="Previous promotional banner">‹</button>
         
-        <div
-          className="promo-slides"
-          style={{ transform: `translateX(-${currentPromo * 100}%)` }}
-        >
+        <div className="promo-slides">
           {promoBanners.map((promo, index) => (
             <div
               key={promo.id ?? index}
@@ -205,11 +237,8 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
         {/* Main Carousel (Left) */}
         {heroLoading ? (
           <div className="hero-carousel-section hero-loading-skeleton skeleton" role="status" aria-label="Loading hero banner" />
-        ) : heroSlides.length > 0 && <div className="hero-carousel-section">
-          <div
-            className="hero-slides-track"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-          >
+        ) : heroSlides.length > 0 && <div className="hero-carousel-section" onTouchStart={(event) => handleTouchStart("hero", event)} onTouchEnd={(event) => handleTouchEnd("hero", event, nextSlide, prevSlide)} onTouchCancel={() => handleTouchCancel("hero")} onClickCapture={(event) => preventSwipeClick("hero", event)}>
+          <div className="hero-slides-track">
             {heroSlides.map((slide, index) => (
               <div
                 key={slide.id ?? index}
@@ -290,16 +319,13 @@ const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBan
         {/* Rotating Side Banners (Right) */}
         {sideLoading ? (
           <div className="hero-fixed-banner-section side-banner-loading-skeleton skeleton" role="status" aria-label="Loading side promotional banner" />
-        ) : sideBanners.length > 0 && <div className="hero-fixed-banner-section" aria-label="Promotional side banners">
+        ) : sideBanners.length > 0 && <div className="hero-fixed-banner-section" aria-label="Promotional side banners" onTouchStart={(event) => handleTouchStart("side", event)} onTouchEnd={(event) => handleTouchEnd("side", event, nextSideBanner, prevSideBanner)} onTouchCancel={() => handleTouchCancel("side")} onClickCapture={(event) => preventSwipeClick("side", event)}>
           <div className="fixed-banner-content">
-            <div
-              className="side-banner-track"
-              style={{ transform: `translateX(-${normalizedSideBannerIndex * 100}%)` }}
-            >
+            <div className="side-banner-track">
               {sideBanners.map((banner, index) => {
                 const bannerKey = banner.id ?? banner.image ?? index;
                 return (
-                  <div className="side-banner-slide" key={bannerKey}>
+                  <div className={`side-banner-slide ${normalizedSideBannerIndex === index ? "active" : ""}`} key={bannerKey}>
                     {!loadedImages[`side-${bannerKey}`] && <div className="media-loading-skeleton skeleton" aria-hidden="true" />}
                     {banner.link ? (
                       <a href={banner.link} target="_blank" rel="noopener noreferrer">
