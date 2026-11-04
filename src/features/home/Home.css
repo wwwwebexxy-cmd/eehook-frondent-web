@@ -578,7 +578,13 @@
 .brand-showcase-card-content h3 {
     margin: 8px 0;
     font: 600 clamp(1.65rem, 3vw, 2.6rem) / 1.02 "Playfair Display", Georgia, serif;
-    overflow-wrap: anywhere;
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
 }
 
 .brand-showcase-card-content p {
