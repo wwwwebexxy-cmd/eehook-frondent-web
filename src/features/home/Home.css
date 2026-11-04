@@ -569,6 +569,7 @@
     justify-content: center;
     min-width: 0;
     padding: 24px;
+    container-type: inline-size;
 }
 
 .brand-showcase-card-content > span:first-child {
@@ -577,12 +578,11 @@
 
 .brand-showcase-card-content h3 {
     margin: 8px 0;
-    font: 600 clamp(1.65rem, 3vw, 2.6rem) / 1.02 "Playfair Display", Georgia, serif;
+    font: 600 clamp(1.2rem, 12cqw, 2.6rem) / 1.02 "Playfair Display", Georgia, serif;
     display: block;
-    max-width: 100%;
-    overflow: hidden;
     overflow-wrap: normal;
-    text-overflow: ellipsis;
+    text-overflow: clip;
+    overflow: visible;
     white-space: nowrap;
     word-break: normal;
 }
