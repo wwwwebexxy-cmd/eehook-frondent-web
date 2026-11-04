@@ -5,6 +5,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { clearAuthSession, isPrivilegedUser, saveAuthSession } from "../authUtils";
 import { isGoogleAuthConfigured } from "../googleConfig";
+import { GOOGLE_LOGIN_OPTIONS } from "../googleLoginConfig";
 import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./Login.css";
 
@@ -240,6 +241,7 @@ function Login() {
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}
+                                        {...GOOGLE_LOGIN_OPTIONS}
                                         theme="outline"
                                         text="continue_with"
                                         shape="pill"
