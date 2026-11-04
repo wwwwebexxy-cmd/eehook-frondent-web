@@ -1,7 +1,7 @@
 import "./../Footer.css";
 
 // import eehook from './../assets/eehook.jpeg'
-import footerlogo from './../assets/footer-logo.png'
+import footerlogo from './../assets/footer-logo-transparent.webp'
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, } from "react-icons/fa";
 import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_NUMBER } from "../config/contact";

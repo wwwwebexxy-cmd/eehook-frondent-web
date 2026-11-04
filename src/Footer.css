@@ -18,7 +18,10 @@
 }
 
 .footer-logo {
+    display: block;
     width: 170px;
+    max-width: 100%;
+    height: auto;
     margin-bottom: 18px;
 }
 
@@ -138,7 +141,7 @@
     }
 
     .footer-logo {
-        width: 100%;
+        width: min(200px, 100%);
     }
 
 
@@ -171,6 +174,7 @@
 
     .footer-logo {
         width: min(130px, 100%);
+        height: auto;
         margin-bottom: 0;
     }
 
