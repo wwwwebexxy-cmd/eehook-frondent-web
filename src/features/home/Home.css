@@ -682,12 +682,17 @@
 
     .brand-showcase-visual {
         flex: 0 0 auto;
-        height: clamp(112px, 30vw, 145px);
+        height: auto;
+        aspect-ratio: 1 / 1;
         min-height: 0;
     }
 
     .brand-showcase-visual img {
+        box-sizing: border-box;
+        max-width: 100%;
+        max-height: 100%;
         padding: 12px;
+        object-fit: contain;
     }
 
     .brand-showcase-product-count {
