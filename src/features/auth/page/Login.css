@@ -182,6 +182,11 @@ body{
   display:flex;
   justify-content:center;
   overflow:hidden;
+  visibility:hidden;
+}
+
+.google-btn.is-ready{
+  visibility:visible;
 }
 
 .google-btn>div{
