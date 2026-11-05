@@ -171,22 +171,28 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
+  overflow:hidden;
   margin-bottom:25px;
 }
 
 .google-btn{
   width:100%;
+  min-width:0;
+  max-width:100%;
   display:flex;
   justify-content:center;
+  overflow:hidden;
 }
 
 .google-btn>div{
-  width:100%!important;
+  width:min(100%, 280px)!important;
+  flex:0 1 280px;
   display:flex!important;
   justify-content:center!important;
-  height:40px!important;
-  min-height:40px!important;
-  max-height:40px!important;
+  align-items:center!important;
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
   overflow:hidden!important;
 }
 

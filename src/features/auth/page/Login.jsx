@@ -246,6 +246,7 @@ function Login() {
                                         text="continue_with"
                                         shape="pill"
                                         size="large"
+                                        width="280"
                                     />
                                 ) : (
                                     <p className="google-unavailable" role="status">

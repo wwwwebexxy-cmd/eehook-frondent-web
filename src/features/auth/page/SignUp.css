@@ -184,13 +184,17 @@ background: #F8F9F3;
 .google-section{
 display:flex;
 justify-content:center;
+overflow:hidden;
 margin-bottom:18px;
 }
 
 .google-btn{
 width:100%;
+min-width:0;
+max-width:100%;
 display:flex;
 justify-content:center;
+overflow:hidden;
 }
 
 .google-unavailable {
@@ -202,12 +206,14 @@ text-align: center;
 }
 
 .google-btn > div{
-width:100% !important;
+width:min(100%, 280px) !important;
+flex:0 1 280px;
 display:flex;
 justify-content:center;
-height:40px !important;
-min-height:40px !important;
-max-height:40px !important;
+align-items:center;
+height:44px !important;
+min-height:44px !important;
+max-height:44px !important;
 overflow:hidden !important;
 }
 
