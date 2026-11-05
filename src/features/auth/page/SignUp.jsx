@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
 import { clearAuthSession, isSuperAdminUser, saveAuthSession } from "../authUtils";
 import { isGoogleAuthConfigured } from "../googleConfig";
@@ -8,7 +9,6 @@ import { GOOGLE_LOGIN_OPTIONS } from "../googleLoginConfig";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import showToast from "../../../utils/toast";
 import { getApiErrorMessage } from "../../../lib/apiResponse";
-import GoogleAuthButton from "../GoogleAuthButton";
 import "./SignUp.css";
 
 function Signup() {
@@ -266,22 +266,24 @@ function Signup() {
 
                         <div className="google-section">
 
-                            {isGoogleAuthConfigured ? (
-                                <GoogleAuthButton
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={handleGoogleError}
-                                    {...GOOGLE_LOGIN_OPTIONS}
-                                    theme="outline"
-                                    text="continue_with"
-                                    shape="pill"
-                                    size="large"
-                                    width="280"
-                                />
+                            <div className="google-btn">
+                                {isGoogleAuthConfigured ? (
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleSuccess}
+                                        onError={handleGoogleError}
+                                        {...GOOGLE_LOGIN_OPTIONS}
+                                        theme="outline"
+                                        text="continue_with"
+                                        shape="pill"
+                                        size="large"
+                                        width="280"
+                                    />
                                 ) : (
-                                <p className="google-unavailable" role="status">
-                                    Google sign-in is temporarily unavailable. Please use email and password.
-                                </p>
-                            )}
+                                    <p className="google-unavailable" role="status">
+                                        Google sign-in is temporarily unavailable. Please use email and password.
+                                    </p>
+                                )}
+                            </div>
 
                         </div>
 
