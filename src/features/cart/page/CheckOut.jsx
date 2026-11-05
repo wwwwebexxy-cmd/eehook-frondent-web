@@ -6,8 +6,8 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 import DirhamAmount from "../../../components/DirhamAmount";
-import { WHATSAPP_NUMBER } from "../../../config/contact";
 import { getSafeCheckoutUrl } from "../../../lib/checkoutUrl";
+import { buildWhatsAppOrderUrl } from "../whatsappOrder";
 
 const Checkout = () => {
 
@@ -96,33 +96,6 @@ const Checkout = () => {
         loadCheckout();
     }, [fetchAddresses, fetchCart]);
 
-    const buildWhatsAppMessage = (orderId, address, items, total) => {
-        const itemLines = items.map((item) => {
-            const variant = item.variant_size !== null && item.size
-                ? `, ${item.unit_type || "Option"}: ${item.size}`
-                : "";
-            return `- ${item.product_name}${variant} x ${item.quantity}`;
-        });
-
-        return [
-            "Hello eehook Team,",
-            "",
-            `I placed an order via WhatsApp. Order: ORD-${String(orderId).padStart(6, "0")}`,
-            "",
-            "Items:",
-            ...itemLines,
-            "",
-            `Total: AED ${Number(total || 0).toFixed(2)}`,
-            "",
-            "Delivery address:",
-            address.full_name,
-            address.phone,
-            address.address_line,
-            `${address.city}${address.emirate ? `, ${address.emirate}` : ""}, ${address.postal_code}`,
-            address.country,
-        ].join("\n");
-    };
-
     const placeOrder = async () => {
 
         if (processing) return;
@@ -134,10 +107,6 @@ const Checkout = () => {
             return;
 
         }
-
-        const whatsappWindow = paymentMethod === "WHATSAPP"
-            ? window.open("about:blank", "_blank")
-            : null;
 
         try {
 
@@ -198,20 +167,24 @@ const Checkout = () => {
             }
 
             if (paymentMethod === "WHATSAPP") {
-                const selectedAddressDetails = addresses.find((address) => address.id === selectedAddress);
-                const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                    buildWhatsAppMessage(orderId, selectedAddressDetails, cartItems, response.data?.grand_total || cartSummary.total)
-                )}`;
-
-                if (whatsappWindow && !whatsappWindow.closed) {
-                    whatsappWindow.location.href = whatsappUrl;
-                    whatsappWindow.opener = null;
-                } else {
-                    window.location.href = whatsappUrl;
-                    return;
+                const selectedAddressDetails = addresses.find(
+                    (address) => String(address.id) === String(selectedAddress),
+                );
+                if (!selectedAddressDetails) {
+                    throw new Error("The selected delivery address could not be found. Please select it again.");
                 }
 
-                showToast.success("Order placed. WhatsApp is ready with your order details.");
+                const whatsappUrl = buildWhatsAppOrderUrl({
+                    orderId,
+                    address: selectedAddressDetails,
+                    items: latestCart.items || cartItems,
+                    total: response.data?.grand_total ?? latestCart.total ?? cartSummary.total,
+                });
+
+                // Navigate in the current tab so mobile browsers can open the
+                // WhatsApp app instead of blocking an async popup.
+                window.location.assign(whatsappUrl);
+                return;
             } else {
                 showToast.success("COD order placed successfully.");
             }
@@ -220,7 +193,6 @@ const Checkout = () => {
 
         } catch (error) {
 
-            if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
             console.log(error);
             if (isInactiveCouponError(error)) {
                 const responseData = error.response?.data || {};
