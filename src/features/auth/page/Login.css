@@ -184,11 +184,18 @@ body{
   width:100%!important;
   display:flex!important;
   justify-content:center!important;
+  height:40px!important;
+  min-height:40px!important;
+  max-height:40px!important;
+  overflow:hidden!important;
 }
 
 .google-btn iframe{
   width:100%!important;
   max-width:100%!important;
+  height:40px!important;
+  max-height:40px!important;
+  display:block!important;
   border-radius:10px!important;
 }
 

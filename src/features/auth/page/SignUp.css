@@ -205,6 +205,10 @@ text-align: center;
 width:100% !important;
 display:flex;
 justify-content:center;
+height:40px !important;
+min-height:40px !important;
+max-height:40px !important;
+overflow:hidden !important;
 }
 
 .signup-link{
@@ -325,6 +329,9 @@ margin-top:16px;
 
 .google-btn iframe{
 width:100% !important;
+height:40px !important;
+max-height:40px !important;
+display:block !important;
 }
 
 }
