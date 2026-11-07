@@ -5,7 +5,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
 import { clearAuthSession, isSuperAdminUser, saveAuthSession } from "../authUtils";
 import { isGoogleAuthConfigured } from "../googleConfig";
-import { GOOGLE_LOGIN_OPTIONS } from "../googleLoginConfig";
+import { getGoogleLoginOptions } from "../googleLoginConfig";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import showToast from "../../../utils/toast";
 import { getApiErrorMessage } from "../../../lib/apiResponse";
@@ -271,7 +271,7 @@ function Signup() {
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}
-                                        {...GOOGLE_LOGIN_OPTIONS}
+                                        {...getGoogleLoginOptions()}
                                         theme="outline"
                                         text="continue_with"
                                         shape="pill"

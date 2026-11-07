@@ -5,7 +5,10 @@ import { GoogleLogin } from "@react-oauth/google";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { clearAuthSession, isPrivilegedUser, saveAuthSession } from "../authUtils";
 import { isGoogleAuthConfigured } from "../googleConfig";
-import { GOOGLE_LOGIN_OPTIONS } from "../googleLoginConfig";
+import {
+    getGoogleLoginOptions,
+    getGoogleRedirectErrorMessage,
+} from "../googleLoginConfig";
 import { getApiErrorMessage } from "../../../lib/apiResponse";
 import "./Login.css";
 
@@ -20,7 +23,11 @@ function Login() {
 
     const [loading, setLoading] = useState(false);
 
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        const googleError = params.get("google_error");
+        return googleError ? getGoogleRedirectErrorMessage(googleError) : "";
+    });
 
     const [retryAfter, setRetryAfter] = useState(0);
 
@@ -31,6 +38,17 @@ function Login() {
         const timer = window.setInterval(() => setRetryAfter((seconds) => Math.max(0, seconds - 1)), 1000);
         return () => window.clearInterval(timer);
     }, [retryAfter]);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const googleError = params.get("google_error");
+        if (!googleError) return;
+
+        params.delete("google_error");
+        const query = params.toString();
+        const cleanUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+        window.history.replaceState(window.history.state, document.title, cleanUrl);
+    }, []);
 
     const handleChange = (e) => {
 
@@ -241,7 +259,7 @@ function Login() {
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}
-                                        {...GOOGLE_LOGIN_OPTIONS}
+                                        {...getGoogleLoginOptions()}
                                         theme="outline"
                                         text="continue_with"
                                         shape="pill"
