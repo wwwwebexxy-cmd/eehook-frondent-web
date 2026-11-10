@@ -18,7 +18,7 @@
 .image-transparency-toggle { display: inline-flex; align-items: center; gap: 5px; color: var(--admin-muted); font: 600 11px Inter, sans-serif; cursor: pointer; }
 .image-transparency-toggle input { width: 15px; height: 15px; accent-color: var(--admin-brand); }
 .variant-images .admin-button.is-processing { cursor: wait; opacity: .7; }
-.variant-images .variant-image-item { background-color: #f7faf8; background-image: linear-gradient(45deg, #e8efeb 25%, transparent 25%), linear-gradient(-45deg, #e8efeb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e8efeb 75%), linear-gradient(-45deg, transparent 75%, #e8efeb 75%); background-position: 0 0, 0 6px, 6px -6px, -6px 0; background-size: 12px 12px; }
+.variant-images .variant-image-item { background: #f7faf8; }
 .editor-unit-row { align-items: start; }
 .editor-unit-row .product-field { min-width: 0; }
 .editor-unit-row .product-field input { width: 100%; }

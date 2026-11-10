@@ -74,6 +74,20 @@ describe("product editor related-products configuration", () => {
         expect(unitTypeSelect).toHaveValue("7");
     });
 
+    it("keeps the original product image background and hides transparency controls", async () => {
+        const user = userEvent.setup();
+        render(<ProductEditor />);
+
+        await user.click(await screen.findByRole("button", { name: /Add Variant/i }));
+        expect(screen.queryByText("Transparent background")).not.toBeInTheDocument();
+        expect(screen.getByText("Uploaded images keep their original background everywhere on the storefront.")).toBeVisible();
+
+        const file = new File(["product image"], "product.jpg", { type: "image/jpeg" });
+        await user.upload(screen.getByLabelText(/Add Image/i), file);
+
+        expect(await screen.findByAltText("Product")).toBeVisible();
+    });
+
     it("shows automatic mode guidance and clears the manual UI when mode changes", async () => {
         const user = userEvent.setup();
         render(<ProductEditor />);
