@@ -504,13 +504,14 @@ function Single_product() {
     ];
 
     const isUsedProduct = data?.product_type === "used";
-    const optionGroups = isUsedProduct ? getOptionGroups(data?.variants || []) : {};
+    const optionGroups = getOptionGroups(data?.variants || []);
+    const hasVariantOptions = Object.keys(optionGroups).length > 0;
 
     /*
         SELECTED VARIANT
     */
 
-    const selectedVariant = isUsedProduct
+    const selectedVariant = hasVariantOptions
         ? findMatchingVariant(data?.variants || [], {
             colorId: selectedColor?.id,
             optionValues: selectedOptionValues,
@@ -640,7 +641,7 @@ function Single_product() {
         );
     };
 
-    const selectUsedOption = (key, value) => {
+    const selectProductOption = (key, value) => {
         const nextValues = { ...selectedOptionValues, [key]: value };
         const nextVariant = findMatchingVariant(data?.variants || [], {
             colorId: selectedColor?.id,
@@ -1045,7 +1046,7 @@ function Single_product() {
                         </div>
                     </div>}
 
-                    {isUsedProduct && Object.entries(optionGroups).map(([key, values]) => (
+                    {hasVariantOptions && Object.entries(optionGroups).map(([key, values]) => (
                         <div className="option-block used-product-option-block" key={key}>
                             <h4>{optionLabel(key)}: <span className="selected-option-label">{selectedVariant?.option_values?.[key] || "Select option"}</span></h4>
                             <div className="sizes used-product-options">
@@ -1054,7 +1055,7 @@ function Single_product() {
                                         type="button"
                                         key={`${key}-${value}`}
                                         className={selectedVariant?.option_values?.[key] === value ? "size-btn active-size" : "size-btn"}
-                                        onClick={() => selectUsedOption(key, value)}
+                                        onClick={() => selectProductOption(key, value)}
                                     >
                                         {value}
                                     </button>

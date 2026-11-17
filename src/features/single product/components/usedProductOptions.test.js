@@ -15,4 +15,20 @@ describe("used product option matching", () => {
     it("finds the exact combination instead of the first same-color variant", () => {
         expect(findMatchingVariant(variants, { colorId: 10, optionValues: { storage: "256 GB", grade: "A" } }).id).toBe(2);
     });
+
+    it("supports standard product option combinations too", () => {
+        const standardVariants = [
+            { id: 3, color: { id: 20 }, option_values: { size: "42mm", connectivity: "GPS" } },
+            { id: 4, color: { id: 20 }, option_values: { size: "46mm", connectivity: "GPS + Cellular" } },
+        ];
+
+        expect(getOptionGroups(standardVariants)).toEqual({
+            size: ["42mm", "46mm"],
+            connectivity: ["GPS", "GPS + Cellular"],
+        });
+        expect(findMatchingVariant(standardVariants, {
+            colorId: 20,
+            optionValues: { size: "46mm", connectivity: "GPS + Cellular" },
+        }).id).toBe(4);
+    });
 });
