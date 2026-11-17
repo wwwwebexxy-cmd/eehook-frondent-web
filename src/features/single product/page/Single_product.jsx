@@ -38,6 +38,7 @@ import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getProductDetailsPath, getProductSelectionPath, slugifyProductName } from "../../../utils/productUrl";
+import { findMatchingVariant, getOptionGroups, normalizeOptionValues, optionLabel } from "../components/usedProductOptions";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -287,6 +288,8 @@ function Single_product() {
     const [selectedColor, setSelectedColor] = useState(null);
 
     const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedOptionValues, setSelectedOptionValues] = useState({});
+    const [selectedCombinationVariantId, setSelectedCombinationVariantId] = useState(null);
 
     const [activeImage, setActiveImage] = useState(null);
 
@@ -500,16 +503,22 @@ function Single_product() {
         ).values()
     ];
 
+    const isUsedProduct = data?.product_type === "used";
+    const optionGroups = isUsedProduct ? getOptionGroups(data?.variants || []) : {};
+
     /*
         SELECTED VARIANT
     */
 
-    const selectedVariant =
-        data?.variants?.find(
-            variant =>
-                variant.color?.id === selectedColor?.id
-        ) ||
-        data?.variants?.[0];
+    const selectedVariant = isUsedProduct
+        ? findMatchingVariant(data?.variants || [], {
+            colorId: selectedColor?.id,
+            optionValues: selectedOptionValues,
+            preferredId: selectedCombinationVariantId,
+        })
+        : data?.variants?.find(
+            variant => variant.color?.id === selectedColor?.id
+        ) || data?.variants?.[0];
 
     useEffect(() => {
 
@@ -528,9 +537,11 @@ function Single_product() {
             const variant = routeVariant;
 
             if (variant) {
+                setSelectedCombinationVariantId(variant.id);
                 setSelectedColor(
                     variant.color
                 );
+                setSelectedOptionValues(normalizeOptionValues(variant.option_values));
 
                 const size =
                     variant.sizes?.find(
@@ -566,6 +577,8 @@ function Single_product() {
         setSelectedColor(
             firstVariant.color
         );
+        setSelectedCombinationVariantId(firstVariant.id);
+        setSelectedOptionValues(normalizeOptionValues(firstVariant.option_values));
 
         const firstSize = firstVariant.sizes?.find((item) => item.unit || item.size) || null;
 
@@ -607,7 +620,9 @@ function Single_product() {
         || selectedSizeVariant?.size
         || selectedSize
         || getStorageOption(selectedVariant);
-    const selectedStorageLabel = selectedStorage?.name || "";
+    const selectedStorageLabel = isUsedProduct
+        ? String(selectedVariant?.option_values?.storage || "")
+        : selectedStorage?.name || "";
     const productHeading = getProductHeading(data.name, selectedStorageLabel, selectedColor?.name);
 
     const syncProductSelectionUrl = (variant, sizeOption) => {
@@ -623,6 +638,22 @@ function Single_product() {
             }),
             { replace: true, preventScrollReset: true }
         );
+    };
+
+    const selectUsedOption = (key, value) => {
+        const nextValues = { ...selectedOptionValues, [key]: value };
+        const nextVariant = findMatchingVariant(data?.variants || [], {
+            colorId: selectedColor?.id,
+            optionValues: nextValues,
+        });
+        if (!nextVariant) return;
+        setSelectedCombinationVariantId(nextVariant.id);
+        setSelectedColor(nextVariant.color || null);
+        setSelectedOptionValues(normalizeOptionValues(nextVariant.option_values));
+        setSelectedSize(null);
+        const image = nextVariant.images?.find((img) => img.is_primary) || nextVariant.images?.[0];
+        setActiveImage(image?.image || null);
+        syncProductSelectionUrl(nextVariant, null);
     };
 
     useEffect(() => {
@@ -999,6 +1030,8 @@ function Single_product() {
                                             const variant = data.variants.find(item => item.color?.id === color.id);
                                             const nextSizeOption = variant?.sizes?.find((item) => item.unit || item.size) || null;
                                             setSelectedColor(color);
+                                            setSelectedCombinationVariantId(variant?.id || null);
+                                            setSelectedOptionValues(normalizeOptionValues(variant?.option_values));
                                             setSelectedSize(nextSizeOption ? (nextSizeOption.unit || nextSizeOption.size) : null);
                                             const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
                                             setActiveImage(image?.image || null);
@@ -1011,6 +1044,24 @@ function Single_product() {
                             })}
                         </div>
                     </div>}
+
+                    {isUsedProduct && Object.entries(optionGroups).map(([key, values]) => (
+                        <div className="option-block used-product-option-block" key={key}>
+                            <h4>{optionLabel(key)}: <span className="selected-option-label">{selectedVariant?.option_values?.[key] || "Select option"}</span></h4>
+                            <div className="sizes used-product-options">
+                                {values.map((value) => (
+                                    <button
+                                        type="button"
+                                        key={`${key}-${value}`}
+                                        className={selectedVariant?.option_values?.[key] === value ? "size-btn active-size" : "size-btn"}
+                                        onClick={() => selectUsedOption(key, value)}
+                                    >
+                                        {value}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
 
                     {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
                         <div className="option-block">
@@ -1065,9 +1116,9 @@ function Single_product() {
                                             </>
                                         )}
                                     </div>
-                                    {String(itemPriceInfo.grade || "").trim() && (
+                                    {String(itemPriceInfo.grade || itemPriceInfo.option_values?.grade || "").trim() && (
                                         <div className="product-grade-value">
-                                            <span>Grade:</span> {String(itemPriceInfo.grade).trim()}
+                                            <span>{isUsedProduct ? "Condition:" : "Grade:"}</span> {String(itemPriceInfo.grade || itemPriceInfo.option_values?.grade).trim()}
                                         </div>
                                     )}
                                     {appliedCoupon && (

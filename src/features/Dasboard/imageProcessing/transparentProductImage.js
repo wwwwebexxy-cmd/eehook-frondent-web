@@ -60,45 +60,13 @@ export function removeLightBackgroundFromPixels(
     return data;
 }
 
-function loadImage(file) {
-    return new Promise((resolve, reject) => {
-        const objectUrl = URL.createObjectURL(file);
-        const image = new Image();
-        image.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            resolve(image);
-        };
-        image.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error("Could not read the selected image."));
-        };
-        image.src = objectUrl;
-    });
-}
-
 /**
- * Converts a product image to a transparent PNG without sending it to a
- * third-party service. If processing is not supported, the original file is
- * returned so upload remains available.
+ * Product-image transparency is temporarily disabled.
+ *
+ * Keep this compatibility helper as a no-op so an older caller cannot
+ * silently replace the uploaded image background. The original file is
+ * returned unchanged and is uploaded/displayed as-is.
  */
 export async function makeProductImageTransparent(file) {
-    if (!(file instanceof File) || !file.type.startsWith("image/")) return file;
-
-    const image = await loadImage(file);
-    const canvas = document.createElement("canvas");
-    canvas.width = image.naturalWidth || image.width;
-    canvas.height = image.naturalHeight || image.height;
-    const context = canvas.getContext("2d");
-    if (!context) return file;
-
-    context.drawImage(image, 0, 0);
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    removeLightBackgroundFromPixels(imageData.data, imageData.width, imageData.height);
-    context.putImageData(imageData, 0, 0);
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-    if (!blob) return file;
-
-    const baseName = file.name.replace(/\.[^.]+$/, "") || "product-image";
-    return new File([blob], `${baseName}.png`, { type: "image/png", lastModified: Date.now() });
+    return file;
 }

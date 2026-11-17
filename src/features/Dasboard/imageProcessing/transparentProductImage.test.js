@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { removeLightBackgroundFromPixels } from "./transparentProductImage";
+import { makeProductImageTransparent, removeLightBackgroundFromPixels } from "./transparentProductImage";
 
 describe("removeLightBackgroundFromPixels", () => {
     it("makes edge-connected light background transparent and preserves the product", () => {
@@ -17,5 +17,11 @@ describe("removeLightBackgroundFromPixels", () => {
         expect(pixels[27]).toBe(0);
         expect(pixels[31]).toBe(0);
         expect(pixels[35]).toBe(0);
+    });
+
+    it("keeps the uploaded file unchanged while transparency is disabled", async () => {
+        const file = new File(["product image"], "product.jpg", { type: "image/jpeg" });
+
+        await expect(makeProductImageTransparent(file)).resolves.toBe(file);
     });
 });
