@@ -32,3 +32,11 @@ export function getOptionGroups(variants = []) {
         return groups;
     }, {});
 }
+
+export function getGradeOptions(variants = []) {
+    return [...new Set(
+        variants
+            .map((variant) => String(variant?.option_values?.grade ?? "").trim())
+            .filter(Boolean),
+    )];
+}

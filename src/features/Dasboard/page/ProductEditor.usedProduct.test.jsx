@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildUsedVariantPayload, getOptionGroups } from "./productEditorOptions";
+import { buildUsedVariantPayload, getGradeOptions, getOptionGroups } from "./productEditorOptions";
 
 describe("used product editor contract", () => {
     it("sends complete option values and an optional offer price", () => {
@@ -37,5 +37,14 @@ describe("used product editor contract", () => {
             storage: ["128 GB", "256 GB"],
             grade: ["A+", "A"],
         });
+    });
+
+    it("keeps unique grade options for the product-level grade dropdown", () => {
+        expect(getGradeOptions([
+            { option_values: { grade: "Flawless" } },
+            { option_values: { grade: "A+" } },
+            { option_values: { grade: "Flawless" } },
+            { option_values: { storage: "256 GB" } },
+        ])).toEqual(["Flawless", "A+"]);
     });
 });

@@ -1,9 +1,35 @@
 @media (max-width: 760px) {
   .product-form-grid.two { grid-template-columns: 1fr; }
+  .product-form-grid.three { grid-template-columns: 1fr; }
   .product-section-content { padding: 15px; }
   .variant-section-heading,
   .variant-subheading { align-items: flex-start; flex-direction: column; }
   .product-editor-footer { position: sticky; bottom: 0; background: var(--admin-bg); padding: 12px 0; z-index: 2; }
+}
+
+.product-form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.variant-section-actions { display: flex; align-items: flex-start; justify-content: flex-end; gap: 12px; min-width: 0; }
+.grade-options-manager { display: grid; gap: 6px; min-width: min(330px, 100%); padding: 10px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fffaf3; }
+.grade-options-manager-heading { display: flex; flex-direction: column; gap: 2px; }
+.grade-options-manager-heading strong { color: var(--admin-ink); font-size: 11px; }
+.grade-options-manager-heading small { color: var(--admin-muted); font-size: 10px; font-weight: 500; }
+.grade-options-add,.grade-field-add { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.grade-options-add input,.grade-field-add input { min-width: 0; flex: 1 1 auto; box-sizing: border-box; border: 1px solid var(--admin-line); border-radius: 7px; padding: 9px; background: #fff; color: var(--admin-ink); font: 12px Inter, sans-serif; }
+.grade-options-add .admin-button,.grade-field-add .admin-button { padding: 8px 10px; min-height: 36px; }
+.grade-options-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.grade-option-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 4px 6px 4px 8px; border-radius: 999px; background: #eef6f3; color: #47736b; font-size: 10px; font-weight: 700; }
+.grade-option-chip button { display: grid; place-items: center; width: 18px; height: 18px; border: 0; border-radius: 50%; background: transparent; color: #47736b; cursor: pointer; }
+.grade-option-chip button:hover { background: #d9ebe5; }
+.grade-field-add .table-icon { flex: 0 0 36px; width: 36px; height: 36px; }
+
+@media (max-width: 900px) {
+  .variant-section-actions { width: 100%; justify-content: stretch; flex-wrap: wrap; }
+  .grade-options-manager { flex: 1 1 100%; min-width: 0; }
+  .variant-section-actions > .admin-button { flex: 0 0 auto; }
+}
+
+@media (max-width: 760px) {
+  .product-form-grid.three { grid-template-columns: 1fr; }
 }
 
 .variant-image-item { width: 140px !important; height: 112px !important; overflow: visible !important; position: relative; }
