@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findMatchingVariant, getOptionGroups, optionLabel } from "./usedProductOptions";
+import { findMatchingVariant, getOptionGroups, getUnitGradeOptions, optionLabel } from "./usedProductOptions";
 
 describe("used product option matching", () => {
     const variants = [
@@ -30,5 +30,13 @@ describe("used product option matching", () => {
             colorId: 20,
             optionValues: { size: "46mm", connectivity: "GPS + Cellular" },
         }).id).toBe(4);
+    });
+
+    it("groups grades stored on multiple-price units", () => {
+        expect(getUnitGradeOptions({ sizes: [
+            { grade: "A+" },
+            { grade: "A" },
+            { grade: "A+" },
+        ] })).toEqual(["A+", "A"]);
     });
 });

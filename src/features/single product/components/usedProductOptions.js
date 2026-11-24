@@ -19,6 +19,14 @@ export function getOptionGroups(variants = []) {
     }, {});
 }
 
+export function getUnitGradeOptions(variant) {
+    return [...new Set(
+        (variant?.sizes || [])
+            .map((item) => String(item?.grade ?? "").trim())
+            .filter(Boolean),
+    )];
+}
+
 export function findMatchingVariant(variants = [], { colorId, optionValues = {}, preferredId } = {}) {
     const candidates = variants.filter((variant) => colorId == null || variant.color?.id === colorId);
     const normalized = normalizeOptionValues(optionValues);

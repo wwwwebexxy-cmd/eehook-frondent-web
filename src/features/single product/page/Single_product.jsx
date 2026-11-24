@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import "../style/Single_product.css";
 import {
@@ -38,7 +38,7 @@ import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 import { hasAuthSession } from "../../auth/authUtils";
 import DirhamAmount from "../../../components/DirhamAmount";
 import { getProductDetailsPath, getProductSelectionPath, slugifyProductName } from "../../../utils/productUrl";
-import { findMatchingVariant, getOptionGroups, normalizeOptionValues, optionLabel } from "../components/usedProductOptions";
+import { findMatchingVariant, getOptionGroups, getUnitGradeOptions, normalizeOptionValues, optionLabel } from "../components/usedProductOptions";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -94,6 +94,21 @@ function getProductHeading(name, storageLabel, colorLabel) {
     }
 
     return heading;
+}
+
+function syncProductSelectionUrl({ data, navigate, variant, sizeOption }) {
+    if (!data?.id || !variant?.id) return;
+
+    const storage = sizeOption?.unit || sizeOption?.size;
+    navigate(
+        getProductSelectionPath(data, {
+            variantId: variant.id,
+            sizeId: sizeOption?.id,
+            color: variant.color?.name,
+            storage: storage?.name,
+        }),
+        { replace: true, preventScrollReset: true },
+    );
 }
 
 function updateMetaContent(attr, key, value, touched, created) {
@@ -288,6 +303,7 @@ function Single_product() {
     const [selectedColor, setSelectedColor] = useState(null);
 
     const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedUnitGrade, setSelectedUnitGrade] = useState("");
     const [selectedOptionValues, setSelectedOptionValues] = useState({});
     const [selectedCombinationVariantId, setSelectedCombinationVariantId] = useState(null);
 
@@ -559,13 +575,14 @@ function Single_product() {
                 setSelectedSize(
                     size ? (size.unit || size.size) : null
                 );
+                setSelectedUnitGrade(String(size?.grade || "").trim());
 
                 const image = variant.images.find(img => img.is_primary) || variant.images[0];
 
                 setActiveImage(
                     image?.image
                 );
-                syncProductSelectionUrl(variant, size || null);
+                syncProductSelectionUrl({ data, navigate, variant, sizeOption: size || null });
                 return;
             }
         }
@@ -584,6 +601,7 @@ function Single_product() {
         const firstSize = firstVariant.sizes?.find((item) => item.unit || item.size) || null;
 
         setSelectedSize(firstSize ? (firstSize.unit || firstSize.size) : null);
+        setSelectedUnitGrade(String(firstSize?.grade || "").trim());
 
         const image = firstVariant.images.find(img => img.is_primary) || firstVariant.images[0];
 
@@ -591,7 +609,7 @@ function Single_product() {
             image?.image || null
         );
 
-        syncProductSelectionUrl(firstVariant, firstSize);
+        syncProductSelectionUrl({ data, navigate, variant: firstVariant, sizeOption: firstSize });
 
     }, [
         data,
@@ -600,15 +618,32 @@ function Single_product() {
         colorSlug,
         storageSlug,
         storageOnlySlug,
+        navigate,
     ]);
 
     const availableSizes =
         selectedVariant?.sizes || [];
 
+    const unitGradeOptions = getUnitGradeOptions(selectedVariant);
+    const storageOptions = [
+        ...new Map(
+            availableSizes
+                .filter((item) => item.unit || item.size)
+                .map((item) => {
+                    const unit = item.unit || item.size;
+                    return [unit.id, item];
+                }),
+        ).values(),
+    ];
+
     const selectedSizeVariant =
         selectedVariant?.sizes?.find(
             item =>
-                (item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id)
+                ((item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id))
+                && (!selectedUnitGrade || String(item.grade || "").trim() === selectedUnitGrade)
+        )
+        || selectedVariant?.sizes?.find(
+            item => (item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id)
         );
 
     const selectedPriceInfo = selectedVariant?.price_type === 'single'
@@ -626,21 +661,6 @@ function Single_product() {
         : selectedStorage?.name || "";
     const productHeading = getProductHeading(data.name, selectedStorageLabel, selectedColor?.name);
 
-    const syncProductSelectionUrl = (variant, sizeOption) => {
-        if (!data?.id || !variant?.id) return;
-
-        const storage = sizeOption?.unit || sizeOption?.size;
-        navigate(
-            getProductSelectionPath(data, {
-                variantId: variant.id,
-                sizeId: sizeOption?.id,
-                color: variant.color?.name,
-                storage: storage?.name,
-            }),
-            { replace: true, preventScrollReset: true }
-        );
-    };
-
     const selectProductOption = (key, value) => {
         const nextValues = { ...selectedOptionValues, [key]: value };
         const nextVariant = findMatchingVariant(data?.variants || [], {
@@ -651,10 +671,12 @@ function Single_product() {
         setSelectedCombinationVariantId(nextVariant.id);
         setSelectedColor(nextVariant.color || null);
         setSelectedOptionValues(normalizeOptionValues(nextVariant.option_values));
-        setSelectedSize(null);
+        const nextSize = nextVariant.sizes?.find((item) => item.unit || item.size) || null;
+        setSelectedSize(nextSize ? (nextSize.unit || nextSize.size) : null);
+        setSelectedUnitGrade(String(nextSize?.grade || "").trim());
         const image = nextVariant.images?.find((img) => img.is_primary) || nextVariant.images?.[0];
         setActiveImage(image?.image || null);
-        syncProductSelectionUrl(nextVariant, null);
+        syncProductSelectionUrl({ data, navigate, variant: nextVariant, sizeOption: nextSize });
     };
 
     useEffect(() => {
@@ -1034,9 +1056,10 @@ function Single_product() {
                                             setSelectedCombinationVariantId(variant?.id || null);
                                             setSelectedOptionValues(normalizeOptionValues(variant?.option_values));
                                             setSelectedSize(nextSizeOption ? (nextSizeOption.unit || nextSizeOption.size) : null);
+                                             setSelectedUnitGrade(String(nextSizeOption?.grade || "").trim());
                                             const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
                                             setActiveImage(image?.image || null);
-                                            syncProductSelectionUrl(variant, nextSizeOption);
+                                             syncProductSelectionUrl({ data, navigate, variant, sizeOption: nextSizeOption });
                                         }}
                                     >
                                         {img ? <img src={getImageUrl(img)} alt={color.name} loading="lazy" decoding="async" /> : <div className="fallback-color" style={{ background: color.code }} />}
@@ -1064,25 +1087,60 @@ function Single_product() {
                         </div>
                     ))}
 
-                    {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
+                    {selectedVariant?.price_type === 'multiple' && storageOptions.length > 0 && (
                         <div className="option-block">
-                            <h4>{availableSizes?.[0]?.unit_type?.name || availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedStorageLabel || "Select option"}</span></h4>
+                            <h4>{storageOptions?.[0]?.unit_type?.name || storageOptions?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedStorageLabel || "Select option"}</span></h4>
                             <div className="sizes">
-                                {availableSizes.map((item) => {
+                                {storageOptions.map((item) => {
                                     const unitObj = item.unit || item.size;
                                     return unitObj && (
                                         <button
-                                            key={item.id}
+                                            key={unitObj.id}
                                             className={selectedSize?.id === unitObj.id ? "size-btn active-size" : "size-btn"}
                                             onClick={() => {
+                                                const matchingGradeRow = availableSizes.find((candidate) => {
+                                                    const candidateUnit = candidate.unit || candidate.size;
+                                                    return candidateUnit?.id === unitObj.id
+                                                        && (!selectedUnitGrade || String(candidate.grade || "").trim() === selectedUnitGrade);
+                                                }) || item;
+                                                const matchingGrade = String(matchingGradeRow.grade || "").trim();
                                                 setSelectedSize(unitObj);
-                                                syncProductSelectionUrl(selectedVariant, item);
+                                                setSelectedUnitGrade(matchingGrade);
+                                                syncProductSelectionUrl({ data, navigate, variant: selectedVariant, sizeOption: matchingGradeRow });
                                             }}
                                         >
                                             {unitObj.name}
                                         </button>
                                     );
                                 })}
+                            </div>
+                        </div>
+                    )}
+
+                    {isUsedProduct && selectedVariant?.price_type === 'multiple' && unitGradeOptions.length > 0 && (
+                        <div className="option-block">
+                            <h4>Condition: <span className="selected-option-label">{selectedUnitGrade || "Select option"}</span></h4>
+                            <div className="sizes used-product-options">
+                                {unitGradeOptions.map((grade) => (
+                                    <button
+                                        type="button"
+                                        key={`grade-${grade}`}
+                                        className={selectedUnitGrade === grade ? "size-btn active-size" : "size-btn"}
+                                        onClick={() => {
+                                            const gradeRow = availableSizes.find((item) => {
+                                                const unit = item.unit || item.size;
+                                                return String(item.grade || "").trim() === grade
+                                                    && (!selectedSize || unit?.id === selectedSize.id);
+                                            }) || availableSizes.find((item) => String(item.grade || "").trim() === grade);
+                                            const unit = gradeRow?.unit || gradeRow?.size;
+                                            setSelectedUnitGrade(grade);
+                                            if (unit) setSelectedSize(unit);
+                                            syncProductSelectionUrl({ data, navigate, variant: selectedVariant, sizeOption: gradeRow || null });
+                                        }}
+                                    >
+                                        {grade}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     )}

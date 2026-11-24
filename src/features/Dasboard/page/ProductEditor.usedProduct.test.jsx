@@ -44,7 +44,7 @@ describe("used product editor contract", () => {
             { option_values: { grade: "Flawless" } },
             { option_values: { grade: "A+" } },
             { option_values: { grade: "Flawless" } },
-            { option_values: { storage: "256 GB" } },
-        ])).toEqual(["Flawless", "A+"]);
+            { option_values: { storage: "256 GB" }, units: [{ grade: "B" }] },
+        ])).toEqual(["Flawless", "A+", "B"]);
     });
 });

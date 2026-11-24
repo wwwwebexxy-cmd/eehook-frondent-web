@@ -36,7 +36,11 @@ export function getOptionGroups(variants = []) {
 export function getGradeOptions(variants = []) {
     return [...new Set(
         variants
-            .map((variant) => String(variant?.option_values?.grade ?? "").trim())
+            .flatMap((variant) => [
+                variant?.option_values?.grade,
+                ...(variant?.units || []).map((unit) => unit?.grade),
+            ])
+            .map((grade) => String(grade ?? "").trim())
             .filter(Boolean),
     )];
 }
