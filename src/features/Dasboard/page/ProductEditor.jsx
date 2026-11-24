@@ -42,8 +42,7 @@ export default function ProductEditor({ readOnly = false }) {
     const editing = Boolean(id);
     const [product, setProduct] = useState(emptyProduct);
     const [variants, setVariants] = useState([]);
-    const [gradeOptions, setGradeOptions] = useState([]);
-    const [dropdowns, setDropdowns] = useState({ categories: [], subcategories: [], brands: [], colors: [], unitTypes: [], units: [], products: [], sellerNames: [] });
+    const [dropdowns, setDropdowns] = useState({ categories: [], subcategories: [], brands: [], colors: [], grades: [], unitTypes: [], units: [], products: [], sellerNames: [] });
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -80,6 +79,7 @@ export default function ProductEditor({ readOnly = false }) {
             await Promise.all([
                 loadOption("unit-types", "unitTypes", 100),
                 loadOption("units", "units", 500),
+                loadOption("grades", "grades", 500),
             ]);
 
             await Promise.all([
@@ -98,12 +98,16 @@ export default function ProductEditor({ readOnly = false }) {
         if (!editing) return () => { active = false; };
         loadProduct(id).then((loaded) => {
             if (!active) return;
-            setProduct(loaded.product); setVariants(loaded.variants); setGradeOptions(getGradeOptions(loaded.variants)); setInitialSnapshot(JSON.stringify({ product: loaded.product, variants: loaded.variants }));
+            setProduct(loaded.product); setVariants(loaded.variants); setInitialSnapshot(JSON.stringify({ product: loaded.product, variants: loaded.variants }));
         }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load product.")); }).finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
     }, [editing, id]);
 
     const filteredSubcategories = useMemo(() => dropdowns.subcategories.filter((item) => !product.category || String(item.category) === String(product.category)), [dropdowns.subcategories, product.category]);
+    const gradeOptions = useMemo(() => {
+        const catalogGrades = dropdowns.grades.map((option) => String(option.label || "").trim()).filter(Boolean);
+        return [...new Set([...catalogGrades, ...getGradeOptions(variants)])];
+    }, [dropdowns.grades, variants]);
     const currentSnapshot = JSON.stringify({ product, variants });
     const hasUnsavedChanges = Boolean(initialSnapshot && initialSnapshot !== currentSnapshot);
     useEffect(() => { const warn = (event) => { if (hasUnsavedChanges) { event.preventDefault(); event.returnValue = ""; } }; window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn); }, [hasUnsavedChanges]);
@@ -112,7 +116,6 @@ export default function ProductEditor({ readOnly = false }) {
     const toggle = (section) => setOpenSections((current) => ({ ...current, [section]: !current[section] }));
     const updateProduct = (name, value) => {
         setProduct((current) => ({ ...current, [name]: value }));
-        if (name === "product_type") setGradeOptions(value === "used" ? getGradeOptions(variants) : []);
     };
     const selectedRelatedIds = Array.isArray(product.related_product_ids) ? product.related_product_ids.map(String) : [];
     const relatedProductOptions = dropdowns.products.filter((option) => String(option.value) !== String(id || "") && !selectedRelatedIds.includes(String(option.value)));
@@ -150,27 +153,46 @@ export default function ProductEditor({ readOnly = false }) {
             setFieldErrors((current) => ({ ...current, [`variant_${index}_color`]: "A product can have only one variant without a color." })); return;
         }
         setFieldErrors((current) => { const next = { ...current }; delete next[`variant_${index}_${name}`]; return next; });
-        if (name === "option_values" && value?.grade) {
-            setGradeOptions((current) => current.includes(value.grade) ? current : [...current, value.grade]);
-        }
         setVariants((current) => current.map((variant, variantIndex) => variantIndex === index ? { ...variant, [name]: value } : variant));
     };
-    const addGradeOption = (value) => {
+    const addGradeOption = async (value) => {
         const grade = String(value || "").trim();
-        if (!grade) return;
-        setGradeOptions((current) => current.includes(grade) ? current : [...current, grade]);
+        if (!grade) return false;
+        const existing = dropdowns.grades.find((option) => String(option.label || "").trim().toLowerCase() === grade.toLowerCase());
+        if (existing) {
+            return true;
+        }
+        try {
+            const response = await createResource("grades", { name: grade });
+            const created = response.data || {};
+            const option = { value: idOf(created), label: String(created.name || grade).trim() };
+            setDropdowns((current) => ({ ...current, grades: [...current.grades, option] }));
+            return true;
+        } catch (requestError) {
+            toast.error(getErrorMessage(requestError, "Could not save grade."));
+            return false;
+        }
     };
-    const removeGradeOption = (value) => {
-        setGradeOptions((current) => current.filter((grade) => grade !== value));
+    const removeGradeOption = async (value) => {
+        const grade = String(value || "").trim();
+        const option = dropdowns.grades.find((item) => String(item.label || "").trim().toLowerCase() === grade.toLowerCase());
+        try {
+            if (option?.value) await deleteResource("grades", option.value);
+        } catch (requestError) {
+            toast.error(getErrorMessage(requestError, "Could not delete grade."));
+            return false;
+        }
+        setDropdowns((current) => ({ ...current, grades: current.grades.filter((item) => item.value !== option?.value) }));
         setVariants((current) => current.map((variant) => {
-            const hasVariantGrade = variant.option_values?.grade === value;
-            const hasUnitGrade = variant.units?.some((unit) => unit.grade === value);
+            const hasVariantGrade = variant.option_values?.grade === grade;
+            const hasUnitGrade = variant.units?.some((unit) => unit.grade === grade);
             if (!hasVariantGrade && !hasUnitGrade) return variant;
             const optionValues = { ...variant.option_values };
             if (hasVariantGrade) delete optionValues.grade;
-            const units = (variant.units || []).map((unit) => unit.grade === value ? { ...unit, grade: "" } : unit);
+            const units = (variant.units || []).map((unit) => unit.grade === grade ? { ...unit, grade: "" } : unit);
             return { ...variant, option_values: optionValues, units };
         }));
+        return true;
     };
     const removeVariant = (index) => setDeleteTarget({ type: "variant", index, id: idOf(variants[index]) });
     const confirmDelete = async () => {
@@ -344,14 +366,15 @@ function FileField({ label, value, onChange }) { const preview = value instanceo
 
 function GradeField({ value, options, onChange, onAdd, onDelete }) {
     const [draft, setDraft] = useState("");
-    const add = () => {
+    const add = async () => {
         const grade = draft.trim();
         if (!grade) return;
-        onAdd(grade);
+        const saved = await onAdd(grade);
+        if (saved === false) return;
         onChange(grade);
         setDraft("");
     };
-    return <label className="product-field grade-field"><span>Condition / Grade (optional)</span><select value={value || ""} onChange={(event) => onChange(event.target.value)}><option value="">Select grade</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select><div className="grade-field-add"><input value={draft} placeholder="Add new grade" onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); add(); } }} /><button type="button" className="admin-button secondary" onClick={add}><FiPlus /> Add</button>{value && options.includes(value) && <button type="button" className="table-icon danger" onClick={() => onDelete(value)} aria-label={`Delete grade ${value}`}><FiTrash2 /></button>}</div><small className="field-hint">Shown to customers as Condition. Add or delete grades above.</small></label>;
+    return <label className="product-field grade-field"><span>Condition / Grade (optional)</span><select value={value || ""} onChange={(event) => onChange(event.target.value)}><option value="">Select grade</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select><div className="grade-field-add"><input value={draft} placeholder="Add new grade" onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void add(); } }} /><button type="button" className="admin-button secondary" onClick={() => void add()}><FiPlus /> Add</button>{value && options.includes(value) && <button type="button" className="table-icon danger" onClick={() => void onDelete(value)} aria-label={`Delete grade ${value}`}><FiTrash2 /></button>}</div><small className="field-hint">Saved grade options can be reused from this dropdown.</small></label>;
 }
 
 function VariantCard({ variant, index, usedProduct, gradeOptions, colors, unitTypes, units, fieldErrors, onChange, onAddGrade, onDeleteGrade, onDelete, onConfirmTypeChange, onAddUnit, onRemoveUnit, onAddImage, onRemoveImage, onMoveImage, processingImage }) {
