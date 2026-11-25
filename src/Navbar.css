@@ -853,6 +853,14 @@ a {
 
 
 /* --- Responsive Layout Configurations --- */
+@media (max-width: 860px) {
+    /* Keep the compact navbar focused on navigation and actions. The logo
+       remains available inside the opened mobile drawer. */
+    .topbar-logo-link {
+        display: none;
+    }
+}
+
 @media(max-width: 1140px) {
     .nav_toggle {
         display: block;
